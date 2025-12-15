@@ -1,0 +1,80 @@
+name: IWS Build and Deploy
+
+on:
+  push:
+    branches:
+      - release
+    tags:
+      - '^(release)( )([0-9]+\.[0-9]+\.[0-9]+)$'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: ['9.0.x']
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Install dependencies
+        run: sudo apt-get install -y python3-paramiko python3-lxml
+
+      - name: Install dependencies
+        run: dotnet restore
+  
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal
+
+      - name: Publish Artifact
+        run: dotnet publish -c Release -o ./publish
+        continue-on-error: true
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: blazor-app-artifact
+          path: ./publish
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download Artifact
+        id: download-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: blazor-app-artifact
+          path: ./downloaded-artifact
+
+      - name: Create SSH key file
+        id: create-ssh-key
+        env:
+          SSH_KEY_ED25519: ${{ secrets.SSH_KEY_ED25519 }}
+        run: echo "$SSH_KEY_ED25519" > ssh_key && chmod 600 ssh_key
+
+      - name: SSH access, check ISS14 and stop ISS14
+        id: check-iss14
+        run: |
+          ssh -p 18281 -i ssh_key -o StrictHostKeyChecking=no deploy@lemonsquizy.com
+          if sudo systemctl is-active iws; then
+            sudo systemctl stop iws
+            echo "ISS14 was running. Stopped ISS14"
+          else
+            echo "ISS14 is not running"
+          fi
+          exit
+          
+      - name: Copy files to server
+        id: copy-files
+        run: |
+          scp -r -P 18281 -i ssh_key ./downloaded-artifact/* deploy@lemonsquizy.com:/home/iss14
+        
+      - name: SSH access and start IWS
+        id: start-iws
+        run: |
+          ssh -p 18281 -i ssh_key -o StrictHostKeyChecking=no deploy@lemonsquizy.com "sudo systemctl start ISS14"
+          exit
