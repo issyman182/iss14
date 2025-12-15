@@ -10,41 +10,38 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        dotnet-version: ['9.0.x']
-      steps:
-      - uses: actions/checkout@v4.2.2
+    steps:
+    - uses: actions/checkout@v4.2.2
       with:
-          submodules: 'recursive'
-      - name: Setup .NET Core
+        submodules: 'recursive'
+    - name: Setup .NET Core
       uses: actions/setup-dotnet@v4.1.0
       with:
-          dotnet-version: 9.0.x
-        
-      - name: Get Engine Tag
-        run: |
-          cd RobustToolbox
-          git fetch --depth=1
+        dotnet-version: 9.0.x
       
-      - name: Install dependencies
-        run: dotnet restore
-        
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
+    - name: Get Engine Tag
+      run: |
+        cd RobustToolbox
+        git fetch --depth=1
+    
+    - name: Install dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
 
-      - name: Test
-        run: dotnet test --no-restore --verbosity normal
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal
 
-      - name: Publish Artifact
-        run: dotnet publish -c Release -o ./publish
-        continue-on-error: true
+    - name: Publish Artifact
+      run: dotnet publish -c Release -o ./publish
+      continue-on-error: true
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: blazor-app-artifact
-          path: ./publish
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: blazor-app-artifact
+        path: ./publish
 
   deploy:
     runs-on: ubuntu-latest
