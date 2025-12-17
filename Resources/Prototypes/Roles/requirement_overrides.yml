@@ -2,15 +2,194 @@
   id: Reduced
   jobs:
     Captain:
-    - !type:DepartmentTimeRequirement
-      department: Engineering
+    - !type:RoleTimeRequirement
+      role: HeadOfSecurity
       time: 1h
+    - !type:RoleTimeRequirement
+      role: Quartermaster
+      time: 1h
+    - !type:RoleTimeRequirement
+      role: ChiefEngineer
+      time: 1h
+    - !type:RoleTimeRequirement
+      role: ChiefMedicalOfficer
+      time: 1h
+    - !type:RoleTimeRequirement
+      role: ResearchDirector
+      time: 1h
+    HeadOfPersonnel:
     - !type:DepartmentTimeRequirement
-      department: Medical
+      department: Civilian
+      time: 5h
+
+#Security jobs
+    HeadOfSecurity:
+    - !type:RoleTimeRequirement
+      role: Warden
+      time: 1h
+    - !type:RoleTimeRequirement
+      role: Detective
+      time: 1h
+    - !type:RoleTimeRequirement
+      role: SecurityOfficer
       time: 1h
     - !type:DepartmentTimeRequirement
       department: Security
-      time: 1h
+      time: 5h
+    Warden:
     - !type:DepartmentTimeRequirement
-      department: Command
+      department: Security
+      time: 3h
+    Detective:
+    - !type:RoleTimeRequirement
+      role: SecurityOfficer
       time: 1h
+    SecurityOfficer:
+    - !type:RoleTimeRequirement
+      role: SecurityCadet
+      time: 1h
+    SecurityCadet:
+    - !type:OverallPlaytimeRequirement
+      time: 2h
+
+#Cargo jobs      
+    Quartermaster:
+    - !type:RoleTimeRequirement
+      role: CargoTechnician
+      time: 1h
+    - !type:RoleTimeRequirement
+      role: SalvageSpecialist
+      time: 1h
+    CargoTechnician:
+    - !type:OverallPlaytimeRequirement
+      time: 0h
+    SalvageSpecialist:
+    - !type:OverallPlaytimeRequirement
+      time: 0h
+
+#Engineering jobs
+    ChiefEngineer:
+    - !type:RoleTimeRequirement
+      role: AtmosphericTechnician
+      time: 1h
+    - !type:RoleTimeRequirement
+      role: StationEngineer
+      time: 1h
+    AtmosphericTechnician:
+    - !type:RoleTimeRequirement
+      role: StationEngineer
+      time: 1h
+    StationEngineer:
+    - !type:RoleTimeRequirement
+      role: TechnicalAssistant
+      time: 1h
+    TechnicalAssistant:
+    - !type:OverallPlaytimeRequirement
+      time: 0h
+
+#Medical jobs
+    ChiefMedicalOfficer:
+    - !type:RoleTimeRequirement
+      role: Chemist
+      time: 2h
+    - !type:RoleTimeRequirement
+      role: MedicalDoctor
+      time: 2h
+    Chemist:
+    - !type:DepartmentTimeRequirement
+      department: Medical
+      time: 2h
+    MedicalDoctor:
+    - !type:DepartmentTimeRequirement
+      department: Medical
+      time: 3h
+    - !type:RoleTimeRequirement
+      role: MedicalIntern
+      time: 1h
+    MedicalIntern:
+    - !type:OverallPlaytimeRequirement
+      time: 0h
+    Paramedic:
+    - !type:OverallPlaytimeRequirement
+      time: 0h
+    Psychologist:
+    - !type:OverallPlaytimeRequirement
+      time: 0h
+
+#Science job
+    ResearchDirector:
+    - !type:RoleTimeRequirement
+      role: Scientist
+      time: 2h
+    Scientist:
+    - !type:RoleTimeRequirement
+      role: ResearchAssistant
+      time: 1h
+    ResearchAssistant:
+    - !type:OverallPlaytimeRequirement
+      time: 0h
+
+#Sillicon jobs
+    StationAi:
+    - !type:OverallPlaytimeRequirement
+      time: 1h
+    Borg:
+    - !type:OverallPlaytimeRequirement
+      time: 1h
+
+#Civilian jobs
+    Bartender:
+    - !type:OverallPlaytimeRequirement
+      time: 0h
+    Botanist:
+    - !type:OverallPlaytimeRequirement
+      time: 0h
+    Chaplain:
+    Chef:
+    - !type:OverallPlaytimeRequirement
+      time: 0h
+    Clown:
+    Janitor:
+    - !type:OverallPlaytimeRequirement
+      time: 0h
+    Lawyer:
+    - !type:OverallPlaytimeRequirement
+      time: 0h
+    Librarian:
+    - !type:OverallPlaytimeRequirement
+      time: 0h
+    Mime:
+    - !type:OverallPlaytimeRequirement
+      time: 0h
+    Musician:
+    - !type:OverallPlaytimeRequirement
+      time: 0h
+    Passenger:
+    - !type:OverallPlaytimeRequirement
+      time: 0h
+    Reporter:
+    - !type:OverallPlaytimeRequirement
+      time: 0h
+    ServiceWorker:
+    - !type:OverallPlaytimeRequirement
+      time: 0h
+
+#    ERTLeader
+#    ERTChaplain
+#    ERTEngineer
+#    ERTSecurity
+#    ERTMedical
+#    ERTJanitor
+#    CentralCommandOfficial
+#    CBURN
+#    DeathSquad
+#    Visitor
+#    CluwneGear
+#    CultLeaderGear
+#    SkeletonBiker
+#    SusChameleonOutfit
+#    WizardBlueGear
+
+
+
+

@@ -1,30 +1,28 @@
-<rules>
-	<title>Welcome on Issy's Space Station (ISS)</title>
-	<serverType>
-		<description>This server is a Light Roleplay (LRP) environment.</description>
-	</serverType>
-	<conduct>
-		<mainRule> All players must behave respectfully toward each other at all times. </mainRule>
-		<noDiscrimination>
-			Discrimination against real or real-life-related persons is strictly prohibited.
-			<examples>
-				<example>Racism</example>
-				<example>Sexism</example>
-				<example>Hate speech</example>
-				<example>Insults</example>
-				<example>Mobbing</example>
-				<example>Unnecessary trolling</example>
-			</examples>
-		</noDiscrimination>
-	</conduct>
-	<roleplay>
-		<inCharacter> Stay in character at all times during roleplay. </inCharacter>
-		<outOfCharacter> If you need to communicate out of character, use OOC. </outOfCharacter>
-	</roleplay>
-	<violence>
-		<rule> Killing or similar hostile actions are only allowed if you have an appropriate antagonist role. </rule>
-	</violence>
-	<support>
-		<questions> For questions about the server or applications, please visit our Discord server. </questions>
-	</support>
-</rules>
+<Document>
+# Welcome on Issy's Space Station (ISS)
+
+## Server Type
+This server is a Light Roleplay (LRP) environment.
+
+## Conduct
+All players must behave respectfully toward each other at all times.
+
+### No Discrimination
+Discrimination against real or real-life-related persons is strictly prohibited.
+- Racism
+- Sexism
+- Hate speech
+- Insults
+- Mobbing
+- Unnecessary trolling
+
+## Roleplay
+- **In Character:** Stay in character at all times during roleplay.
+- **Out Of Character:** If you need to communicate out of character, use OOC.
+
+## Violence
+Killing or similar hostile actions are only allowed if you have an appropriate antagonist role.
+
+## Support
+For questions about the server or applications, please visit our Discord server.
+</Document>

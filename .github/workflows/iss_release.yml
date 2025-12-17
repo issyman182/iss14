@@ -58,6 +58,9 @@ jobs:
       - name: Stop Service, Backup and Cleanup
         run: |
           ssh -p 18281 -i ssh_key -o StrictHostKeyChecking=no deploy@lemonsquizy.com "
+            # Marker für Restore löschen, falls vom letzten Mal noch da
+            rm -f /home/iss14/.restore_info
+
             # 1. Service stoppen (falls aktiv)
             if sudo systemctl is-active iss14; then
               sudo systemctl stop iss14
@@ -86,11 +89,13 @@ jobs:
                 if [ -n \"\$FILES_TO_BACKUP\" ]; then
                     mkdir -p /home/iss14/backup
                     TIMESTAMP=\$(date +%Y%m%d_%H%M%S)
-                    BACKUP_NAME=\"\$TIMESTAMP.zip\"
+                    BACKUP_PATH=\"/home/iss14/backup/\$TIMESTAMP.zip\"
                     
-                    # Zip erstellen (benötigt 'zip' auf dem Server)
-                    echo \"Backing up to /home/iss14/backup/\$BACKUP_NAME\"
-                    zip -r /home/iss14/backup/\$BACKUP_NAME \$FILES_TO_BACKUP
+                    echo \"Backing up to \$BACKUP_PATH\"
+                    zip -r \$BACKUP_PATH \$FILES_TO_BACKUP
+                    
+                    # WICHTIG: Pfad speichern für den Restore-Schritt
+                    echo \"\$BACKUP_PATH\" > /home/iss14/.restore_info
                 else
                     echo 'No config or database files found to backup.'
                 fi
@@ -114,10 +119,29 @@ jobs:
           ssh -p 18281 -i ssh_key -o StrictHostKeyChecking=no deploy@lemonsquizy.com "
             cd /home/iss14/server
             
-            # Entpacken
+            # 1. Neuen Server entpacken (bringt Standard-Configs mit)
+            echo 'Unzipping new server build...'
             unzip -o SS14.Server_linux-x64.zip
             
-            # Service starten
+            # 2. Backup wiederherstellen (überschreibt Standard-Configs mit alten Daten)
+            if [ -f /home/iss14/.restore_info ]; then
+                RESTORE_FILE=\$(cat /home/iss14/.restore_info)
+                
+                if [ -f \"\$RESTORE_FILE\" ]; then
+                    echo \"RESTORING CONFIG/DB FROM: \$RESTORE_FILE\"
+                    # -o (overwrite) ist wichtig, damit die leere Config vom neuen Build überschrieben wird
+                    unzip -o \"\$RESTORE_FILE\"
+                else
+                    echo \"Error: Backup file defined but not found on disk!\"
+                fi
+                
+                # Info-Datei aufräumen
+                rm /home/iss14/.restore_info
+            else
+                echo 'No backup marker found. This seems to be a fresh install or nothing was backed up.'
+            fi
+            
+            # 3. Service starten
             sudo systemctl start ISS14
             echo 'ISS14 started'
           "
