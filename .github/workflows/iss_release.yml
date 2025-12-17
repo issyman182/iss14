@@ -28,15 +28,12 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
       
-    # Schritt 1 aus Tutorial: Packaging Tool bauen
     - name: Build Packaging Tool
       run: dotnet build Content.Packaging --configuration Release
 
-    # Schritt 2 aus Tutorial: Packager ausführen (Linux x64)
     - name: Package Server
       run: dotnet run --project Content.Packaging server --hybrid-acz --platform linux-x64
 
-    # Wir laden nur das fertige ZIP hoch, das spart Zeit und Speicher
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
@@ -58,36 +55,67 @@ jobs:
           SSH_KEY_ED25519: ${{ secrets.SSH_KEY_ED25519 }}
         run: echo "$SSH_KEY_ED25519" > ssh_key && chmod 600 ssh_key
 
-      - name: Stop Service and Cleanup Testing Dir
+      - name: Stop Service, Backup and Cleanup
         run: |
-          # 1. Stoppe den Service (falls nötig)
-          # 2. Erstelle den testing Ordner falls er nicht existiert
-          # 3. Lösche den Inhalt von testing, um sauber zu entpacken
           ssh -p 18281 -i ssh_key -o StrictHostKeyChecking=no deploy@lemonsquizy.com "
+            # 1. Service stoppen (falls aktiv)
             if sudo systemctl is-active iss14; then
               sudo systemctl stop iss14
               echo 'ISS14 was running. Stopped ISS14'
             fi
-            mkdir -p /home/iss14/testing
-            rm -rf /home/iss14/testing/*
+
+            # 2. Backup Logik
+            # Wir prüfen, ob das Server-Verzeichnis überhaupt existiert
+            if [ -d /home/iss14/server ]; then
+                echo 'Checking for files to backup...'
+                cd /home/iss14/server
+                
+                FILES_TO_BACKUP=\"\"
+                
+                # Prüfen ob config existiert
+                if [ -f \"server_config.toml\" ]; then
+                    FILES_TO_BACKUP=\"\$FILES_TO_BACKUP server_config.toml\"
+                fi
+                
+                # Prüfen ob preferences db existiert
+                if [ -f \"data/preferences.db\" ]; then
+                    FILES_TO_BACKUP=\"\$FILES_TO_BACKUP data/preferences.db\"
+                fi
+                
+                # Wenn mindestens eine Datei gefunden wurde: Zippen
+                if [ -n \"\$FILES_TO_BACKUP\" ]; then
+                    mkdir -p /home/iss14/backup
+                    TIMESTAMP=\$(date +%Y%m%d_%H%M%S)
+                    BACKUP_NAME=\"\$TIMESTAMP.zip\"
+                    
+                    # Zip erstellen (benötigt 'zip' auf dem Server)
+                    echo \"Backing up to /home/iss14/backup/\$BACKUP_NAME\"
+                    zip -r /home/iss14/backup/\$BACKUP_NAME \$FILES_TO_BACKUP
+                else
+                    echo 'No config or database files found to backup.'
+                fi
+                
+                # Verzeichnis verlassen, damit wir es gleich löschen können
+                cd ..
+            fi
+
+            # 3. Aufräumen (Clean Install vorbereiten)
+            mkdir -p /home/iss14/server
+            echo 'Cleaning server directory...'
+            rm -rf /home/iss14/server/*
           "
 
       - name: Copy Zip to Server
         run: |
-          # Kopiere das ZIP in den testing Ordner
-          scp -P 18281 -i ssh_key ./downloaded-artifact/SS14.Server_linux-x64.zip deploy@lemonsquizy.com:/home/iss14/testing/
+          scp -P 18281 -i ssh_key ./downloaded-artifact/SS14.Server_linux-x64.zip deploy@lemonsquizy.com:/home/iss14/server/
         
       - name: Unzip and Start Service
         run: |
           ssh -p 18281 -i ssh_key -o StrictHostKeyChecking=no deploy@lemonsquizy.com "
-            # Ins Verzeichnis wechseln
-            cd /home/iss14/testing
+            cd /home/iss14/server
             
-            # Entpacken (-o überschreibt ohne Nachfrage)
+            # Entpacken
             unzip -o SS14.Server_linux-x64.zip
-            
-            # Zip Datei danach löschen (optional, spart Platz)
-            #rm SS14.Server_linux-x64.zip
             
             # Service starten
             sudo systemctl start ISS14

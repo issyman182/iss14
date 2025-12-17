@@ -1,17 +1,30 @@
-<Document>
-  <Header level="1">Server Regeln</Header>
-  <Paragraph>
-    Willkommen auf meiner Station!
-  </Paragraph>
-
-  <Header level="2">1. Sei kein Idiot</Header>
-  <Paragraph>
-    Ernsthaft, verhalte dich einfach normal.
-  </Paragraph>
-
-  <Header level="2">2. Kein RDM</Header>
-  <Paragraph>
-    Töten ohne Grund ist verboten.
-  </Paragraph>
-</Document>
-
+<rules>
+	<title>Welcome on Issy's Space Station (ISS)</title>
+	<serverType>
+		<description>This server is a Light Roleplay (LRP) environment.</description>
+	</serverType>
+	<conduct>
+		<mainRule> All players must behave respectfully toward each other at all times. </mainRule>
+		<noDiscrimination>
+			Discrimination against real or real-life-related persons is strictly prohibited.
+			<examples>
+				<example>Racism</example>
+				<example>Sexism</example>
+				<example>Hate speech</example>
+				<example>Insults</example>
+				<example>Mobbing</example>
+				<example>Unnecessary trolling</example>
+			</examples>
+		</noDiscrimination>
+	</conduct>
+	<roleplay>
+		<inCharacter> Stay in character at all times during roleplay. </inCharacter>
+		<outOfCharacter> If you need to communicate out of character, use OOC. </outOfCharacter>
+	</roleplay>
+	<violence>
+		<rule> Killing or similar hostile actions are only allowed if you have an appropriate antagonist role. </rule>
+	</violence>
+	<support>
+		<questions> For questions about the server or applications, please visit our Discord server. </questions>
+	</support>
+</rules>
