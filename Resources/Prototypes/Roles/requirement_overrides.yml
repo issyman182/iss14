@@ -21,8 +21,6 @@
     - !type:DepartmentTimeRequirement
       department: Civilian
       time: 5h
-
-#Security jobs
     HeadOfSecurity:
     - !type:RoleTimeRequirement
       role: Warden
@@ -51,8 +49,6 @@
     SecurityCadet:
     - !type:OverallPlaytimeRequirement
       time: 2h
-
-#Cargo jobs      
     Quartermaster:
     - !type:RoleTimeRequirement
       role: CargoTechnician
@@ -60,14 +56,6 @@
     - !type:RoleTimeRequirement
       role: SalvageSpecialist
       time: 1h
-    CargoTechnician:
-    - !type:OverallPlaytimeRequirement
-      time: 0h
-    SalvageSpecialist:
-    - !type:OverallPlaytimeRequirement
-      time: 0h
-
-#Engineering jobs
     ChiefEngineer:
     - !type:RoleTimeRequirement
       role: AtmosphericTechnician
@@ -83,11 +71,6 @@
     - !type:RoleTimeRequirement
       role: TechnicalAssistant
       time: 1h
-    TechnicalAssistant:
-    - !type:OverallPlaytimeRequirement
-      time: 0h
-
-#Medical jobs
     ChiefMedicalOfficer:
     - !type:RoleTimeRequirement
       role: Chemist
@@ -106,17 +89,6 @@
     - !type:RoleTimeRequirement
       role: MedicalIntern
       time: 1h
-    MedicalIntern:
-    - !type:OverallPlaytimeRequirement
-      time: 0h
-    Paramedic:
-    - !type:OverallPlaytimeRequirement
-      time: 0h
-    Psychologist:
-    - !type:OverallPlaytimeRequirement
-      time: 0h
-
-#Science job
     ResearchDirector:
     - !type:RoleTimeRequirement
       role: Scientist
@@ -125,71 +97,3 @@
     - !type:RoleTimeRequirement
       role: ResearchAssistant
       time: 1h
-    ResearchAssistant:
-    - !type:OverallPlaytimeRequirement
-      time: 0h
-
-#Sillicon jobs
-    StationAi:
-    - !type:OverallPlaytimeRequirement
-      time: 1h
-    Borg:
-    - !type:OverallPlaytimeRequirement
-      time: 1h
-
-#Civilian jobs
-    Bartender:
-    - !type:OverallPlaytimeRequirement
-      time: 0h
-    Botanist:
-    - !type:OverallPlaytimeRequirement
-      time: 0h
-    Chaplain:
-    Chef:
-    - !type:OverallPlaytimeRequirement
-      time: 0h
-    Clown:
-    Janitor:
-    - !type:OverallPlaytimeRequirement
-      time: 0h
-    Lawyer:
-    - !type:OverallPlaytimeRequirement
-      time: 0h
-    Librarian:
-    - !type:OverallPlaytimeRequirement
-      time: 0h
-    Mime:
-    - !type:OverallPlaytimeRequirement
-      time: 0h
-    Musician:
-    - !type:OverallPlaytimeRequirement
-      time: 0h
-    Passenger:
-    - !type:OverallPlaytimeRequirement
-      time: 0h
-    Reporter:
-    - !type:OverallPlaytimeRequirement
-      time: 0h
-    ServiceWorker:
-    - !type:OverallPlaytimeRequirement
-      time: 0h
-
-#    ERTLeader
-#    ERTChaplain
-#    ERTEngineer
-#    ERTSecurity
-#    ERTMedical
-#    ERTJanitor
-#    CentralCommandOfficial
-#    CBURN
-#    DeathSquad
-#    Visitor
-#    CluwneGear
-#    CultLeaderGear
-#    SkeletonBiker
-#    SusChameleonOutfit
-#    WizardBlueGear
-
-
-
-
