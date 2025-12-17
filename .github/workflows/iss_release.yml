@@ -1,4 +1,4 @@
-name: IWS Build and Deploy
+name: ISS14 Build and Deploy
 
 on:
   push:
@@ -14,6 +14,7 @@ jobs:
     - uses: actions/checkout@v4.2.2
       with:
         submodules: 'recursive'
+    
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v4.1.0
       with:
@@ -27,58 +28,68 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
       
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
+    # Schritt 1 aus Tutorial: Packaging Tool bauen
+    - name: Build Packaging Tool
+      run: dotnet build Content.Packaging --configuration Release
 
-    - name: Test
-      run: dotnet test --no-restore --verbosity normal
+    # Schritt 2 aus Tutorial: Packager ausführen (Linux x64)
+    - name: Package Server
+      run: dotnet run --project Content.Packaging server --hybrid-acz --platform linux-x64
 
-    - name: Publish Artifact
-      run: dotnet publish -c Release -o ./publish
-      continue-on-error: true
-
+    # Wir laden nur das fertige ZIP hoch, das spart Zeit und Speicher
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: blazor-app-artifact
-        path: ./publish
+        name: server-zip
+        path: release/SS14.Server_linux-x64.zip
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     steps:
       - name: Download Artifact
-        id: download-artifact
         uses: actions/download-artifact@v4
         with:
-          name: blazor-app-artifact
+          name: server-zip
           path: ./downloaded-artifact
 
       - name: Create SSH key file
-        id: create-ssh-key
         env:
           SSH_KEY_ED25519: ${{ secrets.SSH_KEY_ED25519 }}
         run: echo "$SSH_KEY_ED25519" > ssh_key && chmod 600 ssh_key
 
-      - name: SSH access, check ISS14 and stop ISS14
-        id: check-iss14
+      - name: Stop Service and Cleanup Testing Dir
         run: |
-          ssh -p 18281 -i ssh_key -o StrictHostKeyChecking=no deploy@lemonsquizy.com
-          if sudo systemctl is-active iws; then
-            sudo systemctl stop iws
-            echo "ISS14 was running. Stopped ISS14"
-          else
-            echo "ISS14 is not running"
-          fi
-          exit
-          
-      - name: Copy files to server
-        id: copy-files
+          # 1. Stoppe den Service (falls nötig)
+          # 2. Erstelle den testing Ordner falls er nicht existiert
+          # 3. Lösche den Inhalt von testing, um sauber zu entpacken
+          ssh -p 18281 -i ssh_key -o StrictHostKeyChecking=no deploy@lemonsquizy.com "
+            if sudo systemctl is-active iss14; then
+              sudo systemctl stop iss14
+              echo 'ISS14 was running. Stopped ISS14'
+            fi
+            mkdir -p /home/iss14/testing
+            rm -rf /home/iss14/testing/*
+          "
+
+      - name: Copy Zip to Server
         run: |
-          scp -r -P 18281 -i ssh_key ./downloaded-artifact/* deploy@lemonsquizy.com:/home/iss14
+          # Kopiere das ZIP in den testing Ordner
+          scp -P 18281 -i ssh_key ./downloaded-artifact/SS14.Server_linux-x64.zip deploy@lemonsquizy.com:/home/iss14/testing/
         
-      - name: SSH access and start IWS
-        id: start-iws
+      - name: Unzip and Start Service
         run: |
-          ssh -p 18281 -i ssh_key -o StrictHostKeyChecking=no deploy@lemonsquizy.com "sudo systemctl start ISS14"
-          exit
+          ssh -p 18281 -i ssh_key -o StrictHostKeyChecking=no deploy@lemonsquizy.com "
+            # Ins Verzeichnis wechseln
+            cd /home/iss14/testing
+            
+            # Entpacken (-o überschreibt ohne Nachfrage)
+            unzip -o SS14.Server_linux-x64.zip
+            
+            # Zip Datei danach löschen (optional, spart Platz)
+            #rm SS14.Server_linux-x64.zip
+            
+            # Service starten
+            sudo systemctl start ISS14
+            echo 'ISS14 started'
+          "

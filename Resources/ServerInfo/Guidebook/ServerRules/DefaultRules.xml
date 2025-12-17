@@ -1,5 +1,17 @@
 <Document>
-  # Server Rules
+  <Header level="1">Server Regeln</Header>
+  <Paragraph>
+    Willkommen auf meiner Station!
+  </Paragraph>
 
-  This server has not written any rules yet. Please listen to the staff.
+  <Header level="2">1. Sei kein Idiot</Header>
+  <Paragraph>
+    Ernsthaft, verhalte dich einfach normal.
+  </Paragraph>
+
+  <Header level="2">2. Kein RDM</Header>
+  <Paragraph>
+    Töten ohne Grund ist verboten.
+  </Paragraph>
 </Document>
+
