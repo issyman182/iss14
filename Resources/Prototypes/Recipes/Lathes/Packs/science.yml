@@ -9,6 +9,7 @@
   - ExosuitFabricatorMachineCircuitboard
   - CutterMachineCircuitboard
   - BorgChargerCircuitboard
+  - PrinterDocMachineCircuitboard # iss14: Starlight bureaucracy port
 
 ## Dynamic
 

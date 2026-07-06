@@ -1,0 +1,28 @@
+# Document printer categories (Starlight bureaucracy port)
+- type: latheCategory
+  id: Reports
+  name: lathe-category-reports
+
+- type: latheCategory
+  id: Statements
+  name: lathe-category-statements
+
+- type: latheCategory
+  id: InquiriesAndAppeals
+  name: lathe-category-inquiries-and-appeals
+
+- type: latheCategory
+  id: Complaints
+  name: lathe-category-complaints
+
+- type: latheCategory
+  id: Permissions
+  name: lathe-category-permissions
+
+- type: latheCategory
+  id: OrdersAndInstructions
+  name: lathe-category-orders-and-instructions
+
+- type: latheCategory
+  id: Communications
+  name: lathe-category-communications

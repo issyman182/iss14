@@ -8,6 +8,7 @@
     RubberStampApproved: 1
     RubberStampDenied: 1
     BoxFolderPlasticClipboardEmpty: 2
+    PrinterDocFlatpack: 2 # iss14: Starlight bureaucracy port
     Paper: 10
     Envelope: 10
     HandLabeler: 2

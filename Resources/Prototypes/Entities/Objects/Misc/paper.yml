@@ -54,7 +54,10 @@
         Quantity: 1.25
   - type: Item
     size: Tiny
+  - type: Material # iss14: papers are feedstock for the document printer (Starlight bureaucracy port)
   - type: PhysicalComposition
+    materialComposition: # iss14: see above
+      Paper: 100
 
 - type: entity
   parent: BasePaper
