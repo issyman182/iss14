@@ -18,7 +18,7 @@ public sealed partial class EntityCensusWindow : FancyWindow
     private static readonly Color GrowColor = Color.FromHex("#e5533d");
     private static readonly Color ShrinkColor = Color.FromHex("#4caf50");
 
-    [Dependency] private readonly IPrototypeManager _prototypes = default!;
+    [Dependency] private IPrototypeManager _prototypes = default!;
 
     private List<EntityCensusEntry> _entries = new();
     private bool _minuteAvailable;

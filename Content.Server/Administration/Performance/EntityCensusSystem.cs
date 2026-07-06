@@ -13,7 +13,7 @@ namespace Content.Server.Administration.Performance;
 /// A full census iterates every entity, so it only happens on demand (while a panel is open,
 /// at most once per <see cref="CacheAge"/>) plus once at round start for the round baseline.
 /// </remarks>
-public sealed class EntityCensusSystem : EntitySystem
+public sealed partial class EntityCensusSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
 
