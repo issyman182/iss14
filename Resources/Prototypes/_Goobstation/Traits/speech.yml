@@ -1,0 +1,40 @@
+# Goob accents port: speech accent traits (Dementia, Bogan, Medieval, British).
+
+- type: trait
+  id: Dementia
+  name: trait-dementia-name
+  description: trait-dementia-desc
+  category: SpeechTraits
+  cost: 1
+  components:
+  - type: ReplacementAccent
+    accent: dementia
+
+- type: trait
+  id: Bogan
+  name: trait-bogan-name
+  description: trait-bogan-desc
+  category: SpeechTraits
+  cost: 1
+  components:
+  - type: ReplacementAccent
+    accent: bogan
+
+- type: trait
+  id: MedievalAccent
+  name: trait-medieval-accent-name
+  description: trait-medieval-accent-desc
+  category: SpeechTraits
+  cost: 1
+  components:
+  - type: MedievalAccent
+
+- type: trait
+  id: british
+  name: trait-british-name
+  description: trait-british-desc
+  category: SpeechTraits
+  cost: 1
+  components:
+  - type: ReplacementAccent
+    accent: british

@@ -1,4 +1,4 @@
-- type: markingsGroup
+﻿- type: markingsGroup
   parent: Undergarments
   id: Moth
   onlyGroupWhitelisted: true
@@ -140,6 +140,13 @@
   id: MobMoth
   name: Urist McFluff
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - TauCetiBasic
+    - Moffic
+    understands:
+    - TauCetiBasic
+    - Moffic
   - type: Damageable
     damageModifierSet: Moth
   - type: ZombieAccentOverride

@@ -10,3 +10,9 @@
 - type: traitCategory
   id: Quirks
   name: trait-category-quirks
+
+# Einstein Engines - Language
+- type: traitCategory
+  id: LanguageTraits
+  name: trait-category-languages
+  maxTraitPoints: 4

@@ -1,4 +1,4 @@
-- type: markingsGroup
+﻿- type: markingsGroup
   parent: Undergarments
   id: Human
   limits:
@@ -93,6 +93,13 @@
   id: MobHuman
   name: Urist McHands
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - TauCetiBasic
+    - SolCommon
+    understands:
+    - TauCetiBasic
+    - SolCommon
   - type: Butcherable
     spawned:
     - id: FoodMeatHuman

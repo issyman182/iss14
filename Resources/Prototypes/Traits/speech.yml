@@ -15,6 +15,8 @@
     - type: MothAccent
     - type: ReplacementAccent
       accent: scottish
+    - type: CheeseAccent # goob edit - Goob accents port
+    - type: BoganAccent # goob edit - Goob accents port
 
 # 1 Cost
 

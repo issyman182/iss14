@@ -39,6 +39,8 @@
   description: Boo!
   categories: [ HideSpawnMenu ]
   components:
+  - type: LanguageSpeaker # Einstein Engines - Languages
+  - type: UniversalLanguageSpeaker # Einstein Engines - Languages
   - type: Sprite
     sprite: Mobs/Ghosts/ghost_human.rsi
     color: "#fff8"

@@ -4,6 +4,8 @@
   categories: [ HideSpawnMenu ]
   save: false
   components:
+  - type: LanguageSpeaker # Einstein Engines - Languages
+  - type: UniversalLanguageSpeaker # Einstein Engines - Languages
   - type: MovementSpeedModifier
     baseSprintSpeed: 24
     baseWalkSpeed: 16

@@ -4,6 +4,12 @@
   id: MobBat
   description: Some cultures find them terrifying, others crunchy on the teeth.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Mouse
+    understands:
+    - Mouse
+    - TauCetiBasic
   - type: MovementSpeedModifier
     baseWalkSpeed : 3
     baseSprintSpeed : 6
@@ -203,6 +209,12 @@
   id: MobChicken
   description: Comes before an egg, and IS a dinosaur!
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Chicken
+    understands:
+    - Chicken
+    - TauCetiBasic
   - type: Sprite
     drawdepth: Mobs
     layers:
@@ -353,6 +365,12 @@
   id: MobCockroach
   description: This station is just crawling with bugs.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Languages
+    speaks:
+    - Hissing
+    understands:
+    - Hissing
+    - TauCetiBasic
   - type: Sprite
     drawdepth: SmallMobs
     sprite: Mobs/Animals/cockroach.rsi
@@ -486,6 +504,12 @@
   id: MobMothroach
   description: This is the adorable by-product of multiple attempts at genetically mixing mothpeople with cockroaches.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Moffic
+    understands:
+    - Moffic
+    - TauCetiBasic
   - type: GhostRole
     makeSentient: true
     allowSpeech: true
@@ -658,6 +682,12 @@
   id: MobDuckMallard
   description: An adorable mallard duck, it's fluffy and soft!
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Duck
+    understands:
+    - Duck
+    - TauCetiBasic
   - type: Sprite
     drawdepth: Mobs
     layers:
@@ -952,6 +982,12 @@
   id: MobCrab
   description: A folk legend goes around that his claw snaps spacemen out of existence over distasteful remarks. Be polite and tolerant for your own safety.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Crab
+    understands:
+    - Crab
+    - TauCetiBasic
   - type: Sprite
     drawdepth: Mobs
     layers:
@@ -1466,6 +1502,12 @@
   id: MobKangaroo
   description: A large marsupial herbivore. It has powerful hind legs, with nails that resemble long claws.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Kangaroo
+    understands:
+    - Kangaroo
+    - TauCetiBasic
   - type: MovementSpeedModifier
     baseWalkSpeed: 3.5
     baseSprintSpeed: 4.5
@@ -1675,6 +1717,12 @@
   parent: MobBaseAncestor
   description: New church of neo-darwinists actually believe that EVERY animal evolved from a monkey. Tastes like pork, and killing them is both fun and relaxing.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Monkey
+    understands:
+    - Monkey
+    - Kobold
   - type: NameIdentifier
     group: Monkey
   - type: Speech
@@ -1711,6 +1759,13 @@
   description: New church of neo-darwinists actually believe that EVERY animal evolved from a monkey. Tastes like pork, and killing them is both fun and relaxing.
   suffix: syndicate base
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Monkey
+    understands:
+    - Monkey
+    - Kobold
+    - TauCetiBasic # Understanding your nukeops partners.
   - type: NameIdentifier
     group: Monkey
   - type: SentienceTarget
@@ -1760,6 +1815,13 @@
   description: Cousins to the sentient race of lizard people, kobolds blend in with their natural habitat and are as nasty as monkeys; ready to pull out your hair and stab you to death.
   abstract: true
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Kobold
+    understands:
+    - Kobold
+    - Monkey
+    - TauCetiBasic
   - type: NameIdentifier
     group: Kobold
   - type: LizardAccent
@@ -1927,6 +1989,12 @@
   id: MobMouse
   description: Squeak!
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Mouse
+    understands:
+    - Mouse
+    - TauCetiBasic
   - type: GhostRole
     makeSentient: true
     allowSpeech: true
@@ -2411,6 +2479,11 @@
   abstract: true
   description: Infiltrates your domain, spies on you, and somehow still a cool pet.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - TauCetiBasic
+    understands:
+    - TauCetiBasic
   - type: MovementSpeedModifier
     baseWalkSpeed : 2.5
     baseSprintSpeed : 6
@@ -2497,6 +2570,12 @@
   id: MobPenguin
   description: Their lives are constant pain due to their inner-body knees.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Penguin
+    understands:
+    - Penguin
+    - TauCetiBasic
   - type: Sprite
     drawdepth: Mobs
     layers:
@@ -2636,6 +2715,12 @@
   id: MobSnake
   description: Hissss! Bites aren't poisonous.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Hissing
+    understands:
+    - Hissing
+    - TauCetiBasic
   - type: Sprite
     drawdepth: Mobs
     layers:
@@ -2686,6 +2771,12 @@
   id: MobSpiderBase
   abstract: true
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Xeno
+    understands:
+    - Xeno
+    - TauCetiBasic
   - type: Physics
   - type: Fixtures
     fixtures:
@@ -2900,6 +2991,11 @@
   description: This spider looks a little magical
   suffix: Wizard
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Universal # Should allow them to understand everything and speak it too. Might need to change this.
+    understands:
+    - Universal
   - type: Accentless
     removes:
     - type: ReplacementAccent
@@ -2911,6 +3007,12 @@
   id: MobPossum
   description: '"O Possum! My Possum!" -- Walt Whitman, 1865'
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Hissing
+    understands:
+    - Hissing
+    - TauCetiBasic
   - type: Sprite
     drawdepth: Mobs
     sprite: Mobs/Animals/possum.rsi
@@ -2984,6 +3086,12 @@
   id: MobRaccoon
   description: Trash panda!
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Hissing
+    understands:
+    - Hissing
+    - TauCetiBasic
   - type: Sprite
     drawdepth: Mobs
     sprite: Mobs/Animals/raccoon.rsi
@@ -3037,6 +3145,12 @@
   id: MobFox
   description: They're a fox.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Fox
+    understands:
+    - Fox
+    - TauCetiBasic
   - type: Sprite
     drawdepth: Mobs
     sprite: Mobs/Animals/fox.rsi
@@ -3166,6 +3280,12 @@
   parent: [MobCorgiBase, BaseSlicingRefinable]
   id: MobCorgi
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Dog
+    understands:
+    - Dog
+    - TauCetiBasic
   - type: DamageStateVisuals
     states:
       Alive:
@@ -3283,6 +3403,12 @@
   id: MobCat
   description: Feline pet, very funny.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Cat
+    understands:
+    - Cat
+    - TauCetiBasic
   - type: Sprite
     drawdepth: Mobs
     sprite: Mobs/Pets/cat.rsi
@@ -3374,6 +3500,12 @@
   parent: MobCatSpace
   description: Explosive kitten.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Cat
+    understands:
+    - Cat
+    - TauCetiBasic # Needs to understand your nukie ops.
   - type: Sprite
     layers:
     - map: ["enum.DamageStateVisualLayers.Base"]
@@ -3519,6 +3651,12 @@
   id: MobSloth
   description: Very slow animal. For people with low energy.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Hissing
+    understands:
+    - Hissing
+    - TauCetiBasic
   - type: MovementSpeedModifier
     baseWalkSpeed : 0.5
     baseSprintSpeed : 1
@@ -3576,6 +3714,12 @@
   id: MobFerret
   description: Just a silly little guy!
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Hissing
+    understands:
+    - Hissing
+    - TauCetiBasic
   - type: Sprite
     drawdepth: Mobs
     sprite: Mobs/Pets/ferret.rsi
@@ -3630,6 +3774,12 @@
   id: MobHamster
   description: A cute, fluffy, robust hamster.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Mouse
+    understands:
+    - Mouse
+    - TauCetiBasic
   - type: GhostRole
     makeSentient: true
     allowSpeech: true
@@ -3785,6 +3935,12 @@
   id: MobPig
   description: Oink.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Pig
+    understands:
+    - Pig
+    - TauCetiBasic
   - type: Sprite
     drawdepth: Mobs
     layers:
@@ -3856,6 +4012,12 @@
   id: MobDionaNymph
   description: It's like a cat, only.... branch-ier.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - RootSpeak
+    understands:
+    - RootSpeak
+    - TauCetiBasic
   - type: Sprite
     drawdepth: Mobs
     layers:
@@ -3947,6 +4109,12 @@
   id: MobReindeerBuck
   description: You think it can pull a sleigh?
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Deer
+    understands:
+    - Deer
+    - TauCetiBasic
   - type: Sprite
     drawdepth: Mobs
     layers:

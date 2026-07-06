@@ -2,7 +2,9 @@ using System;
 using System.Linq;
 using System.Text;
 using Content.Server.Speech.Prototypes;
+using Content.Shared._EinsteinEngines.Language; // Einstein Engines - Language
 using Content.Shared.Chat;
+using Content.Shared.Eye.Blinding.Components; // Einstein Engines - Language (blindness check for visual languages)
 using Content.Shared.Ghost;
 using Content.Shared.Players;
 using Robust.Shared.Console;
@@ -103,8 +105,9 @@ public sealed partial class ChatSystem
 
     /// <summary>
     ///     Everything needed to rebuild a garbled variant of a spoken message for a hard-of-hearing listener.
+    ///     LanguageObfuscatedMessage is the language-obfuscated variant for listeners who don't understand the language. (Einstein Engines - Language)
     /// </summary>
-    private readonly record struct SpeechObfuscationData(string Message, string WrapId, string Name, string Verb, string FontId, int FontSize);
+    private readonly record struct SpeechObfuscationData(string Message, string WrapId, string Name, string Verb, string FontId, int FontSize, string? LanguageObfuscatedMessage = null);
 
     /// <summary>
     ///     Sends a chat message to the given players in range of the source entity.
@@ -113,7 +116,8 @@ public sealed partial class ChatSystem
     ///     When set (only for the <see cref="ChatChannel.Local"/> say channel), hard-of-hearing listeners past their clear
     ///     range receive a garbled, freshly-rebuilt version of the message instead of the original.
     /// </param>
-    private void SendInVoiceRange(ChatChannel channel, string message, string wrappedMessage, EntityUid source, ChatTransmitRange range, NetUserId? author = null, SpeechObfuscationData? obfuscation = null)
+    private void SendInVoiceRange(ChatChannel channel, string message, string wrappedMessage, EntityUid source, ChatTransmitRange range, NetUserId? author = null, SpeechObfuscationData? obfuscation = null,
+        LanguagePrototype? language = null, string? languageObfuscatedMessage = null, string? wrappedLanguageObfuscatedMessage = null) // Einstein Engines - Language
     {
         foreach (var (session, data) in GetRecipients(source, VoiceRange))
         {
@@ -122,24 +126,49 @@ public sealed partial class ChatSystem
                 continue;
             var entHideChat = entRange == MessageRangeCheckResult.HideChat;
 
+            // Einstein Engines - Language: whether the listener understands the language spoken. Emotes/LOOC don't use languages.
+            var canUnderstand = true;
+
             // Hearing impairment only affects spoken words, not emotes (seen) or LOOC (out-of-character).
             if (channel == ChatChannel.Local && session.AttachedEntity is { Valid: true } listener)
             {
+                // Einstein Engines - Language begin
+                if (language != null)
+                    canUnderstand = _language.CanUnderstand(listener, language.ID);
+
+                if (language != null && !language.SpeechOverride.RequireSpeech)
+                {
+                    // Visual languages (e.g. sign language) are seen, not heard: blocked by blindness rather than deafness.
+                    if (!data.Observer && IsBlindListener(listener))
+                        continue;
+                }
+                else
+                // Einstein Engines - Language end
                 switch (GetSpeechHearing(listener, data.Range, data.Observer, VoiceRange))
                 {
                     case SpeechHearing.None:
                         continue;
                     case SpeechHearing.Muffled when obfuscation is { } obf && _hardOfHearingQuery.TryGetComponent(listener, out var hoh):
-                        var garbled = ObfuscateMessageReadability(obf.Message, hoh.Clarity);
+                        // Einstein Engines - Language: garble what the listener would actually perceive.
+                        var perceived = canUnderstand ? obf.Message : obf.LanguageObfuscatedMessage ?? obf.Message;
+                        var garbled = ObfuscateMessageReadability(perceived, hoh.Clarity);
                         var garbledWrap = Loc.GetString(obf.WrapId,
                             ("entityName", obf.Name),
                             ("verb", obf.Verb),
                             ("fontType", obf.FontId),
                             ("fontSize", obf.FontSize),
-                            ("message", FormattedMessage.EscapeText(garbled)));
+                            ("color", GetLanguageColor(language)), // Einstein Engines - Language
+                            ("message", ApplyLanguageMarkup(language, FormattedMessage.EscapeText(garbled)))); // Einstein Engines - Language
                         _chatManager.ChatMessageToOne(channel, garbled, garbledWrap, source, entHideChat, session.Channel, author: author);
                         continue;
                 }
+            }
+
+            // Einstein Engines - Language: listeners who don't understand the language get the obfuscated variant.
+            if (!canUnderstand && languageObfuscatedMessage != null && wrappedLanguageObfuscatedMessage != null)
+            {
+                _chatManager.ChatMessageToOne(channel, languageObfuscatedMessage, wrappedLanguageObfuscatedMessage, source, entHideChat, session.Channel, author: author);
+                continue;
             }
 
             _chatManager.ChatMessageToOne(channel, message, wrappedMessage, source, entHideChat, session.Channel, author: author);
@@ -147,6 +176,53 @@ public sealed partial class ChatSystem
 
         _replay.RecordServerMessage(new ChatMessage(channel, message, wrappedMessage, GetNetEntity(source), null, MessageRangeHideChatForReplay(range)));
     }
+
+    // Einstein Engines - Language begin
+    /// <summary>
+    ///     Whether the listener cannot see, and therefore cannot perceive visual languages such as sign language.
+    /// </summary>
+    private bool IsBlindListener(EntityUid listener)
+    {
+        return TryComp<BlindableComponent>(listener, out var blindable) && blindable.IsBlind;
+    }
+
+    /// <summary>
+    ///     The effective chat color of the given language: its color override alpha-blended against <see cref="DefaultSpeakColor"/>.
+    /// </summary>
+    private Color GetLanguageColor(LanguagePrototype? language)
+    {
+        if (language?.SpeechOverride.Color is { } color && color.A > 0f)
+            return Color.InterpolateBetween(DefaultSpeakColor, color, color.A);
+
+        return DefaultSpeakColor;
+    }
+
+    /// <summary>
+    ///     Decorates escaped message content with the language's color (and optionally font) markup.
+    ///     Colors use alpha blending against <see cref="DefaultSpeakColor"/>, mirroring upstream Einstein Engines behavior.
+    /// </summary>
+    private string ApplyLanguageMarkup(LanguagePrototype? language, string escapedMessage, bool includeFont = false)
+    {
+        if (language == null)
+            return escapedMessage;
+
+        var result = escapedMessage;
+
+        if (includeFont && language.SpeechOverride.FontId is { } fontId)
+        {
+            var size = language.SpeechOverride.FontSize is { } fontSize ? $" size={fontSize}" : string.Empty;
+            result = $"[font=\"{fontId}\"{size}]{result}[/font]";
+        }
+
+        if (language.SpeechOverride.Color is { } color && color.A > 0f)
+        {
+            var blended = Color.InterpolateBetween(DefaultSpeakColor, color, color.A);
+            result = $"[color={blended.ToHex()}]{result}[/color]";
+        }
+
+        return result;
+    }
+    // Einstein Engines - Language end
 
     /// <summary>
     ///     Returns true if the given player is 'allowed' to send the given message, false otherwise.
@@ -208,6 +284,12 @@ public sealed partial class ChatSystem
         RaiseLocalEvent(sender, ev, true);
 
         return ev.Message;
+    }
+
+    // Einstein Engines - Language: accents are not applied to languages that don't involve speech (e.g. sign language).
+    public string TransformSpeech(EntityUid sender, string message, LanguagePrototype language)
+    {
+        return language.SpeechOverride.RequireSpeech ? TransformSpeech(sender, message) : message;
     }
 
     public bool CheckIgnoreSpeechBlocker(EntityUid sender, bool ignoreBlocker)

@@ -1,6 +1,8 @@
 using Content.Server.Administration.Logs;
 using Content.Server.Chat.Managers;
 using Content.Server.Chat.Systems;
+using Content.Server._EinsteinEngines.Language; // Einstein Engines - Language
+using Content.Shared._EinsteinEngines.Language; // Einstein Engines - Language
 using Content.Server.Ghost;
 using Content.Server.Power.Components;
 using Content.Shared.Chat;
@@ -36,6 +38,7 @@ public sealed partial class RadioSystem : EntitySystem
     [Dependency] private SharedMindSystem _mind = default!;
     [Dependency] private SharedJobSystem _jobs = default!;
     [Dependency] private EntityQuery<TelecomExemptComponent> _exemptQuery = default!;
+    [Dependency] private LanguageSystem _language = default!; // Einstein Engines - Language
 
     // set used to prevent radio feedback loops.
     private readonly HashSet<string> _messages = new();
@@ -51,7 +54,7 @@ public sealed partial class RadioSystem : EntitySystem
     {
         if (args.Channel != null && component.Channels.Contains(args.Channel.ID))
         {
-            SendRadioMessage(uid, args.Message, args.Channel, uid);
+            SendRadioMessage(uid, args.Message, args.Channel, uid, language: args.Language); // Einstein Engines - Language
             args.Channel = null; // prevent duplicate messages from other listeners.
         }
     }
@@ -61,15 +64,18 @@ public sealed partial class RadioSystem : EntitySystem
         if (!TryComp(uid, out ActorComponent? actor))
             return;
 
-        var msg = args.ChatMsg;
+        // Einstein Engines - Language: listeners who don't understand the language get the obfuscated variant.
+        var baseMsg = _language.CanUnderstand(uid, args.Language.ID) ? args.ChatMsg : args.LanguageObfuscatedChatMsg;
+
+        var msg = baseMsg;
         if (_ghost.CanGhostWarp(actor.PlayerSession, out _))
         {
             msg = new MsgChatMessage
             {
-                Message = new ChatMessage(args.ChatMsg.Message)
+                Message = new ChatMessage(baseMsg.Message)
                 {
                     WrappedMessage = _chatManager.PrependFollowButtonIfAppropriate(
-                        args.ChatMsg.Message.WrappedMessage,
+                        baseMsg.Message.WrappedMessage,
                         args.MessageSource,
                         actor.PlayerSession.Channel),
                 },
@@ -82,9 +88,9 @@ public sealed partial class RadioSystem : EntitySystem
     /// <summary>
     /// Send radio message to all active radio listeners
     /// </summary>
-    public void SendRadioMessage(EntityUid messageSource, string message, ProtoId<RadioChannelPrototype> channel, EntityUid radioSource, bool escapeMarkup = true)
+    public void SendRadioMessage(EntityUid messageSource, string message, ProtoId<RadioChannelPrototype> channel, EntityUid radioSource, bool escapeMarkup = true, LanguagePrototype? language = null) // Einstein Engines - Language
     {
-        SendRadioMessage(messageSource, message, _prototype.Index(channel), radioSource, escapeMarkup: escapeMarkup);
+        SendRadioMessage(messageSource, message, _prototype.Index(channel), radioSource, escapeMarkup: escapeMarkup, language: language); // Einstein Engines - Language
     }
 
     /// <summary>
@@ -92,8 +98,16 @@ public sealed partial class RadioSystem : EntitySystem
     /// </summary>
     /// <param name="messageSource">Entity that spoke the message</param>
     /// <param name="radioSource">Entity that picked up the message and will send it, e.g. headset</param>
-    public void SendRadioMessage(EntityUid messageSource, string message, RadioChannelPrototype channel, EntityUid radioSource, bool escapeMarkup = true)
+    public void SendRadioMessage(EntityUid messageSource, string message, RadioChannelPrototype channel, EntityUid radioSource, bool escapeMarkup = true, LanguagePrototype? language = null) // Einstein Engines - Language
     {
+        // Einstein Engines - Language begin
+        language ??= _language.GetLanguage(messageSource);
+
+        // Languages that cannot be spoken over the radio are never transmitted.
+        if (!language.SpeechOverride.AllowRadio)
+            return;
+        // Einstein Engines - Language end
+
         // TODO if radios ever garble / modify messages, feedback-prevention needs to be handled better than this.
         if (!_messages.Add(message))
             return;
@@ -122,14 +136,35 @@ public sealed partial class RadioSystem : EntitySystem
             ? FormattedMessage.EscapeText(message)
             : message;
 
-        var wrappedMessage = Loc.GetString(speech.Bold ? "chat-radio-message-wrap-bold" : "chat-radio-message-wrap",
+        // Einstein Engines - Language begin: language-aware wrapping (font/verb overrides + obfuscated variant).
+        var verb = language.SpeechOverride.SpeechVerbOverrides is { } verbsOverride
+            ? Loc.GetString(_random.Pick(verbsOverride).ToString())
+            : Loc.GetString(_random.Pick(speech.SpeechVerbStrings));
+        var fontType = language.SpeechOverride.FontId ?? speech.FontId;
+        var fontSize = language.SpeechOverride.FontSize ?? speech.FontSize;
+        var wrapId = speech.Bold ? "chat-radio-message-wrap-bold" : "chat-radio-message-wrap";
+
+        var wrappedMessage = Loc.GetString(wrapId,
             ("color", channel.Color),
-            ("fontType", speech.FontId),
-            ("fontSize", speech.FontSize),
-            ("verb", Loc.GetString(_random.Pick(speech.SpeechVerbStrings))),
+            ("fontType", fontType),
+            ("fontSize", fontSize),
+            ("verb", verb),
             ("channel", $"\\[{channel.LocalizedName}\\]"),
             ("name", name),
-            ("message", content));
+            ("message", ApplyLanguageColor(language, content)));
+
+        // The variant for listeners who don't understand the language.
+        var obfuscated = _language.ObfuscateSpeech(message, language);
+        var obfuscatedContent = escapeMarkup ? FormattedMessage.EscapeText(obfuscated) : obfuscated;
+        var wrappedObfuscated = Loc.GetString(wrapId,
+            ("color", channel.Color),
+            ("fontType", fontType),
+            ("fontSize", fontSize),
+            ("verb", verb),
+            ("channel", $"\\[{channel.LocalizedName}\\]"),
+            ("name", name),
+            ("message", ApplyLanguageColor(language, obfuscatedContent)));
+        // Einstein Engines - Language end
 
         // most radios are relayed to chat, so lets parse the chat message beforehand
         var chat = new ChatMessage(
@@ -139,7 +174,18 @@ public sealed partial class RadioSystem : EntitySystem
             NetEntity.Invalid,
             null);
         var chatMsg = new MsgChatMessage { Message = chat };
-        var ev = new RadioReceiveEvent(message, messageSource, channel, radioSource, chatMsg);
+
+        // Einstein Engines - Language begin
+        var obfuscatedChat = new ChatMessage(
+            ChatChannel.Radio,
+            obfuscated,
+            wrappedObfuscated,
+            NetEntity.Invalid,
+            null);
+        var obfuscatedChatMsg = new MsgChatMessage { Message = obfuscatedChat };
+
+        var ev = new RadioReceiveEvent(message, messageSource, channel, radioSource, chatMsg, obfuscatedChatMsg, language);
+        // Einstein Engines - Language end
 
         var sendAttemptEv = new RadioSendAttemptEvent(channel, radioSource);
         RaiseLocalEvent(ref sendAttemptEv);
@@ -187,6 +233,20 @@ public sealed partial class RadioSystem : EntitySystem
         _replay.RecordServerMessage(chat);
         _messages.Remove(message);
     }
+
+    // Einstein Engines - Language begin
+    /// <summary>
+    ///     Decorates radio message content with the language's color markup, if any.
+    /// </summary>
+    private static string ApplyLanguageColor(LanguagePrototype language, string content)
+    {
+        if (language.SpeechOverride.Color is not { } color || color.A <= 0f)
+            return content;
+
+        var blended = Color.InterpolateBetween(Color.White, color, color.A);
+        return $"[color={blended.ToHex()}]{content}[/color]";
+    }
+    // Einstein Engines - Language end
 
     /// <inheritdoc cref="TelecomServerComponent"/>
     private bool HasActiveServer(MapId mapId, string channelId)

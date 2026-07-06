@@ -1,10 +1,14 @@
+using Content.Shared._EinsteinEngines.Language; // Einstein Engines - Language
 using Content.Shared.Chat;
 using Content.Shared.Radio;
 
 namespace Content.Server.Radio;
 
+/// <remarks>
+///     LanguageObfuscatedChatMsg and Language were added for per-listener language understanding. (Einstein Engines - Language)
+/// </remarks>
 [ByRefEvent]
-public readonly record struct RadioReceiveEvent(string Message, EntityUid MessageSource, RadioChannelPrototype Channel, EntityUid RadioSource, MsgChatMessage ChatMsg);
+public readonly record struct RadioReceiveEvent(string Message, EntityUid MessageSource, RadioChannelPrototype Channel, EntityUid RadioSource, MsgChatMessage ChatMsg, MsgChatMessage LanguageObfuscatedChatMsg, LanguagePrototype Language); // Einstein Engines - Language
 
 /// <summary>
 /// Event raised on the parent entity of a headset radio when a radio message is received

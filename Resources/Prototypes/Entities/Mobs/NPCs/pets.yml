@@ -7,6 +7,12 @@
   id: MobCorgiIan
   description: Favorite pet corgi.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Dog
+    understands:
+    - Dog
+    - TauCetiBasic
   - type: Sprite
     drawdepth: Mobs
     sprite: Mobs/Pets/corgi.rsi
@@ -142,6 +148,12 @@
   id: MobCorgiIanPup
   description: Favourite puppy corgi. Awww.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Languages
+    speaks:
+    - Dog
+    understands:
+    - Dog
+    - TauCetiBasic
   - type: Grammar
     attributes:
       proper: true
@@ -160,6 +172,12 @@
   id: MobCatRuntime
   description: Professional mouse hunter. Escape artist.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Cat
+    understands:
+    - Cat
+    - TauCetiBasic
   - type: NpcFactionMember
     factions:
       - PetsNT
@@ -183,6 +201,12 @@
   parent: MobCatCalico
   description: Ask nicely, and maybe they'll give you one of their spare lives.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Cat
+    understands:
+    - Cat
+    - TauCetiBasic
   - type: NpcFactionMember
     factions:
       - PetsNT
@@ -203,6 +227,12 @@
   parent: MobCatCaracal
   description: He out here.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Cat
+    understands:
+    - Cat
+    - TauCetiBasic
   - type: Fixtures
     fixtures:
       fix1:
@@ -230,6 +260,12 @@
   id: MobBandito
   description: Just a silly little guy!
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Hissing
+    understands:
+    - Hissing
+    - TauCetiBasic
   - type: Grammar
     attributes:
       proper: true
@@ -245,6 +281,12 @@
   id: MobBingus
   description: Bingus my beloved...
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Cat
+    understands:
+    - Cat
+    - TauCetiBasic
   - type: Sprite
     drawdepth: Mobs
     sprite: Mobs/Pets/bingus.rsi
@@ -302,6 +344,12 @@
   id: MobMcGriff
   description: This dog can tell something smells around here, and that something is CRIME!
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Dog
+    understands:
+    - Dog
+    - TauCetiBasic
   - type: Sprite
     drawdepth: Mobs
     sprite: Mobs/Pets/mcgriff.rsi
@@ -378,6 +426,12 @@
   id: MobPaperwork
   description: Took up a new job sorting books in the library after he got transferred from Space Station 13. He seems to be just as slow at this.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Hissing
+    understands:
+    - Hissing
+    - TauCetiBasic
   - type: Sprite
     drawdepth: Mobs
     sprite: Mobs/Pets/paperwork.rsi
@@ -412,6 +466,12 @@
   id: MobWalter
   description: He likes chems and treats. Walter.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Dog
+    understands:
+    - Dog
+    - TauCetiBasic
   - type: Sprite
     drawdepth: Mobs
     sprite: Mobs/Pets/walter.rsi
@@ -475,6 +535,12 @@
   id: MobPossumMorty
   description: The station's resident Didelphis virginiana. A sensitive but resilient kind of guy.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Hissing
+    understands:
+    - Hissing
+    - TauCetiBasic
   - type: InteractionPopup
     successChance: 1.0 # Hey, c'mon, this is Morty we're talking about here.
     interactSuccessString: petting-success-possum
@@ -541,6 +607,12 @@
   id: MobRaccoonMorticia
   description: A powerful creature of the night. Her eyeshadow is always on point.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Hissing
+    understands:
+    - Hissing
+    - TauCetiBasic
   - type: InteractionPopup
     successChance: 0.7
     interactSuccessString: petting-success-raccoon
@@ -563,6 +635,12 @@
   id: MobAlexander
   description: Chef's finest colleague.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Pig
+    understands:
+    - Pig
+    - TauCetiBasic
   - type: InteractionPopup
     successChance: 1
     interactSuccessString: petting-success-pig
@@ -585,6 +663,12 @@
   id: MobFoxRenault
   description: The captain's trustworthy fox.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Fox
+    understands:
+    - Fox
+    - TauCetiBasic
   - type: InteractionPopup
     successChance: 1
     interactSuccessString: petting-success-soft-floofy
@@ -615,6 +699,12 @@
   id: MobHamsterHamlet
   description: A grumpy, cute and fluffy hamster.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Mouse
+    understands:
+    - Mouse
+    - TauCetiBasic
   - type: Sprite
     drawdepth: SmallMobs
     sprite: Mobs/Pets/hamlet.rsi
@@ -684,6 +774,12 @@
   id: MobSpiderShiva
   description: The first defender of the station.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Xeno
+    understands:
+    - Xeno
+    - TauCetiBasic
   - type: InteractionPopup
     successChance: 0.5 # spider is mean
     interactSuccessString: petting-success-tarantula
@@ -751,6 +847,12 @@
   id: MobKangarooWillow
   description: Willow the boxing kangaroo.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Kangaroo
+    understands:
+    - Kangaroo
+    - TauCetiBasic
   - type: InteractionPopup
     successChance: 0.8
     interactSuccessString: petting-success-kangaroo
@@ -782,6 +884,12 @@
   parent: [MobAdultSlimes, StripableInventoryBase, BaseSlicingRefinable]
   description: This masterpiece has gone through thousands of experiments. But it is the sweetest creature in the world. Smile Slime!
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Bubblish # I am not giving them universal like EE. They are a slime, they can do slime speak.
+    understands:
+    - Bubblish
+    - TauCetiBasic
   - type: Sprite
     layers:
     - map: [ "enum.DamageStateVisualLayers.Base" ]
@@ -863,6 +971,13 @@
   id: MobMonkeyPunpun
   description: A prominent representative of monkeys with unlimited access to alcohol.
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Monkey
+    understands:
+    - Monkey
+    - Kobold
+    - TauCetiBasic
   - type: GhostRole
     prob: 1
     makeSentient: true
@@ -897,6 +1012,12 @@
   id: MobCrabAtmos
   description: The noble and stalwart defender of Atmosia. Viva!
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - Crab
+    understands:
+    - Crab
+    - TauCetiBasic
 #  - type: GhostRole
 #    prob: 1
 #    makeSentient: true

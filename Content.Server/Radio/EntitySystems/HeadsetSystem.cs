@@ -1,3 +1,4 @@
+using Content.Server._EinsteinEngines.Language; // Einstein Engines - Language
 using Content.Shared.Chat;
 using Content.Shared.Inventory.Events;
 using Content.Shared.Radio;
@@ -12,6 +13,7 @@ public sealed partial class HeadsetSystem : SharedHeadsetSystem
 {
     [Dependency] private INetManager _netMan = default!;
     [Dependency] private RadioSystem _radio = default!;
+    [Dependency] private LanguageSystem _language = default!; // Einstein Engines - Language
 
     public override void Initialize()
     {
@@ -48,7 +50,7 @@ public sealed partial class HeadsetSystem : SharedHeadsetSystem
             && TryComp(component.Headset, out EncryptionKeyHolderComponent? keys)
             && keys.Channels.Contains(args.Channel.ID))
         {
-            _radio.SendRadioMessage(uid, args.Message, args.Channel, component.Headset);
+            _radio.SendRadioMessage(uid, args.Message, args.Channel, component.Headset, language: args.Language); // Einstein Engines - Language
             args.Channel = null; // prevent duplicate messages from other listeners.
         }
     }
@@ -110,6 +112,10 @@ public sealed partial class HeadsetSystem : SharedHeadsetSystem
         }
 
         if (TryComp(parent, out ActorComponent? actor))
-            _netMan.ServerSendMessage(args.ChatMsg, actor.PlayerSession.Channel);
+        {
+            // Einstein Engines - Language: wearers who don't understand the language get the obfuscated variant.
+            var msg = _language.CanUnderstand(parent, args.Language.ID) ? args.ChatMsg : args.LanguageObfuscatedChatMsg;
+            _netMan.ServerSendMessage(msg, actor.PlayerSession.Channel);
+        }
     }
 }

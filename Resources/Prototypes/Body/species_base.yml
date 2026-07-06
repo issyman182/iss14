@@ -1,4 +1,4 @@
-- type: entity
+﻿- type: entity
   abstract: true
   parent:
   - BaseMob
@@ -170,6 +170,11 @@
   id: BaseSpeciesMobOrganic
   save: false
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - TauCetiBasic
+    understands:
+    - TauCetiBasic
   - type: Hunger
   - type: Thirst
   - type: Barotrauma

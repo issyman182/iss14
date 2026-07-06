@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Content.Shared._EinsteinEngines.Language; // Einstein Engines - Language
 using Content.Shared.Chat;
 using Content.Shared.Database;
 using Content.Shared.IdentityManagement;
@@ -18,6 +19,7 @@ public sealed partial class ChatSystem
         string originalMessage,
         ChatTransmitRange range,
         string? nameOverride,
+        LanguagePrototype language, // Einstein Engines - Language
         bool hideLog = false,
         bool ignoreActionBlocker = false
         )
@@ -25,7 +27,7 @@ public sealed partial class ChatSystem
         if (!_actionBlocker.CanSpeak(source) && !ignoreActionBlocker)
             return;
 
-        var message = TransformSpeech(source, originalMessage);
+        var message = TransformSpeech(source, originalMessage, language); // Einstein Engines - Language
 
         if (message.Length == 0)
             return;
@@ -48,24 +50,54 @@ public sealed partial class ChatSystem
                 speech = proto;
         }
 
+        // Einstein Engines - Language begin
+        if (!language.SpeechOverride.RequireSpeech)
+        {
+            // Since this is basically an emote (e.g. sign language), make it act like an emote for identity.
+            var ent = Identity.Entity(source, EntityManager);
+            name = nameOverride ?? Name(ent);
+        }
+        // Einstein Engines - Language end
+
         name = FormattedMessage.EscapeText(name);
 
-        var verb = Loc.GetString(_random.Pick(speech.SpeechVerbStrings));
+        // Einstein Engines - Language begin: the language can override the speech verb, font and message wrap.
+        var verb = language.SpeechOverride.SpeechVerbOverrides is { } verbsOverride
+            ? Loc.GetString(_random.Pick(verbsOverride).ToString())
+            : Loc.GetString(_random.Pick(speech.SpeechVerbStrings));
+        var fontType = language.SpeechOverride.FontId ?? speech.FontId;
+        var fontSize = language.SpeechOverride.FontSize ?? speech.FontSize;
         var wrapId = speech.Bold ? "chat-manager-entity-say-bold-wrap-message" : "chat-manager-entity-say-wrap-message";
+        if (language.SpeechOverride.MessageWrapOverrides.TryGetValue(InGameICChatType.Speak, out var wrapOverride))
+            wrapId = wrapOverride;
 
+        var languageColor = GetLanguageColor(language); // custom language wraps (e.g. sign language) use a color argument
         var wrappedMessage = Loc.GetString(wrapId,
             ("entityName", name),
             ("verb", verb),
-            ("fontType", speech.FontId),
-            ("fontSize", speech.FontSize),
-            ("message", FormattedMessage.EscapeText(message)));
+            ("fontType", fontType),
+            ("fontSize", fontSize),
+            ("color", languageColor),
+            ("message", ApplyLanguageMarkup(language, FormattedMessage.EscapeText(message))));
+
+        // The message as perceived by listeners who don't understand the language.
+        var languageObfuscatedMessage = _language.ObfuscateSpeech(message, language);
+        var wrappedLanguageObfuscatedMessage = Loc.GetString(wrapId,
+            ("entityName", name),
+            ("verb", verb),
+            ("fontType", fontType),
+            ("fontSize", fontSize),
+            ("color", languageColor),
+            ("message", ApplyLanguageMarkup(language, FormattedMessage.EscapeText(languageObfuscatedMessage))));
+        // Einstein Engines - Language end
 
         // Pass the raw pieces so hard-of-hearing listeners past their clear range can be given a garbled variant.
-        var obfuscation = new SpeechObfuscationData(message, wrapId, name, verb, speech.FontId, speech.FontSize);
+        var obfuscation = new SpeechObfuscationData(message, wrapId, name, verb, fontType, fontSize, languageObfuscatedMessage); // Einstein Engines - Language
 
-        SendInVoiceRange(ChatChannel.Local, message, wrappedMessage, source, range, obfuscation: obfuscation);
+        SendInVoiceRange(ChatChannel.Local, message, wrappedMessage, source, range, obfuscation: obfuscation,
+            language: language, languageObfuscatedMessage: languageObfuscatedMessage, wrappedLanguageObfuscatedMessage: wrappedLanguageObfuscatedMessage); // Einstein Engines - Language
 
-        var ev = new EntitySpokeEvent(source, message, null, null);
+        var ev = new EntitySpokeEvent(source, message, null, null, language); // Einstein Engines - Language
         RaiseLocalEvent(source, ev, true);
 
         // To avoid logging any messages sent by entities that are not players, like vendors, cloning, etc.
@@ -97,6 +129,7 @@ public sealed partial class ChatSystem
         ChatTransmitRange range,
         RadioChannelPrototype? channel,
         string? nameOverride,
+        LanguagePrototype language, // Einstein Engines - Language
         bool hideLog = false,
         bool ignoreActionBlocker = false
         )
@@ -104,11 +137,20 @@ public sealed partial class ChatSystem
         if (!_actionBlocker.CanSpeak(source) && !ignoreActionBlocker)
             return;
 
-        var message = TransformSpeech(source, FormattedMessage.RemoveMarkupOrThrow(originalMessage));
+        // Einstein Engines - Language: languages that don't work over the radio never reach the channel.
+        if (channel != null && !language.SpeechOverride.AllowRadio)
+            channel = null;
+
+        var message = TransformSpeech(source, FormattedMessage.RemoveMarkupOrThrow(originalMessage), language); // Einstein Engines - Language
         if (message.Length == 0)
             return;
 
         var obfuscatedMessage = ObfuscateMessageReadability(message, 0.2f);
+
+        // Einstein Engines - Language begin: the variants of the message for listeners who don't understand the language.
+        var languageObfuscatedMessage = _language.ObfuscateSpeech(message, language);
+        var languageObfuscatedGarbledMessage = ObfuscateMessageReadability(languageObfuscatedMessage, 0.2f);
+        // Einstein Engines - Language end
 
         // get the entity's name by visual identity (if no override provided).
         string nameIdentity = FormattedMessage.EscapeText(nameOverride ?? Identity.Name(source, EntityManager));
@@ -124,17 +166,51 @@ public sealed partial class ChatSystem
             RaiseLocalEvent(source, nameEv);
             name = nameEv.VoiceName;
         }
+
+        // Einstein Engines - Language begin
+        if (!language.SpeechOverride.RequireSpeech)
+        {
+            // Since this is basically an emote (e.g. sign language), make it act like an emote for identity.
+            var ent = Identity.Entity(source, EntityManager);
+            name = nameOverride ?? Name(ent);
+        }
+        // Einstein Engines - Language end
+
         name = FormattedMessage.EscapeText(name);
 
-        var wrappedMessage = Loc.GetString("chat-manager-entity-whisper-wrap-message",
-            ("entityName", name), ("message", FormattedMessage.EscapeText(message)));
+        // Einstein Engines - Language begin: language-aware wrapping. The language may override the whisper wrap.
+        var wrapId = "chat-manager-entity-whisper-wrap-message";
+        var unknownWrapId = "chat-manager-entity-whisper-unknown-wrap-message";
+        if (language.SpeechOverride.MessageWrapOverrides.TryGetValue(InGameICChatType.Whisper, out var wrapOverride))
+            wrapId = unknownWrapId = wrapOverride;
 
-        var wrappedobfuscatedMessage = Loc.GetString("chat-manager-entity-whisper-wrap-message",
-            ("entityName", nameIdentity), ("message", FormattedMessage.EscapeText(obfuscatedMessage)));
+        // Custom language wraps (e.g. sign language) also use verb/font/color arguments.
+        var whisperSpeech = GetSpeechVerb(source, message);
+        var whisperVerb = language.SpeechOverride.SpeechVerbOverrides is { } whisperVerbsOverride
+            ? Loc.GetString(_random.Pick(whisperVerbsOverride).ToString())
+            : Loc.GetString(_random.Pick(whisperSpeech.SpeechVerbStrings));
+        var whisperColor = GetLanguageColor(language);
 
-        var wrappedUnknownMessage = Loc.GetString("chat-manager-entity-whisper-unknown-wrap-message",
-            ("message", FormattedMessage.EscapeText(obfuscatedMessage)));
+        string WrapWhisper(string locId, string entityName, string msg)
+        {
+            return Loc.GetString(locId,
+                ("entityName", entityName),
+                ("verb", whisperVerb),
+                ("fontType", language.SpeechOverride.FontId ?? whisperSpeech.FontId),
+                ("fontSize", language.SpeechOverride.FontSize ?? whisperSpeech.FontSize),
+                ("color", whisperColor),
+                ("message", ApplyLanguageMarkup(language, FormattedMessage.EscapeText(msg), includeFont: true)));
+        }
 
+        var wrappedMessage = WrapWhisper(wrapId, name, message);
+        var wrappedobfuscatedMessage = WrapWhisper(wrapId, nameIdentity, obfuscatedMessage);
+        var wrappedUnknownMessage = WrapWhisper(unknownWrapId, string.Empty, obfuscatedMessage);
+
+        // Same three wraps, but for listeners who don't understand the spoken language.
+        var wrappedLanguageMessage = WrapWhisper(wrapId, name, languageObfuscatedMessage);
+        var wrappedLanguageObfuscatedMessage = WrapWhisper(wrapId, nameIdentity, languageObfuscatedGarbledMessage);
+        var wrappedLanguageUnknownMessage = WrapWhisper(unknownWrapId, string.Empty, languageObfuscatedGarbledMessage);
+        // Einstein Engines - Language end
 
         foreach (var (session, data) in GetRecipients(source, WhisperMuffledRange))
         {
@@ -151,30 +227,51 @@ public sealed partial class ChatSystem
             float whisperClearRange = WhisperClearRange;
             if (!data.Observer)
             {
-                if (_deafQuery.HasComponent(listener))
-                    continue;
-
-                if (_hardOfHearingQuery.TryGetComponent(listener, out var hardOfHearing))
+                // Einstein Engines - Language: visual languages (e.g. sign language) are seen rather than heard.
+                if (!language.SpeechOverride.RequireSpeech)
                 {
-                    if (data.Range > hardOfHearing.MuffledRange)
+                    if (IsBlindListener(listener))
                         continue;
-                    whisperClearRange = MathF.Min(whisperClearRange, hardOfHearing.ClearRange);
+                }
+                else
+                {
+                    if (_deafQuery.HasComponent(listener))
+                        continue;
+
+                    if (_hardOfHearingQuery.TryGetComponent(listener, out var hardOfHearing))
+                    {
+                        if (data.Range > hardOfHearing.MuffledRange)
+                            continue;
+                        whisperClearRange = MathF.Min(whisperClearRange, hardOfHearing.ClearRange);
+                    }
                 }
             }
 
+            // Einstein Engines - Language: what the listener perceives depends on whether they understand the language.
+            var canUnderstand = _language.CanUnderstand(listener, language.ID);
+
             if (data.Range <= whisperClearRange || data.Observer)
-                _chatManager.ChatMessageToOne(ChatChannel.Whisper, message, wrappedMessage, source, false, session.Channel);
+                _chatManager.ChatMessageToOne(ChatChannel.Whisper,
+                    canUnderstand ? message : languageObfuscatedMessage,
+                    canUnderstand ? wrappedMessage : wrappedLanguageMessage,
+                    source, false, session.Channel); // Einstein Engines - Language
             //If listener is too far, they only hear fragments of the message
             else if (_examineSystem.InRangeUnOccluded(source, listener, WhisperMuffledRange))
-                _chatManager.ChatMessageToOne(ChatChannel.Whisper, obfuscatedMessage, wrappedobfuscatedMessage, source, false, session.Channel);
+                _chatManager.ChatMessageToOne(ChatChannel.Whisper,
+                    canUnderstand ? obfuscatedMessage : languageObfuscatedGarbledMessage,
+                    canUnderstand ? wrappedobfuscatedMessage : wrappedLanguageObfuscatedMessage,
+                    source, false, session.Channel); // Einstein Engines - Language
             //If listener is too far and has no line of sight, they can't identify the whisperer's identity
             else
-                _chatManager.ChatMessageToOne(ChatChannel.Whisper, obfuscatedMessage, wrappedUnknownMessage, source, false, session.Channel);
+                _chatManager.ChatMessageToOne(ChatChannel.Whisper,
+                    canUnderstand ? obfuscatedMessage : languageObfuscatedGarbledMessage,
+                    canUnderstand ? wrappedUnknownMessage : wrappedLanguageUnknownMessage,
+                    source, false, session.Channel); // Einstein Engines - Language
         }
 
         _replay.RecordServerMessage(new ChatMessage(ChatChannel.Whisper, message, wrappedMessage, GetNetEntity(source), null, MessageRangeHideChatForReplay(range)));
 
-        var ev = new EntitySpokeEvent(source, message, channel, obfuscatedMessage);
+        var ev = new EntitySpokeEvent(source, message, channel, obfuscatedMessage, language); // Einstein Engines - Language
         RaiseLocalEvent(source, ev, true);
         if (!hideLog)
             if (originalMessage == message)

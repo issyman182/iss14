@@ -47,6 +47,7 @@
   parent: BaseControllable
   id: BaseMob
   components:
+  - type: LanguageSpeaker # Einstein Engines - Language. This component is required to support speech, but it does not define known languages.
   - type: MobCollision
   - type: Physics
     bodyType: KinematicController

@@ -1,3 +1,4 @@
+using Content.Shared._EinsteinEngines.Language; // Einstein Engines - Language
 using Content.Shared.Inventory;
 using Content.Shared.Radio;
 using Content.Shared.Speech;
@@ -62,16 +63,22 @@ public sealed class EntitySpokeEvent : EntityEventArgs
     public readonly string? ObfuscatedMessage; // not null if this was a whisper
 
     /// <summary>
+    ///     The language in which the message was spoken. Einstein Engines - Language
+    /// </summary>
+    public readonly LanguagePrototype Language;
+
+    /// <summary>
     /// If the entity was trying to speak into a radio, this was the channel they were trying to access. If a radio
     /// message gets sent on this channel, this should be set to null to prevent duplicate messages.
     /// </summary>
     public RadioChannelPrototype? Channel;
 
-    public EntitySpokeEvent(EntityUid source, string message, RadioChannelPrototype? channel, string? obfuscatedMessage)
+    public EntitySpokeEvent(EntityUid source, string message, RadioChannelPrototype? channel, string? obfuscatedMessage, LanguagePrototype language) // Einstein Engines - Language
     {
         Source = source;
         Message = message;
         Channel = channel;
         ObfuscatedMessage = obfuscatedMessage;
+        Language = language; // Einstein Engines - Language
     }
 }

@@ -1,4 +1,4 @@
-- type: markingsGroup
+﻿- type: markingsGroup
   parent: Undergarments
   id: Arachnid
   onlyGroupWhitelisted: true
@@ -74,6 +74,13 @@
   id: MobArachnid
   name: Urist McWebs
   components:
+  - type: LanguageKnowledge # Einstein Engines - Language
+    speaks:
+    - TauCetiBasic
+    - Chittin
+    understands:
+    - TauCetiBasic
+    - Chittin
   - type: Respirator
     damage:
       types:
