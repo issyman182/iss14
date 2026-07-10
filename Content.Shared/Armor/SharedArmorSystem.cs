@@ -55,14 +55,21 @@ public abstract partial class SharedArmorSystem : EntitySystem
         if (TryComp<MaskComponent>(uid, out var mask) && mask.IsToggled)
             return;
 
-        // Shitmed Change Start - armor only protects the body parts it covers
+        // Shitmed Change Start - armor coverage applies to targeted damage;
+		// untargeted damage uses the full armor modifier
+		
         if (args.Args.TargetPart == null)
-            return;
+	{
+		args.Args.Damage =
+			DamageSpecifier.ApplyModifierSet(args.Args.Damage, component.Modifiers);
+		return;
+	}
 
-        var (partType, _) = _body.ConvertTargetBodyPart(args.Args.TargetPart);
+	var (partType, _) = _body.ConvertTargetBodyPart(args.Args.TargetPart);
 
-        if (component.ArmorCoverage.Contains(partType))
-            args.Args.Damage = DamageSpecifier.ApplyModifierSet(args.Args.Damage, component.Modifiers);
+	if (component.ArmorCoverage.Contains(partType))
+		args.Args.Damage =
+			DamageSpecifier.ApplyModifierSet(args.Args.Damage, component.Modifiers);
         // Shitmed Change End
     }
 
