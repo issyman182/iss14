@@ -50,7 +50,7 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
     [Dependency] private MobStateSystem _mobStateSystem = default!;
     [Dependency] private DamageableSystem _damageableSystem = default!;
     [Dependency] private SharedDrunkSystem _drunkSystem = default!;
-    [Dependency] private SharedStutteringSystem _stutteringSystem = default!;
+    [Dependency] private StutteringSystem _stutteringSystem = default!;
     [Dependency] private MetabolizerSystem _metabolizer = default!;
 
     private float _bloodlossMultiplier = 4f; // Goobstation

@@ -6,8 +6,6 @@
   id: BaseMobVulpkanin
   name: Urist McBark
   components:
-  - type: Hunger
-  - type: Thirst
   - type: MessyDrinker
     spillChance: 0.33
   - type: Icon
@@ -52,9 +50,11 @@
       types:
         Heat: 2.5 # Per second, scales with temperature & other constants
   - type: Wagging
+  # iss14: upstream's BeforeHeatExchangeEvent has no direction, so the old
+  # heatingCoefficient 1.2 / coolingCoefficient 0.3 pair collapses to one value.
+  # Kept the cold-resistance half, which is the defining half of the trait.
   - type: TemperatureProtection
-    heatingCoefficient: 1.2
-    coolingCoefficient: 0.3
+    coefficient: 0.3
   - type: JumpAbility
     action: ActionVulpkaninGravityJump
     canCollide: true

@@ -1,6 +1,7 @@
 using Content.Shared.Access.Systems;
 using Content.Shared.Actions;
 using Content.Shared.Administration.Logs;
+using Content.Shared.Body.Events;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.Database;
 using Content.Shared.Body.Events;
@@ -24,8 +25,8 @@ using Content.Shared.Roles;
 using Content.Shared.Silicons.Borgs.Components;
 using Content.Shared.Throwing;
 using Content.Shared.UserInterface;
-using Content.Shared.Whitelist;
 using Content.Shared.Wires;
+using Content.Shared.Whitelist;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Configuration;
 using Robust.Shared.Containers;
@@ -292,12 +293,10 @@ public abstract partial class SharedBorgSystem : EntitySystem
         // Don't use the ItemSlotsSystem eject method since we don't want to play a sound and want we to eject the battery even if the slot is locked.
         if (TryComp<PowerCellSlotComponent>(chassis, out var slotComp) &&
             _container.TryGetContainer(chassis, slotComp.CellSlotId, out var slotContainer))
-        {
-            args.Giblets.UnionWith(_container.EmptyContainer(slotContainer));
-        }
+            _container.EmptyContainer(slotContainer);
 
-        args.Giblets.UnionWith(_container.EmptyContainer(chassis.Comp.BrainContainer));
-        args.Giblets.UnionWith(_container.EmptyContainer(chassis.Comp.ModuleContainer));
+        _container.EmptyContainer(chassis.Comp.BrainContainer);
+        _container.EmptyContainer(chassis.Comp.ModuleContainer);
     }
 
     private void OnGetDeadIC(Entity<BorgChassisComponent> chassis, ref GetCharactedDeadIcEvent args)

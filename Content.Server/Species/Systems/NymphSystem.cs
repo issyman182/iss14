@@ -8,6 +8,7 @@
 using Content.Server.Mind;
 using Content.Shared.Species.Components;
 using Content.Shared.Body.Events;
+using Content.Shared.Whitelist;
 using Content.Shared.Zombies;
 using Content.Server.Zombies;
 using Robust.Shared.Prototypes;
@@ -21,6 +22,7 @@ public sealed partial class NymphSystem : EntitySystem
     [Dependency] private MindSystem _mindSystem = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private ZombieSystem _zombie = default!;
+    [Dependency] private EntityWhitelistSystem _whitelist = default!;
 
     public override void Initialize()
     {
@@ -38,6 +40,9 @@ public sealed partial class NymphSystem : EntitySystem
             return;
 
         if (!_protoManager.TryIndex<EntityPrototype>(comp.EntityPrototype, out var entityProto))
+            return;
+
+        if (!_whitelist.CheckBoth(args.OldBody, comp.Blacklist, comp.Whitelist)) // iss14: event carries OldBody
             return;
 
         // Get the organs' position & spawn a nymph there

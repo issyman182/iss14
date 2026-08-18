@@ -1022,8 +1022,7 @@
   - type: SurgeryOrganOnAddCondition
     components:
       brain:
-      - type: RatvarianLanguage
-      - type: Clumsy
+      - type: RatvarianLanguage # iss14: Clumsy dropped, see disabilities.yml
     inverse: true
   - type: SurgeryPartCondition
     parts: [ Head ]
@@ -1045,7 +1044,6 @@
   - type: SurgeryOrganOnAddCondition
     components:
       brain:
-      - type: RatvarianLanguage
-      - type: Clumsy
+      - type: RatvarianLanguage # iss14: Clumsy dropped, see disabilities.yml
   - type: SurgeryPartCondition
     parts: [ Head ]

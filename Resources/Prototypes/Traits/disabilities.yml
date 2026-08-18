@@ -62,8 +62,10 @@
   blacklist:
     components:
       - BorgChassis
-  components:
-    - type: Muted
+  specials:
+  - !type:ApplyStatusEffectSpecial
+    statusEffects:
+    - TraitStatusEffectMuted
 
 - type: trait
   id: Paracusia
@@ -186,4 +188,5 @@
     organSlot: brain
     components:
     - type: RatvarianLanguage
-    - type: Clumsy
+    # iss14: upstream removed ClumsyComponent in favour of status effects, which cannot
+    # be attached to an organ. Lobotomy no longer grants clumsiness - needs reimplementing.

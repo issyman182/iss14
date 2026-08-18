@@ -728,6 +728,9 @@ public partial class PainSystem
             && _net.IsServer)
         {
             RaiseNetworkEvent(new MobThresholdChecked(GetNetEntity(body)), body); // Shitcod to handle overlays.
+
+            var checkedEv = new MobThresholdsChecked(); // iss14
+            RaiseLocalEvent(body, ref checkedEv);
         }
     }
 

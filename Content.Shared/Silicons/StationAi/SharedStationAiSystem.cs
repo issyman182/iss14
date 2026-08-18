@@ -270,7 +270,7 @@ public abstract partial class SharedStationAiSystem : EntitySystem
         // Starlight-end
 
         // Try to insert our thing into them
-        if (slot != null && _slots.CanEject(uid, args.User, slot)) // Starlight-edit
+        if (slot != null && _slots.CanEject(uid, slot, args.User)) // Starlight-edit
         {
             if (!_slots.TryInsert(args.Args.Target.Value, targetHolder.Slot, slot.Item!.Value, args.User, excludeUserAudio: true)) // Starlight-edit
             {
@@ -289,7 +289,7 @@ public abstract partial class SharedStationAiSystem : EntitySystem
         // Starlight-end
 
         // Otherwise try to take from them
-        if (slot != null && _slots.CanEject(args.Args.Target.Value, args.User, targetHolder.Slot)) // Starlight-edit
+        if (slot != null && _slots.CanEject(args.Args.Target.Value, targetHolder.Slot, args.User)) // Starlight-edit
         {
             if (!_slots.TryInsert(uid, slot, targetHolder.Slot.Item!.Value, args.User, excludeUserAudio: true)) // Starlight-edit
             {

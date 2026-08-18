@@ -20,8 +20,11 @@
   description: Access the tools implanted within you
   components:
   - type: Action
-    icon: { sprite: Clothing/Belt/utility.rsi, state: icon }
-    iconOn: Interface/Default/blocked.png
+  - type: Sprite # iss14: action icons live on a Sprite component now
+    sprite: Clothing/Belt/utility.rsi
+    layers:
+    - state: icon
+      map: ["enum.ActionVisuals.Icon"]
 
 - type: entity
   abstract: true
@@ -205,13 +208,10 @@
     state: botany
   - type: Storage
     whitelist:
-      tags:
-      - PlantSampleTaker
-      - BotanyShovel
-      - BotanyHoe
-      - BotanyHatchet
-      - Dropper
+      # iss14: upstream turned the botany tool tags into components
       components:
+      - BotanySampleTaker
+      - BotanyHoe
       - HandLabeler
   - type: Construction
     node: "botany tools panel"
@@ -296,8 +296,11 @@
   description: Increases your melee damage by 25%, consumes 30W while active.
   components:
   - type: Action
-    icon: Interface/Default/blocked.png
-    iconOn: { sprite: Objects/Tools/Toolboxes/toolbox_blue.rsi, state: icon }
+  - type: Sprite # iss14: action icons live on a Sprite component now
+    sprite: Objects/Tools/Toolboxes/toolbox_blue.rsi
+    layers:
+    - state: icon
+      map: ["enum.ActionVisuals.Icon"]
   - type: InstantAction
     event: !type:ToggleActionEvent
 

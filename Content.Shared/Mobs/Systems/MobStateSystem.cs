@@ -2,6 +2,7 @@ using Content.Shared.ActionBlocker;
 using Content.Shared.Administration.Logs;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Mobs.Components;
+using Content.Shared.Popups;
 using Content.Shared.Standing;
 using Robust.Shared.Timing;
 using Content.Shared._Shitmed.Medical.Surgery.Consciousness.Systems; // Shitmed Change
@@ -18,14 +19,15 @@ public partial class MobStateSystem : EntitySystem
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private DamageableSystem _damageable = default!;
     [Dependency] private ConsciousnessSystem _consciousness = default!; // Shitmed Change
+    [Dependency] private SharedPopupSystem _popup = default!;
     private ISawmill _sawmill = default!;
 
     [Dependency] private EntityQuery<MobStateComponent> _mobStateQuery = default!;
 
     public override void Initialize()
     {
-        _sawmill = LogManager.GetSawmill("MobState");
         base.Initialize();
+
         SubscribeEvents();
     }
 

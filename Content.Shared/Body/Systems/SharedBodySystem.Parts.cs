@@ -144,7 +144,7 @@ public partial class SharedBodySystem
             // For whatever reason this slot is initialized properly on the server, but not on the client.
             // This seems to be an issue due to wiz-merge, on my old branch it was properly instantiating
             // ItemInsertionSlot's container on both ends. It does show up properly on ItemSlotsComponent though.
-            _slots.AddItemSlot(ent, ent.Comp.ContainerName, ent.Comp.ItemInsertionSlot);
+            _slots.AddItemSlot(ent.Owner, ent.Comp.ContainerName, ent.Comp.ItemInsertionSlot);
             Dirty(ent, ent.Comp);
         }
 
@@ -165,7 +165,7 @@ public partial class SharedBodySystem
     private void OnBodyPartRemove(Entity<BodyPartComponent> ent, ref ComponentRemove args)
     {
         if (ent.Comp.PartType == BodyPartType.Chest)
-            _slots.RemoveItemSlot(ent, ent.Comp.ItemInsertionSlot);
+            _slots.RemoveItemSlot(ent.Owner, ent.Comp.ItemInsertionSlot);
     }
 
     /// <summary>

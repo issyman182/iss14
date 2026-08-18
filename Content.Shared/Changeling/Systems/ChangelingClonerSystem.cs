@@ -27,8 +27,8 @@ public sealed partial class ChangelingClonerSystem : EntitySystem
     [Dependency] private SharedCloningSystem _cloning = default!;
     [Dependency] private SharedAppearanceSystem _appearance = default!;
     [Dependency] private SharedChangelingIdentitySystem _changelingIdentity = default!;
-    [Dependency] private SharedForensicsSystem _forensics = default!;
-    [Dependency] private SharedHumanoidAppearanceSystem _humanoidAppearance = default!;
+    [Dependency] private ForensicsSystem _forensics = default!;
+    [Dependency] private SharedHumanoidAppearanceSystem _humanoidAppearance = default!; // iss14: classic appearance, not Nubody's visual body
 
     public override void Initialize()
     {

@@ -11,8 +11,6 @@
   components:
   # iss14: cat ears - hears speech/whispers 20% farther, and "psps" calls twice as far.
   - type: AcuteHearing
-  - type: Hunger
-  - type: Thirst
   - type: Icon
     sprite: _Carpmosia/Mobs/Species/Tajaran/parts.rsi
     state: torso_m
@@ -35,7 +33,7 @@
       types:
         Slash: 5
   - type: Temperature
-    currentTemperature: 312
+    temperature: 312
   - type: TemperatureDamage
     heatDamageThreshold: 322
     coldDamageThreshold: 245

@@ -9,10 +9,7 @@
   components:
   - type: Action
     useDelay: 0.5
-    icon:
-      sprite: _Goobstation/Actions/kravmaga.rsi
-      state: legsweep
-  - type: Sprite # For guidebook
+  - type: Sprite # For guidebook, and the action icon since upstream moved it here
     sprite: _Goobstation/Actions/kravmaga.rsi
     state: legsweep
   - type: InstantAction
@@ -30,10 +27,7 @@
   components:
   - type: Action
     useDelay: 0.5
-    icon:
-      sprite: _Goobstation/Actions/kravmaga.rsi
-      state: neckchop
-  - type: Sprite # For guidebook
+  - type: Sprite # For guidebook, and the action icon since upstream moved it here
     sprite: _Goobstation/Actions/kravmaga.rsi
     state: neckchop
   - type: InstantAction
@@ -52,10 +46,7 @@
   components:
   - type: Action
     useDelay: 0.5
-    icon:
-      sprite: _Goobstation/Actions/kravmaga.rsi
-      state: lungpunch
-  - type: Sprite # For guidebook
+  - type: Sprite # For guidebook, and the action icon since upstream moved it here
     sprite: _Goobstation/Actions/kravmaga.rsi
     state: lungpunch
   - type: InstantAction

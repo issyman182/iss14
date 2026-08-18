@@ -1,8 +1,8 @@
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Prototypes;
 using Robust.Shared.Serialization;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom;
-using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototype.Dictionary;
 
 namespace Content.Shared.Damage
 {
@@ -20,11 +20,11 @@ namespace Content.Shared.Damage
     [Virtual]
     public partial class DamageModifierSet
     {
-        [DataField("coefficients", customTypeSerializer: typeof(PrototypeIdDictionarySerializer<float, DamageTypePrototype>))]
-        public Dictionary<string, float> Coefficients = new();
+        [DataField]
+        public Dictionary<ProtoId<DamageTypePrototype>, float> Coefficients = new();
 
-        [DataField("flatReductions", customTypeSerializer: typeof(PrototypeIdDictionarySerializer<float, DamageTypePrototype>))]
-        public Dictionary<string, float> FlatReduction = new();
+        [DataField]
+        public Dictionary<ProtoId<DamageTypePrototype>, float> FlatReductions = new();
 
         /// <summary>
         /// Goobstation: which armor penetration directions this set ignores.

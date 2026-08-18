@@ -13,14 +13,16 @@
   - type: Action
     useDelay: 80
     raiseOnUser: true
-    icon:
-      sprite: Mobs/Aliens/Asteroid/goliath.rsi
-      state: goliath_tentacle_spawn
-    iconOn:
-      sprite: Mobs/Aliens/Asteroid/goliath.rsi
-      state: goliath_tentacle_wiggle
     sound:
       path: "/Audio/Weapons/slash.ogg"
+  - type: Sprite # iss14: action icons live on a Sprite component now
+    sprite: Mobs/Aliens/Asteroid/goliath.rsi
+    layers:
+    - state: goliath_tentacle_spawn
+      map: ["enum.ActionVisuals.Icon"]
+    - state: goliath_tentacle_wiggle
+      map: ["enum.ActionVisuals.IconToggled"]
+      visible: false
   - type: TargetAction
     range: 10
   - type: WorldTargetAction

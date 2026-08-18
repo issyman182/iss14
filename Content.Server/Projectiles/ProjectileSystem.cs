@@ -51,7 +51,9 @@ public sealed partial class ProjectileSystem : SharedProjectileSystem
             return;
         }
 
-        var ev = new ProjectileHitEvent(component.Damage * _damageableSystem.UniversalProjectileDamageModifier, target, component.Shooter);
+        var damageEv = new BeforeProjectileHitEvent(component.Damage, target, component.Shooter);
+        RaiseLocalEvent(uid, ref damageEv);
+        var ev = new ProjectileHitEvent(damageEv.Damage * _damageableSystem.UniversalProjectileDamageModifier, target, component.Shooter);
         RaiseLocalEvent(uid, ref ev);
 
         var otherName = ToPrettyString(target);
@@ -61,7 +63,6 @@ public sealed partial class ProjectileSystem : SharedProjectileSystem
             damageRequired -= _damageableSystem.GetTotalDamage((target, damageableComponent));
             damageRequired = FixedPoint2.Max(damageRequired, FixedPoint2.Zero);
         }
-        var deleted = Deleted(target);
 
         // Goobstation - ranged aim-miss falloff: the aimed body part only lands close-up; the
         // chance falls off with shot distance and the hit degrades to the chest.
@@ -78,9 +79,10 @@ public sealed partial class ProjectileSystem : SharedProjectileSystem
                 targetPart = TargetBodyPart.Chest;
         }
 
-        if (_damageableSystem.TryChangeDamage((target, damageableComponent), ev.Damage, out var damage, component.IgnoreResistances, origin: component.Shooter, targetPart: targetPart) && Exists(component.Shooter))
+        if (_damageableSystem.TryChangeDamage((target, damageableComponent), ev.Damage, out var damage, component.IgnoreResistances, origin: component.Shooter, targetPart: targetPart)
+            && Exists(component.Shooter))
         {
-            if (!deleted)
+            if (!Deleted(target))
             {
                 _color.RaiseEffect(Color.Red, new List<EntityUid> { target }, Filter.Pvs(target, entityManager: EntityManager));
             }
@@ -96,7 +98,7 @@ public sealed partial class ProjectileSystem : SharedProjectileSystem
             component.ProjectileSpent = true;
         }
 
-        if (!deleted)
+        if (!Deleted(target))
         {
             _guns.PlayImpactSound(target, damage, component.SoundHit, component.ForceSound);
 

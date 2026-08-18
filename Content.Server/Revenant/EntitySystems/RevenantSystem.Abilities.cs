@@ -1,37 +1,41 @@
 using Content.Shared.Actions;
-using Content.Shared.Popups;
-using Content.Shared.Damage;
-using Content.Shared.Revenant;
-using Robust.Shared.Random;
-using Content.Shared.Tag;
 using Content.Shared.Storage.Components;
-using Content.Server.Ghost;
-using Robust.Shared.Physics;
+using Content.Shared.Tag;
 using Content.Shared.Throwing;
-using Content.Server.Storage.EntitySystems;
-using Content.Shared.Interaction;
-using Content.Shared.Item;
-using Content.Shared.Bed.Sleep;
+using Robust.Shared.Physics;
+using Robust.Shared.Random;
 using System.Linq;
 using System.Numerics;
+using Content.Server.Ghost;
 using Content.Server.Revenant.Components;
-using Content.Shared.Physics;
+using Content.Server.Storage.EntitySystems;
+using Content.Shared.Bed.Sleep;
+using Content.Shared.Damage;
 using Content.Shared.DoAfter;
 using Content.Shared.Emag.Systems;
 using Content.Shared.FixedPoint;
 using Content.Shared.Humanoid;
+using Content.Shared.IdentityManagement;
+using Content.Shared.Interaction;
+using Content.Shared.Item;
 using Content.Shared.Light.Components;
 using Content.Shared.Maps;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
+using Content.Shared.Physics;
+using Content.Shared.Popups;
+using Content.Shared.Revenant;
 using Content.Shared.Revenant.Components;
-using Robust.Shared.Physics.Components;
-using Robust.Shared.Utility;
-using Robust.Shared.Map.Components;
+using Content.Shared.Tag;
+using Content.Shared.Throwing;
 using Content.Shared.Whitelist;
+using Robust.Shared.Map.Components;
+using Robust.Shared.Physics;
+using Robust.Shared.Physics.Components;
 using Robust.Shared.Prototypes;
-using Content.Shared.IdentityManagement;
+using Robust.Shared.Random;
+using Robust.Shared.Utility;
 
 namespace Content.Server.Revenant.EntitySystems;
 
@@ -49,10 +53,9 @@ public sealed partial class RevenantSystem
     [Dependency] private SharedMapSystem _mapSystem = default!;
     [Dependency] private SharedActionsSystem _actionsSystem = default!; // iss14
 
-    [Dependency] private EntityQuery<TagComponent> _tagQuery = default!;
-    [Dependency] private EntityQuery<ItemComponent> _itemQuery = default!;
-    [Dependency] private EntityQuery<PoweredLightComponent> _poweredLightQuery = default!;
-    [Dependency] private EntityQuery<MobStateComponent> _mobStateQuery = default!;
+    [Dependency] private EntityQuery<ItemComponent> _itemQuery;
+    [Dependency] private EntityQuery<MobStateComponent> _mobStateQuery;
+    [Dependency] private EntityQuery<PoweredLightComponent> _poweredLightQuery;
 
     private static readonly ProtoId<TagPrototype> WindowTag = "Window";
 
@@ -102,7 +105,7 @@ public sealed partial class RevenantSystem
         else
             AddComp<CorporealComponent>(uid);
 
-        _actionsSystem.SetToggled(args.Action, !corporeal);
+        _actionsSystem.SetToggled(args.Action.AsNullable(), !corporeal); // iss14: SetToggled takes a nullable-comp entity
     }
 
     private void OnInteract(EntityUid uid, RevenantComponent component, UserActivateInWorldEvent args)
@@ -114,9 +117,10 @@ public sealed partial class RevenantSystem
             return;
         var target = args.Target;
 
-        if (HasComp<PoweredLightComponent>(target))
+        // Try to do something spooky first.
+        if (_ghost.DoGhostBooEvent(target))
         {
-            args.Handled = _ghost.DoGhostBooEvent(target);
+            args.Handled = true;
             return;
         }
 
@@ -201,7 +205,7 @@ public sealed partial class RevenantSystem
             return;
         }
 
-        if (_physics.GetEntitiesIntersectingBody(uid, (int) CollisionGroup.Impassable).Count > 0)
+        if (_physics.GetEntitiesIntersectingBody(uid, (int)CollisionGroup.Impassable).Count > 0)
         {
             _popup.PopupEntity(Loc.GetString("revenant-in-solid"), uid, uid);
             return;
@@ -251,7 +255,7 @@ public sealed partial class RevenantSystem
 
         essence.Harvested = true;
         ChangeEssenceAmount(uid, essence.EssenceAmount, component);
-        _store.TryAddCurrency(new Dictionary<string, FixedPoint2>
+        _store.TryAddCurrency(new()
             { {component.StolenEssenceCurrencyPrototype, essence.EssenceAmount} }, uid);
 
         if (!_mobStateQuery.HasComp(args.Args.Target))
@@ -307,7 +311,7 @@ public sealed partial class RevenantSystem
         foreach (var ent in lookup)
         {
             //break windows
-            if (_tagQuery.HasComponent(ent) && _tag.HasTag(ent, WindowTag))
+            if (_tag.HasTag(ent, WindowTag))
             {
                 //hardcoded damage specifiers til i die.
                 var dspec = new DamageSpecifier();
@@ -322,13 +326,12 @@ public sealed partial class RevenantSystem
             _entityStorage.OpenStorage(ent, args.Performer);
 
             //chucks shit
-            if (_itemQuery.HasComponent(ent) &&
+            if (_itemQuery.HasComp(ent) &&
                 TryComp<PhysicsComponent>(ent, out var phys) && phys.BodyType != BodyType.Static)
                 _throwing.TryThrow(ent, _random.NextAngle().ToWorldVec());
 
-            //flicker lights
-            if (_poweredLightQuery.HasComponent(ent))
-                _ghost.DoGhostBooEvent(ent);
+            //spooky stuff
+            _ghost.DoGhostBooEvent(ent);
         }
     }
 

@@ -34,6 +34,7 @@ using Content.Shared._Shitmed.Body.Organ;
 using Content.Shared.Body.Systems;
 using Content.Shared.Body.Components;
 using Content.Goobstation.Common.Body;
+using Content.Shared.Ghost.Components;
 
 
 namespace Content.Server.Body.Systems

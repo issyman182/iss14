@@ -9,8 +9,6 @@
     species: Moth
     hideLayersOnEquip:
     - HeadTop
-  - type: Hunger
-  - type: Thirst
   - type: Icon
     sprite: Mobs/Species/Moth/parts.rsi
     state: full
@@ -54,7 +52,7 @@
       types:
         Heat: 2.5 # moths burn more easily
   - type: Temperature
-    currentTemperature: 310.15
+    temperature: 310.15
     specificHeat: 46
   - type: TemperatureDamage # Moths hate the heat and thrive in the cold.
     heatDamageThreshold: 320

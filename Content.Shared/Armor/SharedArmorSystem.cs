@@ -94,7 +94,7 @@ public abstract partial class SharedArmorSystem : EntitySystem
         if (component is { ArmourCoverageHidden: true, ArmourModifiersHidden: true })
             return;
 
-        if (!component.Modifiers.Coefficients.Any() && !component.Modifiers.FlatReduction.Any())
+        if (!component.Modifiers.Coefficients.Any() && !component.Modifiers.FlatReductions.Any())
             return;
 
         var examineMarkup = GetArmorExamine(component);
@@ -134,18 +134,19 @@ public abstract partial class SharedArmorSystem : EntitySystem
             {
                 msg.PushNewline();
 
-                var armorType = Loc.GetString("armor-damage-type-" + coefficientArmor.Key.ToLower());
+                // TODO: probably make these prototype fields or have a test that they all exist
+                var armorType = Loc.GetString("armor-damage-type-" + coefficientArmor.Key.Id.ToLower());
                 msg.AddMarkupOrThrow(Loc.GetString("armor-coefficient-value",
                     ("type", armorType),
                     ("value", MathF.Round((1f - coefficientArmor.Value) * 100, 1))
                 ));
             }
 
-            foreach (var flatArmor in armorModifiers.FlatReduction)
+            foreach (var flatArmor in armorModifiers.FlatReductions)
             {
                 msg.PushNewline();
 
-                var armorType = Loc.GetString("armor-damage-type-" + flatArmor.Key.ToLower());
+                var armorType = Loc.GetString("armor-damage-type-" + flatArmor.Key.Id.ToLower());
                 msg.AddMarkupOrThrow(Loc.GetString("armor-reduction-value",
                     ("type", armorType),
                     ("value", flatArmor.Value)

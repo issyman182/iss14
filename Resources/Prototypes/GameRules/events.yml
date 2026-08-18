@@ -152,6 +152,10 @@
     duration: 1
     minimumPlayers: 15
   - type: BreakerFlipRule
+    blacklist:
+      components:
+        - ProtectedGrid
+
 
 - type: entity
   id: BureaucraticError
@@ -348,7 +352,7 @@
       path: /Audio/Announcements/power_off.ogg
       params:
         volume: -4
-    duration: 60
+    duration: 60 # iss14 tuning
     maxDuration: 100
   - type: PowerGridCheckRule
 

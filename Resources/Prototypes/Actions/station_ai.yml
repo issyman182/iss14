@@ -8,9 +8,10 @@
   - type: Action
     priority: -9
     itemIconStyle: BigAction
-    icon:
-      sprite: Interface/Actions/actions_ai.rsi
-      state: ai_core
+  - type: Sprite
+    sprite: Interface/Actions/actions_ai.rsi
+    layers:
+    - state: ai_core
   - type: InstantAction
     event: !type:JumpToCoreEvent
 
@@ -22,15 +23,16 @@
   description: Shunt into a borg chassis with a AI interface installed.
   components:
   - type: Action
-    icon:
-      { sprite: _Starlight/Interface/Actions/actions_shunt.rsi, state: icon }
-    iconOn:
-      {
-        sprite: _Starlight/Interface/Actions/actions_shunt.rsi,
-        state: icon-on,
-      }
     itemIconStyle: BigAction
     priority: 1
+  - type: Sprite # iss14: action icons live on a Sprite component now
+    sprite: _Starlight/Interface/Actions/actions_shunt.rsi
+    layers:
+    - state: icon
+      map: ["enum.ActionVisuals.Icon"]
+    - state: icon-on
+      map: ["enum.ActionVisuals.IconToggled"]
+      visible: false
   - type: TargetAction
   - type: EntityTargetAction
     canTargetSelf: false # no whitelist cause the posibrain has the shunt comp. not the chassis.
@@ -47,11 +49,11 @@
   components:
   - type: Action
     useDelay: 1
-    icon:
-      {
-        sprite: _Starlight/Interface/Actions/actions_shunt.rsi,
-        state: icon-unshunt,
-      }
+  - type: Sprite # iss14: action icons live on a Sprite component now
+    sprite: _Starlight/Interface/Actions/actions_shunt.rsi
+    layers:
+    - state: icon-unshunt
+      map: ["enum.ActionVisuals.Icon"]
   - type: InstantAction
     event: !type:AIUnShuntActionEvent
 
@@ -63,9 +65,11 @@
   components:
   - type: Action
     itemIconStyle: BigAction
-    icon:
-      sprite: Interface/Actions/actions_ai.rsi
-      state: warp
+  - type: Sprite # iss14: action icons live on a Sprite component now
+    sprite: Interface/Actions/actions_ai.rsi
+    layers:
+    - state: warp
+      map: ["enum.ActionVisuals.Icon"]
   - type: InstantAction
     event: !type:StationAiOpenWarpActionEvent
 
@@ -78,9 +82,10 @@
   - type: Action
     priority: -3
     itemIconStyle: NoItem
-    icon:
-      sprite: Interface/Actions/actions_ai.rsi
-      state: state_laws
     useDelay: 0.5
+  - type: Sprite
+    sprite: Interface/Actions/actions_ai.rsi
+    layers:
+    - state: state_laws
   - type: InstantAction
     event: !type:ToggleLawsScreenEvent

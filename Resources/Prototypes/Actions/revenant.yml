@@ -12,8 +12,10 @@
   components:
   - type: Action
     useDelay: 15
-    icon: Interface/Actions/defile.png
     itemIconStyle: BigAction
+  - type: Sprite
+    layers:
+    - texture: Interface/Actions/defile.png
   - type: InstantAction
     event: !type:RevenantDefileActionEvent
 
@@ -24,9 +26,11 @@
   description: Costs 40 Essence.
   components:
   - type: Action
-    icon: Interface/Actions/overloadlight.png
     useDelay: 20
     itemIconStyle: BigAction
+  - type: Sprite
+    layers:
+    - texture: Interface/Actions/overloadlight.png
   - type: InstantAction
     event: !type:RevenantOverloadLightsActionEvent
 
@@ -50,10 +54,16 @@
   description: Freely switch between being visible and invisible. Costs no essence.
   components:
   - type: Action
-    icon: { sprite: Objects/Specific/Robotics/borgmodule.rsi, state: xenoborg_stealth }
-    iconOn: { sprite: Objects/Specific/Robotics/borgmodule.rsi, state: icon-xenoborg-cloak }
     useDelay: 2
     itemIconStyle: BigAction
+  - type: Sprite # iss14: action icons live on a Sprite component now
+    sprite: Objects/Specific/Robotics/borgmodule.rsi
+    layers:
+    - state: xenoborg_stealth
+      map: ["enum.ActionVisuals.Icon"]
+    - state: icon-xenoborg-cloak
+      map: ["enum.ActionVisuals.IconToggled"]
+      visible: false
   - type: InstantAction
     event: !type:RevenantToggleCorporealActionEvent
 
@@ -64,8 +74,10 @@
   description: Costs 60 Essence.
   components:
   - type: Action
-    icon: Interface/Actions/malfunction.png
     useDelay: 20
     itemIconStyle: BigAction
+  - type: Sprite
+    layers:
+    - texture: Interface/Actions/malfunction.png
   - type: InstantAction
     event: !type:RevenantMalfunctionActionEvent

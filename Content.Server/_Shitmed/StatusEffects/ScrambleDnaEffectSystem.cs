@@ -18,6 +18,7 @@ using Content.Shared.Humanoid;
 using Content.Shared.Preferences;
 using Content.Shared.Popups;
 using Content.Shared.Forensics.Components;
+using Content.Shared.Forensics.Systems;
 
 namespace Content.Server._Shitmed.StatusEffects;
 

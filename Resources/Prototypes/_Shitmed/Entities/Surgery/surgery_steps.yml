@@ -807,8 +807,7 @@
     - type: Drill
     addOrganOnAdd:
       brain:
-      - type: RatvarianLanguage
-      - type: Clumsy
+      - type: RatvarianLanguage # iss14: Clumsy dropped, see disabilities.yml
     duration: 5
   - type: Sprite
     sprite: _Shitmed/Objects/Specific/Medical/Surgery/drill.rsi
@@ -831,8 +830,7 @@
     duration: 4
     removeOrganOnAdd:
       brain:
-      - type: RatvarianLanguage
-      - type: Clumsy
+      - type: RatvarianLanguage # iss14: Clumsy dropped, see disabilities.yml
   - type: Sprite
     sprite: _Shitmed/Objects/Specific/Medical/Surgery/hemostat.rsi
     state: hemostat

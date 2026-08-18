@@ -7,10 +7,13 @@
   components:
   - type: HumanoidAppearance
     species: Diona
-  - type: Hunger
-    baseDecayRate: 0.0083
-  - type: Thirst
-    baseDecayRate: 0.0083
+  # iss14: DionaHunger/DionaThirst carry the slower decay this used to set inline
+  - type: Satiation
+    satiations:
+      Hunger:
+        prototype: DionaHunger
+      Thirst:
+        prototype: DionaThirst
   - type: Icon
     sprite: Mobs/Species/Diona/parts.rsi
     state: full

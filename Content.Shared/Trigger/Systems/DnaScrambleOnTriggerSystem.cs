@@ -15,7 +15,7 @@ public sealed partial class DnaScrambleOnTriggerSystem : XOnTriggerSystem<DnaScr
     [Dependency] private MetaDataSystem _metaData = default!;
     [Dependency] private SharedHumanoidAppearanceSystem _humanoidAppearance = default!;
     [Dependency] private IdentitySystem _identity = default!;
-    [Dependency] private SharedForensicsSystem _forensics = default!;
+    [Dependency] private ForensicsSystem _forensics = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private INetManager _net = default!;
 

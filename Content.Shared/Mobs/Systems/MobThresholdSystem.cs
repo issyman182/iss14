@@ -367,6 +367,9 @@ public sealed partial class MobThresholdSystem : EntitySystem
         if (_net.IsServer) // Shitmed Change
             RaiseNetworkEvent(new MobThresholdChecked(GetNetEntity(target)), target);
 
+        var checkedEv = new MobThresholdsChecked(); // iss14
+        RaiseLocalEvent(target, ref checkedEv);
+
         UpdateAlerts(target, mobState.CurrentState, threshold, damageable, body); // Shitmed Change
     }
 
@@ -482,6 +485,9 @@ public sealed partial class MobThresholdSystem : EntitySystem
         if (_net.IsServer) // Shitmed Change
             RaiseNetworkEvent(new MobThresholdChecked(GetNetEntity(target)), target);
 
+        var checkedEv = new MobThresholdsChecked(); // iss14
+        RaiseLocalEvent(target, ref checkedEv);
+
         UpdateAlerts(target, mobState.CurrentState, thresholds, args.Damageable);
     }
 
@@ -494,6 +500,9 @@ public sealed partial class MobThresholdSystem : EntitySystem
         // mob states are handled by consciousness. so we fine here
         if (_net.IsServer)
             RaiseNetworkEvent(new MobThresholdChecked(GetNetEntity(body)), body);
+
+        var checkedEv = new MobThresholdsChecked(); // iss14
+        RaiseLocalEvent(body, ref checkedEv);
 
         UpdateAlerts(body, mobState.CurrentState, thresholds, null, Comp<BodyComponent>(body));
     }
@@ -534,6 +543,9 @@ public sealed partial class MobThresholdSystem : EntitySystem
             RaiseNetworkEvent(new MobThresholdChecked(GetNetEntity(ent.Owner)), ent.Owner);
         }
 
+        var checkedEv = new MobThresholdsChecked(); // iss14
+        RaiseLocalEvent(ent.Owner, ref checkedEv);
+
         UpdateAlerts(ent, currentState, thresholds, damageable, bodyComponent);
     }
     // Shitmed Change End
@@ -545,6 +557,13 @@ public sealed partial class MobThresholdSystem : EntitySystem
 
     #endregion
 }
+
+/// <summary>
+/// iss14: local counterpart to the networked <see cref="MobThresholdChecked"/>. Raised on the target
+/// whenever its thresholds are re-checked, so server-side systems can recompute derived state.
+/// </summary>
+[ByRefEvent]
+public record struct MobThresholdsChecked;
 
 /// <summary>
 /// Shitmed Change: Event that triggers when an entity with a mob threshold is checked

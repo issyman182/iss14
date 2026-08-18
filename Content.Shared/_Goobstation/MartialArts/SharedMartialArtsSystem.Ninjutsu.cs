@@ -115,7 +115,8 @@ public abstract partial class SharedMartialArtsSystem
 
         var modifier = sneakAttack.TakedownSpeedModifier;
         _movementMod.TryUpdateMovementSpeedModDuration(target, MartsGenericSlow, TimeSpan.FromSeconds(slowdownTime), modifier, modifier);
-        _status.TryAddStatusEffect<MutedComponent>(target, "Muted", TimeSpan.FromSeconds(muteTime), true);
+        // iss14: muting is a status-effect entity now, MutedComponent no longer exists
+        _newStatus.TryAddStatusEffectDuration(target, "StatusEffectMuted", TimeSpan.FromSeconds(muteTime));
 
         _audio.PlayPvs(sneakAttack.AssassinateSoundUnarmed, target);
         ComboPopup(ent, target, sneakAttack.TakedownComboName);
