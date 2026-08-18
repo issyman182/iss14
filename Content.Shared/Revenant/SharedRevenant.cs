@@ -58,6 +58,13 @@ public sealed partial class RevenantMalfunctionActionEvent : InstantActionEvent
 {
 }
 
+/// <summary>
+/// iss14: Freely toggles the revenant between corporeal (visible) and incorporeal (invisible).
+/// </summary>
+public sealed partial class RevenantToggleCorporealActionEvent : InstantActionEvent
+{
+}
+
 
 [NetSerializable, Serializable]
 public enum RevenantVisuals : byte

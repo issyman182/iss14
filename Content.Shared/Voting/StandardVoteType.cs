@@ -23,7 +23,12 @@ public enum StandardVoteType : byte
     /// <summary>
     /// Vote to kick a player.
     /// </summary>
-    Votekick
+    Votekick,
+
+    /// <summary>
+    /// iss14: Vote to restart the round immediately, skipping the usual post-round wait timer.
+    /// </summary>
+    RestartNow
 }
 
 /// <summary>

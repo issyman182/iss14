@@ -31,6 +31,15 @@
                 <Button Name="DeselectAllButton" Text="{Loc id-card-console-window-deselect-all-button}" />
             </BoxContainer>
         </BoxContainer>
+        <!-- Job icon selection: every job icon, including ones without a job (syndicate, ERT, CBURN, ...) -->
+        <BoxContainer Orientation="Horizontal" Margin="0 4 0 2">
+            <Label Text="{Loc id-permissions-icon-label}" />
+            <TextureRect Name="CurrentJobIconRect" SetSize="24 24" Margin="6 0 0 0" VerticalAlignment="Center" Stretch="KeepAspectCentered" />
+        </BoxContainer>
+        <ScrollContainer HScrollEnabled="False" MinSize="0 76" MaxSize="99999 112">
+            <GridContainer Name="JobIconGrid" Columns="16" />
+        </ScrollContainer>
+        <Control MinSize="0 8" />
         <!-- Individual access buttons -->
         <ScrollContainer HScrollEnabled="False" MinSize="0 220" VerticalExpand="True">
             <Control Name="AccessLevelControlContainer" />

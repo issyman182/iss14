@@ -571,6 +571,15 @@
       types:
         Asphyxiation: -0.5
   - type: CombatMode
+  - type: ClothGrowth # iss14: gets bigger and hits harder the more cloth it eats
+    whitelist:
+      tags:
+      - ClothMade
+    maxCloth: 60
+    maxScale: 2.2 # roughly 1.5x the size of a human at full growth
+    maxDamageBonus:
+      types:
+        Piercing: 5
   - type: Solution
     solution:
       reagents:

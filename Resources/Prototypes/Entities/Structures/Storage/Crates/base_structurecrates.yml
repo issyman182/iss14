@@ -95,6 +95,7 @@
   - type: Lock
   - type: LockVisuals
   - type: AccessReader
+  - type: StationAiWhitelist # iss14 (from Starlight): lets the AI open and (un)lock secure crates
   - type: Icon
     sprite: Structures/Storage/Crates/secure.rsi
     state: icon

@@ -42,6 +42,21 @@
 #  - type: InstantAction
 #    event: !type:RevenantBlightActionEvent
 
+# iss14: free visibility toggle (uses the xenoborg cloaking module sprite)
+- type: entity
+  parent: BaseAction
+  id: ActionRevenantToggleCorporeal
+  name: Corporeal
+  description: Freely switch between being visible and invisible. Costs no essence.
+  components:
+  - type: Action
+    icon: { sprite: Objects/Specific/Robotics/borgmodule.rsi, state: xenoborg_stealth }
+    iconOn: { sprite: Objects/Specific/Robotics/borgmodule.rsi, state: icon-xenoborg-cloak }
+    useDelay: 2
+    itemIconStyle: BigAction
+  - type: InstantAction
+    event: !type:RevenantToggleCorporealActionEvent
+
 - type: entity
   parent: BaseAction
   id: ActionRevenantMalfunction

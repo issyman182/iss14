@@ -1,12 +1,14 @@
 using System.Linq;
 using Content.Server.DeviceNetwork;
 using Content.Server.DeviceNetwork.Systems;
+using Content.Server.Silicons.StationAi; // iss14 (from Starlight)
 using Content.Shared.PowerCell;
 using Content.Shared.DeviceNetwork;
 using Content.Shared.DeviceNetwork.Events;
 using Content.Shared.Medical.CrewMonitoring;
 using Content.Shared.Medical.SuitSensor;
 using Content.Shared.Pinpointer;
+using Content.Shared.Silicons.StationAi; // iss14 (from Starlight)
 using Robust.Server.GameObjects;
 
 namespace Content.Server.Medical.CrewMonitoring;
@@ -15,6 +17,7 @@ public sealed partial class CrewMonitoringConsoleSystem : EntitySystem
 {
     [Dependency] private PowerCellSystem _cell = default!;
     [Dependency] private UserInterfaceSystem _uiSystem = default!;
+    [Dependency] private StationAiSystem _stationAi = default!; // iss14 (from Starlight)
 
     public override void Initialize()
     {
@@ -22,6 +25,28 @@ public sealed partial class CrewMonitoringConsoleSystem : EntitySystem
         SubscribeLocalEvent<CrewMonitoringConsoleComponent, ComponentRemove>(OnRemove);
         SubscribeLocalEvent<CrewMonitoringConsoleComponent, DeviceNetworkPacketEvent>(OnPacketReceived);
         SubscribeLocalEvent<CrewMonitoringConsoleComponent, BoundUIOpenedEvent>(OnUIOpened);
+        SubscribeLocalEvent<CrewMonitoringConsoleComponent, CrewMonitoringWarpRequestMessage>(OnWarpRequest); // iss14 (from Starlight)
+    }
+
+    /// <summary>
+    /// iss14 (from Starlight): an AI viewing the crew monitor clicked the map - warp its eye there.
+    /// </summary>
+    private void OnWarpRequest(EntityUid uid, CrewMonitoringConsoleComponent component, CrewMonitoringWarpRequestMessage args)
+    {
+        if (args.Actor is not { Valid: true } actor)
+            return;
+
+        if (!HasComp<StationAiHeldComponent>(actor))
+        {
+            Log.Warning($"{ToPrettyString(actor)} attempted to warp via crew monitor {ToPrettyString(uid)} without being a station AI.");
+            return;
+        }
+
+        var coordinates = GetCoordinates(args.Coordinates);
+        if (!coordinates.IsValid(EntityManager))
+            return;
+
+        _stationAi.TryWarpEyeToCoordinates(actor, coordinates);
     }
 
     private void OnRemove(EntityUid uid, CrewMonitoringConsoleComponent component, ComponentRemove args)

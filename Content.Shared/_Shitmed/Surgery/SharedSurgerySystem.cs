@@ -442,6 +442,7 @@ public abstract partial class SharedSurgerySystem : EntitySystem
         if (!HasComp<SurgeryTargetComponent>(body) ||
             !IsLyingDown(body, user) ||
             GetSingleton(surgery) is not { } surgeryEntId ||
+            HasComp<SurgeryDisabledComponent>(surgeryEntId) || // iss14: disabled surgeries can never run
             !TryComp(surgeryEntId, out SurgeryComponent? surgeryComp) ||
             !surgeryComp.Steps.Contains(stepId) ||
             GetSingleton(stepId) is not { } stepEnt
@@ -532,7 +533,8 @@ public abstract partial class SharedSurgerySystem : EntitySystem
 
         _allSurgeries.Clear();
         foreach (var entity in _prototypes.EnumeratePrototypes<EntityPrototype>())
-            if (entity.HasComponent<SurgeryComponent>())
+            if (entity.HasComponent<SurgeryComponent>()
+                && !entity.HasComponent<SurgeryDisabledComponent>()) // iss14: disabled surgeries aren't offered anywhere
                 _allSurgeries.Add(new EntProtoId(entity.ID));
     }
 }

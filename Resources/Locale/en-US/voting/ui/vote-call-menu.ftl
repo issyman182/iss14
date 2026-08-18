@@ -1,4 +1,6 @@
 ui-vote-type-restart = Restart round
+# iss14
+ui-vote-type-restart-now = Restart round now (skip wait timer)
 ui-vote-type-gamemode = Next gamemode
 ui-vote-type-map = Next map
 ui-vote-type-votekick = Votekick

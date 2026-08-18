@@ -14,7 +14,15 @@ namespace Content.Server.GameTicking;
 
 public sealed partial class GameTicker
 {
-    public const float PresetFailedCooldownIncrease = 30f;
+    // iss14: was 30 seconds. Failed presets now always do a clean delayed restart (see StartPreset),
+    // so keep the wait short.
+    public const float PresetFailedCooldownIncrease = 10f;
+
+    // iss14: upstream attempts the fallback presets in the same tick when the picked preset fails.
+    // Rules of the failed preset that were already started kept running alongside the fallback mode
+    // (multiple game modes at once), so this is disabled in favour of a clean delayed restart.
+    // Set to true to restore the upstream same-tick fallback behaviour.
+    private static readonly bool UseSameTickFallback = false;
 
     /// <summary>
     /// The selected preset that will be used at the start of the next round.
@@ -55,7 +63,7 @@ public sealed partial class GameTicker
             DelayStart(TimeSpan.FromSeconds(PresetFailedCooldownIncrease));
         }
 
-        if (_cfg.GetCVar(CCVars.GameLobbyFallbackEnabled))
+        if (UseSameTickFallback && _cfg.GetCVar(CCVars.GameLobbyFallbackEnabled))
         {
             var fallbackPresets = _cfg.GetCVar(CCVars.GameLobbyFallbackPreset).Split(",");
             var startFailed = true;
@@ -95,7 +103,8 @@ public sealed partial class GameTicker
 
         else
         {
-            _sawmill.Info($"Fallback - Failed to start preset but fallbacks are disabled. Returning to Lobby.");
+            // iss14: clean restart instead of same-tick fallback; delayed by PresetFailedCooldownIncrease.
+            _sawmill.Info($"Failed to start preset '{CurrentPreset?.ID}'. Restarting round with a {PresetFailedCooldownIncrease} second delay.");
             FailedPresetRestart();
             return false;
         }

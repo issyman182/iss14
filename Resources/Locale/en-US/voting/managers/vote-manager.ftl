@@ -11,6 +11,10 @@ ui-vote-restart-yes = Yes
 ui-vote-restart-no = No
 ui-vote-restart-abstain = Abstain
 
+# iss14: restart-now vote (skips the post-round wait timer)
+ui-vote-restart-now-title = Restart round now
+ui-vote-restart-now-succeeded = Restart vote succeeded. Restarting the round now.
+
 ui-vote-gamemode-title = Next gamemode
 ui-vote-gamemode-tie = Tie for gamemode vote! Picking... { $picked }
 ui-vote-gamemode-win = { $winner } won the gamemode vote!

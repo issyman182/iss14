@@ -5,6 +5,7 @@ using Content.Shared.Actions.Components;
 using Content.Shared.Follower;
 using Content.Shared.Follower.Components;
 using Content.Shared.Mind;
+using Content.Shared.Mind.Components;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Popups;
@@ -72,6 +73,15 @@ public sealed partial class StationAIShuntSystem : EntitySystem
             return;
         if (!TryComp<MobStateComponent>(uid, out var state) || state.CurrentState != MobState.Alive)
             return;
+
+        // iss14: never enter a body that is already possessed by a player - e.g. a cyborg
+        // running on an active positronic brain. Only vacant chassis can be shunted into.
+        if (IsOccupied(target))
+        {
+            if (_net.IsServer) //only send on server cause client is confused somehow?
+                _popup.PopupEntity(Loc.GetString("shunt-target-occupied"), target, uid, PopupType.Large);
+            return;
+        }
 
         if (TryComp<BorgChassisComponent>(target, out var chassisComp))
         {
@@ -192,6 +202,22 @@ public sealed partial class StationAIShuntSystem : EntitySystem
     }
     #endregion
 
+    /// <summary>
+    /// iss14: True if the target (or the brain inside its chassis) is already possessed by a
+    /// player mind, e.g. a cyborg running on an active positronic brain. Uses the networked
+    /// HasMind flag so the check works identically on client and server.
+    /// </summary>
+    private bool IsOccupied(EntityUid target)
+    {
+        if (TryComp<MindContainerComponent>(target, out var mindContainer) && mindContainer.HasMind)
+            return true;
+
+        return TryComp<BorgChassisComponent>(target, out var chassis)
+               && chassis.BrainContainer.ContainedEntity is { } brain
+               && TryComp<MindContainerComponent>(brain, out var brainMindContainer)
+               && brainMindContainer.HasMind;
+    }
+
     #region Verbs
     public void GetAltVerbs(EntityUid uid, Component comp, GetVerbsEvent<AlternativeVerb> ev)
     {
@@ -226,6 +252,9 @@ public sealed partial class StationAIShuntSystem : EntitySystem
         {
             if (TryComp<BorgChassisComponent>(uid, out var chassis) && !HasComp<StationAIShuntComponent>(chassis.BrainContainer.ContainedEntity))
                 return; //target borg chassis has no brain with shuntable component.
+
+            if (IsOccupied(uid))
+                return; // iss14: a player is already in this body, don't offer the verb.
         }
         // Handle shunt-through targets
         else if (comp is StationAIShuntThroughComponent)
@@ -236,6 +265,9 @@ public sealed partial class StationAIShuntSystem : EntitySystem
 
             if (findEv.Target == null)
                 return; // No valid target found inside
+
+            if (IsOccupied(findEv.Target.Value))
+                return; // iss14: a player is already in this body, don't offer the verb.
         }
         else
         {

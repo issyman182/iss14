@@ -1,3 +1,4 @@
+using Content.Shared.Actions;
 using Content.Shared.Popups;
 using Content.Shared.Damage;
 using Content.Shared.Revenant;
@@ -46,6 +47,7 @@ public sealed partial class RevenantSystem
     [Dependency] private EntityWhitelistSystem _whitelistSystem = default!;
     [Dependency] private SharedTransformSystem _transformSystem = default!;
     [Dependency] private SharedMapSystem _mapSystem = default!;
+    [Dependency] private SharedActionsSystem _actionsSystem = default!; // iss14
 
     [Dependency] private EntityQuery<TagComponent> _tagQuery = default!;
     [Dependency] private EntityQuery<ItemComponent> _itemQuery = default!;
@@ -64,6 +66,43 @@ public sealed partial class RevenantSystem
         SubscribeLocalEvent<RevenantComponent, RevenantOverloadLightsActionEvent>(OnOverloadLightsAction);
         SubscribeLocalEvent<RevenantComponent, RevenantBlightActionEvent>(OnBlightAction);
         SubscribeLocalEvent<RevenantComponent, RevenantMalfunctionActionEvent>(OnMalfunctionAction);
+        SubscribeLocalEvent<RevenantComponent, RevenantToggleCorporealActionEvent>(OnToggleCorporealAction); // iss14
+    }
+
+    /// <summary>
+    /// iss14: Freely switch between corporeal (visible) and incorporeal (invisible).
+    /// Costs no essence; blocked while an ability has forced the revenant corporeal.
+    /// </summary>
+    private void OnToggleCorporealAction(EntityUid uid, RevenantComponent component, RevenantToggleCorporealActionEvent args)
+    {
+        if (args.Handled)
+            return;
+
+        // Abilities force corporeality through the Corporeal status effect; while that's
+        // ticking the revenant may not phase back out.
+        if (_statusEffects.HasStatusEffect(uid, "Corporeal"))
+        {
+            _popup.PopupEntity(Loc.GetString("revenant-toggle-corporeal-forced"), uid, uid);
+            return;
+        }
+
+        var corporeal = HasComp<CorporealComponent>(uid);
+
+        // Don't materialize inside a wall, same rule as TryUseAbility.
+        if (!corporeal && _physics.GetEntitiesIntersectingBody(uid, (int)CollisionGroup.Impassable).Count > 0)
+        {
+            _popup.PopupEntity(Loc.GetString("revenant-in-solid"), uid, uid);
+            return;
+        }
+
+        args.Handled = true;
+
+        if (corporeal)
+            RemComp<CorporealComponent>(uid);
+        else
+            AddComp<CorporealComponent>(uid);
+
+        _actionsSystem.SetToggled(args.Action, !corporeal);
     }
 
     private void OnInteract(EntityUid uid, RevenantComponent component, UserActivateInWorldEvent args)

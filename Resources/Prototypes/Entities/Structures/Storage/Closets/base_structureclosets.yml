@@ -187,6 +187,7 @@
   - type: AccessReader
   - type: Lock
   - type: LockVisuals
+  - type: StationAiWhitelist # iss14 (from Starlight): lets the AI open and (un)lock wall lockers
   - type: Sprite
     sprite: Structures/Storage/wall_locker.rsi
     layers:

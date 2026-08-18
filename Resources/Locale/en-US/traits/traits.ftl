@@ -71,3 +71,18 @@ trait-deaf-desc = You are completely deaf. You can't hear any speech or radio ch
 
 trait-hard-of-hearing-name = Hard of Hearing
 trait-hard-of-hearing-desc = Your hearing is failing. You only make out speech clearly when the speaker is right next to you - anyone further away just sounds like garbled mumbling. Radio earpieces still come through fine.
+
+trait-missing-left-arm-name = Missing Left Arm
+trait-missing-left-arm-desc = You lost your left arm somewhere along the way. You start the shift without it - and without the hand that used to be attached to it.
+
+trait-missing-right-arm-name = Missing Right Arm
+trait-missing-right-arm-desc = You lost your right arm somewhere along the way. You start the shift without it - and without the hand that used to be attached to it.
+
+trait-missing-left-leg-name = Missing Left Leg
+trait-missing-left-leg-desc = You lost your left leg somewhere along the way. Better find a crutch, a wheelchair, or a very patient friend.
+
+trait-missing-right-leg-name = Missing Right Leg
+trait-missing-right-leg-desc = You lost your right leg somewhere along the way. Better find a crutch, a wheelchair, or a very patient friend.
+
+trait-lobotomized-name = Lobotomized
+trait-lobotomized-desc = At some point someone put a drill to your skull, and you haven't been the same since. You are clumsy and your speech is... unusual. Brain surgery could fix you up.

@@ -3,6 +3,8 @@ revenant-max-essence-increased = Your max essence has increased!
 
 revenant-not-enough-essence = Not enough essence!
 revenant-in-solid = You cannot use this ability while within a solid object.
+# iss14: free visibility toggle
+revenant-toggle-corporeal-forced = You cannot fade away yet!
 
 revenant-soul-too-powerful = This soul is too strong to harvest!
 revenant-soul-harvested = This soul has already been harvested!

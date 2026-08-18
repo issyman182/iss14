@@ -14,3 +14,4 @@ admin-verb-id-permissions = Edit ID / Permissions
 id-permissions-title = ID Permissions (Admin)
 id-permissions-target-label = Editing:
 id-permissions-invalid-target = The target ID card no longer exists.
+id-permissions-icon-label = Job icon:

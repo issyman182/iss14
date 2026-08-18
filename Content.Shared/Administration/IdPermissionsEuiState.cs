@@ -14,6 +14,7 @@ public sealed class IdPermissionsEuiState(
     string? fullName,
     string? jobTitle,
     string jobProto,
+    string jobIcon,
     List<ProtoId<AccessLevelPrototype>> access)
     : EuiStateBase
 {
@@ -31,6 +32,9 @@ public sealed class IdPermissionsEuiState(
     /// <summary>Job prototype id from the station record (or the card itself); empty if unknown.</summary>
     public readonly string JobProto = jobProto;
 
+    /// <summary>Job icon prototype id currently on the card; empty if unknown.</summary>
+    public readonly string JobIcon = jobIcon;
+
     /// <summary>Access tags currently on the card.</summary>
     public readonly List<ProtoId<AccessLevelPrototype>> Access = access;
 }
@@ -41,6 +45,7 @@ public sealed class IdPermissionsWriteMessage(
     string fullName,
     string jobTitle,
     string? jobProto,
+    string? jobIcon,
     List<ProtoId<AccessLevelPrototype>> access)
     : EuiMessageBase
 {
@@ -49,6 +54,9 @@ public sealed class IdPermissionsWriteMessage(
 
     /// <summary>Job prototype to apply (sets icon/departments/record job); null = leave unchanged.</summary>
     public readonly string? JobProto = jobProto;
+
+    /// <summary>Job icon to apply, overriding the job preset's icon; null = leave unchanged.</summary>
+    public readonly string? JobIcon = jobIcon;
 
     public readonly List<ProtoId<AccessLevelPrototype>> Access = access;
 }

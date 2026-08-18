@@ -40,6 +40,7 @@ public partial class NavMapControl : MapGridControl
     // Actions
     public event Action<NetEntity?>? TrackedEntitySelectedAction;
     public event Action<DrawingHandleScreen>? PostWallDrawingAction;
+    public event Action<EntityCoordinates>? MapClickedAction; // iss14 (from Starlight): raw map click coordinates
 
     // Tracked data
     public Dictionary<EntityCoordinates, (bool Visible, Color Color)> TrackedCoordinates = new();
@@ -199,10 +200,11 @@ public partial class NavMapControl : MapGridControl
 
         if (args.Function == EngineKeyFunctions.UIClick)
         {
-            if (TrackedEntitySelectedAction == null)
+            // iss14 (from Starlight): also report plain map clicks via MapClickedAction.
+            if (TrackedEntitySelectedAction == null && MapClickedAction == null)
                 return;
 
-            if (_xform == null || _physics == null || TrackedEntities.Count == 0)
+            if (_xform == null || _physics == null)
                 return;
 
             // If the cursor has moved a significant distance, exit
@@ -217,28 +219,44 @@ public partial class NavMapControl : MapGridControl
             var unscaledPosition = (localPosition - MidPointVector) / MinimapScale;
             var worldPosition = Vector2.Transform(new Vector2(unscaledPosition.X, -unscaledPosition.Y) + offset, _transformSystem.GetWorldMatrix(_xform));
 
-            // Find closest tracked entity in range
-            var closestEntity = NetEntity.Invalid;
-            var closestDistance = float.PositiveInfinity;
-
-            foreach ((var currentEntity, var blip) in TrackedEntities)
+            // iss14 (from Starlight): resolve the clicked world position to entity coordinates.
+            EntityCoordinates? clickCoords = null;
+            if (MapClickedAction != null)
             {
-                if (!blip.Selectable)
-                    continue;
+                var mapCoordinates = new MapCoordinates(worldPosition, _xform.MapID);
+                var coordinates = _transformSystem.ToCoordinates(mapCoordinates);
 
-                var currentDistance = (_transformSystem.ToMapCoordinates(blip.Coordinates).Position - worldPosition).Length();
-
-                if (closestDistance < currentDistance || currentDistance * MinimapScale > MaxSelectableDistance)
-                    continue;
-
-                closestEntity = currentEntity;
-                closestDistance = currentDistance;
+                if (_transformSystem.IsValid(coordinates))
+                    clickCoords = coordinates;
             }
 
-            if (closestDistance > MaxSelectableDistance || !closestEntity.IsValid())
-                return;
+            if (TrackedEntitySelectedAction != null && TrackedEntities.Count != 0)
+            {
+                // Find closest tracked entity in range
+                var closestEntity = NetEntity.Invalid;
+                var closestDistance = float.PositiveInfinity;
 
-            TrackedEntitySelectedAction.Invoke(closestEntity);
+                foreach ((var currentEntity, var blip) in TrackedEntities)
+                {
+                    if (!blip.Selectable)
+                        continue;
+
+                    var currentDistance = (_transformSystem.ToMapCoordinates(blip.Coordinates).Position - worldPosition).Length();
+
+                    if (closestDistance < currentDistance || currentDistance * MinimapScale > MaxSelectableDistance)
+                        continue;
+
+                    closestEntity = currentEntity;
+                    closestDistance = currentDistance;
+                }
+
+                if (closestDistance <= MaxSelectableDistance && closestEntity.IsValid())
+                    TrackedEntitySelectedAction.Invoke(closestEntity);
+            }
+
+            // iss14 (from Starlight)
+            if (clickCoords != null)
+                MapClickedAction?.Invoke(clickCoords.Value);
         }
 
         else if (args.Function == EngineKeyFunctions.UIRightClick)

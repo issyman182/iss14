@@ -10,6 +10,7 @@ using Content.Server.Roles;
 using Content.Server.RoundEnd;
 using Content.Shared.CCVar;
 using Content.Shared.Chat;
+using Content.Shared.GameTicking;
 using Content.Shared.Database;
 using Content.Shared.Maps;
 using Content.Shared.Players;
@@ -38,8 +39,16 @@ namespace Content.Server.Voting.Managers
             {StandardVoteType.Restart, CCVars.VoteRestartEnabled},
             {StandardVoteType.Preset, CCVars.VotePresetEnabled},
             {StandardVoteType.Map, CCVars.VoteMapEnabled},
-            {StandardVoteType.Votekick, CCVars.VotekickEnabled}
+            {StandardVoteType.Votekick, CCVars.VotekickEnabled},
+            // iss14: shares the restart vote toggle - both are restart votes.
+            {StandardVoteType.RestartNow, CCVars.VoteRestartEnabled}
         };
+
+        /// <summary>
+        /// iss14: how long after a successful "restart round now" vote the round actually restarts,
+        /// replacing the usual multi-minute post-round wait.
+        /// </summary>
+        private static readonly TimeSpan RestartNowCountdown = TimeSpan.FromSeconds(10);
 
         public void CreateStandardVote(ICommonSession? initiator, StandardVoteType voteType, string[]? args = null)
         {
@@ -59,6 +68,9 @@ namespace Content.Server.Voting.Managers
                 case StandardVoteType.Restart:
                     CreateRestartVote(initiator);
                     break;
+                case StandardVoteType.RestartNow: // iss14
+                    CreateRestartVote(initiator, restartNow: true);
+                    break;
                 case StandardVoteType.Preset:
                     CreatePresetVote(initiator);
                     break;
@@ -77,7 +89,7 @@ namespace Content.Server.Voting.Managers
                 TimeoutStandardVote(voteType);
         }
 
-        private void CreateRestartVote(ICommonSession? initiator)
+        private void CreateRestartVote(ICommonSession? initiator, bool restartNow = false)
         {
 
             var playerVoteMaximum = _cfg.GetCVar(CCVars.VoteRestartMaxPlayers);
@@ -86,9 +98,15 @@ namespace Content.Server.Voting.Managers
             var ghostVotePercentageRequirement = _cfg.GetCVar(CCVars.VoteRestartGhostPercentage);
             var ghostVoterPercentage = CalculateEligibleVoterPercentage(VoterEligibility.Ghost);
 
-            if (totalPlayers <= playerVoteMaximum || ghostVoterPercentage >= ghostVotePercentageRequirement)
+            // iss14: after round end the ghost-percentage gate makes no sense - the round is
+            // already over, "restart now" just skips the wait timer.
+            var postRound = _gameTicker != null && _gameTicker.RunLevel == GameRunLevel.PostRound;
+
+            if ((restartNow && postRound)
+                || totalPlayers <= playerVoteMaximum
+                || ghostVoterPercentage >= ghostVotePercentageRequirement)
             {
-                StartVote(initiator);
+                StartVote(initiator, restartNow);
             }
             else
             {
@@ -136,12 +154,12 @@ namespace Content.Server.Voting.Managers
             return eligibleCount;
         }
 
-        private void StartVote(ICommonSession? initiator)
+        private void StartVote(ICommonSession? initiator, bool restartNow = false)
         {
             var alone = _playerManager.PlayerCount == 1 && initiator != null;
             var options = new VoteOptions
             {
-                Title = Loc.GetString("ui-vote-restart-title"),
+                Title = Loc.GetString(restartNow ? "ui-vote-restart-now-title" : "ui-vote-restart-title"),
                 Options =
                 {
                     (Loc.GetString("ui-vote-restart-yes"), "yes"),
@@ -178,9 +196,29 @@ namespace Content.Server.Voting.Managers
                     else // If the cvar is disabled or there's no admins on, proceed as normal
                     {
                         _adminLogger.Add(LogType.Vote, LogImpact.Medium, $"Restart vote succeeded: {votesYes}/{votesNo}");
-                        _chatManager.DispatchServerAnnouncement(Loc.GetString("ui-vote-restart-succeeded"));
-                        var roundEnd = _entityManager.EntitySysManager.GetEntitySystem<RoundEndSystem>();
-                        roundEnd.EndRound();
+
+                        if (restartNow)
+                        {
+                            // iss14: skip the post-round wait timer. If the round already ended,
+                            // restart straight away; otherwise end it with a short countdown.
+                            _chatManager.DispatchServerAnnouncement(Loc.GetString("ui-vote-restart-now-succeeded"));
+                            var gameTicker = _entityManager.EntitySysManager.GetEntitySystem<GameTicker>();
+                            if (gameTicker.RunLevel == GameRunLevel.PostRound)
+                            {
+                                gameTicker.RestartRound();
+                            }
+                            else
+                            {
+                                var roundEnd = _entityManager.EntitySysManager.GetEntitySystem<RoundEndSystem>();
+                                roundEnd.EndRound(RestartNowCountdown);
+                            }
+                        }
+                        else
+                        {
+                            _chatManager.DispatchServerAnnouncement(Loc.GetString("ui-vote-restart-succeeded"));
+                            var roundEnd = _entityManager.EntitySysManager.GetEntitySystem<RoundEndSystem>();
+                            roundEnd.EndRound();
+                        }
                     }
                 }
                 else

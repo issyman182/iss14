@@ -14,6 +14,7 @@ using Content.Shared.Database;
 using Content.Shared.Eui;
 using Content.Shared.Roles;
 using Content.Shared.StationRecords;
+using Content.Shared.StatusIcon;
 using Robust.Shared.Configuration;
 using Robust.Shared.Prototypes;
 
@@ -61,7 +62,7 @@ public sealed partial class IdPermissionsEui : BaseEui
 
     public override EuiStateBase GetNewState() => _state;
 
-    private IdPermissionsEuiState _state = new(false, false, "", null, null, "", new());
+    private IdPermissionsEuiState _state = new(false, false, "", null, null, "", "", new());
 
     public void BuildState()
     {
@@ -73,7 +74,7 @@ public sealed partial class IdPermissionsEui : BaseEui
 
         if (!_entities.EntityExists(_target) || !_entities.TryGetComponent(_target, out IdCardComponent? idCard))
         {
-            _state = new IdPermissionsEuiState(true, false, "", null, null, "", new());
+            _state = new IdPermissionsEuiState(true, false, "", null, null, "", "", new());
             StateDirty();
             return;
         }
@@ -99,6 +100,7 @@ public sealed partial class IdPermissionsEui : BaseEui
             idCard.FullName,
             idCard.LocalizedJobTitle,
             jobProto,
+            idCard.JobIcon.Id,
             access);
 
         StateDirty();
@@ -149,6 +151,12 @@ public sealed partial class IdPermissionsEui : BaseEui
             idCardSystem.TryChangeJobDepartment(_target, job);
         }
 
+        // Explicitly picked icon wins over the job preset's icon. This allows icons that have no
+        // job prototype at all (syndicate, nukies, ERT, CBURN, death squad, ...).
+        JobIconPrototype? explicitIcon = null;
+        if (write.JobIcon != null && _proto.TryIndex<JobIconPrototype>(write.JobIcon, out explicitIcon))
+            idCardSystem.TryChangeJobIcon(_target, explicitIcon, player: player);
+
         // Keep the station record in sync, like the ID card console.
         var records = _entities.System<StationRecordsSystem>();
         var hasRecord = false;
@@ -165,6 +173,9 @@ public sealed partial class IdPermissionsEui : BaseEui
                 record.JobPrototype = job.ID;
                 record.JobIcon = job.Icon;
             }
+
+            if (explicitIcon != null)
+                record.JobIcon = explicitIcon.ID;
 
             records.Synchronize(key);
         }

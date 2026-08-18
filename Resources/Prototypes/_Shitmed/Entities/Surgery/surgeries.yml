@@ -499,6 +499,7 @@
   id: SurgeryTendWoundsBrute
   name: Tend Bruise Wounds
   components:
+  - type: SurgeryDisabled # iss14: fully healing brute via surgery is too strong; remove this line to re-enable
   - type: Surgery
     steps:
     - SurgeryStepCarefulIncisionScalpel
@@ -512,6 +513,7 @@
   id: SurgeryTendWoundsBurn
   name: Tend Burn Wounds
   components:
+  - type: SurgeryDisabled # iss14: fully healing burn via surgery is too strong; remove this line to re-enable
   - type: Surgery
     steps:
     - SurgeryStepCarefulIncisionScalpel

@@ -14,8 +14,8 @@ public sealed class IdPermissionsEui : BaseEui
     {
         _window = new IdPermissionsWindow();
 
-        _window.OnWrite += (fullName, jobTitle, jobProto, access) =>
-            SendMessage(new IdPermissionsWriteMessage(fullName, jobTitle, jobProto, access));
+        _window.OnWrite += (fullName, jobTitle, jobProto, jobIcon, access) =>
+            SendMessage(new IdPermissionsWriteMessage(fullName, jobTitle, jobProto, jobIcon, access));
         _window.OnClose += () => SendMessage(new CloseEuiMessage());
     }
 

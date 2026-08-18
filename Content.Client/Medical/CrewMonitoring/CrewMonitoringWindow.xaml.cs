@@ -32,6 +32,9 @@ public sealed partial class CrewMonitoringWindow : FancyWindow
     private bool _tryToScrollToListFocus;
     private Texture? _blipTexture;
 
+    /// <summary>iss14 (from Starlight): raised when the nav map itself is clicked.</summary>
+    public event Action<EntityCoordinates>? MapClicked;
+
     public CrewMonitoringWindow()
     {
         RobustXamlLoader.Load(this);
@@ -41,6 +44,7 @@ public sealed partial class CrewMonitoringWindow : FancyWindow
         _spriteSystem = _entManager.System<SpriteSystem>();
 
         NavMap.TrackedEntitySelectedAction += SetTrackedEntityFromNavMap;
+        NavMap.MapClickedAction += coordinates => MapClicked?.Invoke(coordinates); // iss14 (from Starlight)
     }
 
     public void Set(string stationName, EntityUid? mapUid)

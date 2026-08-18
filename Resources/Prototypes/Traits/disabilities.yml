@@ -128,3 +128,62 @@
       - BorgChassis
   components:
     - type: HardOfHearing
+
+# iss14: missing limb traits
+- type: trait
+  id: MissingLeftArm
+  name: trait-missing-left-arm-name
+  description: trait-missing-left-arm-desc
+  category: Disabilities
+  specials:
+  - !type:RemoveBodyPartsSpecial
+    parts:
+    - part: Arm
+      symmetry: Left
+
+- type: trait
+  id: MissingRightArm
+  name: trait-missing-right-arm-name
+  description: trait-missing-right-arm-desc
+  category: Disabilities
+  specials:
+  - !type:RemoveBodyPartsSpecial
+    parts:
+    - part: Arm
+      symmetry: Right
+
+- type: trait
+  id: MissingLeftLeg
+  name: trait-missing-left-leg-name
+  description: trait-missing-left-leg-desc
+  category: Disabilities
+  specials:
+  - !type:RemoveBodyPartsSpecial
+    parts:
+    - part: Leg
+      symmetry: Left
+
+- type: trait
+  id: MissingRightLeg
+  name: trait-missing-right-leg-name
+  description: trait-missing-right-leg-desc
+  category: Disabilities
+  specials:
+  - !type:RemoveBodyPartsSpecial
+    parts:
+    - part: Leg
+      symmetry: Right
+
+# iss14: same effect as the lobotomy surgery (components live on the brain organ),
+# so mend brain tissue surgery can cure it.
+- type: trait
+  id: Lobotomized
+  name: trait-lobotomized-name
+  description: trait-lobotomized-desc
+  category: Disabilities
+  specials:
+  - !type:AddOrganComponentsSpecial
+    organSlot: brain
+    components:
+    - type: RatvarianLanguage
+    - type: Clumsy
