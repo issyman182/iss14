@@ -223,6 +223,7 @@
     - id: BoxEncryptionKeyMedical
     - id: BoxCMOCircuitboards
     - id: ClothingBackpackDuffelSurgeryFilled # Shitmed
+    - id: MedicalBiofabricatorFlatpack # Shitmed
     - id: PlushieLizardJobChiefmedicalofficer
       prob: 0.02
 

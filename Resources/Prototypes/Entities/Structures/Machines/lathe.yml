@@ -259,6 +259,8 @@
     - CargoBoardsStatic
     - MedicalBoardsStatic
     - EngineeringBoardsStatic
+    # Shitmed
+    - MedicalBoardsStaticShitmed
     dynamicPacks:
     - EngineeringBoards
     - CargoBoards
@@ -268,6 +270,8 @@
     - CameraBoards
     - MechBoards
     - ShuttleBoards
+    # Shitmed
+    - MedicalBoardsShitmed
   - type: EmagLatheRecipes
     emagDynamicPacks:
     - SecurityBoards
@@ -311,11 +315,20 @@
     - RoboticsStatic
     - BorgModulesStatic
     - BorgLimbsStatic
+    # Shitmed
+    - BorgModulesStaticShitmed
     dynamicPacks:
     - Robotics
     - BorgModules
     - MechParts
     - MechEquipment
+    # Shitmed
+    - BorgModulesShitmed
+    - BasicCybernetics
+    - MedicalCybernetics
+    - AdvancedCybernetics
+    - PowerAugments
+    - ToolAugments
   - type: MaterialStorage
     whitelist: *StandardMaterialWhitelist
   - type: OreSiloClient
@@ -402,6 +415,8 @@
     - SecurityAmmo
     - SecurityWeapons
     - SecurityDisablers
+    # Shitmed
+    - SecurityCybernetics
   - type: EmagLatheRecipes
     emagStaticPacks:
     - SyndicateAmmoStatic
@@ -478,8 +493,15 @@
     - MedicalClothingStatic
     - EmptyMedkitsStatic
     - SurgeryStatic
+    # Shitmed
+    - SurgeryStaticShitmed
+    - MedicalBoardsStaticShitmed
     dynamicPacks:
     - Chemistry
+    # Shitmed
+    - Surgery
+    - MedicalCybernetics
+    - MedicalBoardsShitmed
   - type: Machine
     board: MedicalTechFabCircuitboard
   - type: StealTarget

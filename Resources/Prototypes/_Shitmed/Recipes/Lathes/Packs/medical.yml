@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Shitmed - surgery recipe packs (from Goob-Station _Goobstation/Recipes/Lathes/Packs/medical.yml).
+
+## Static
+
+- type: latheRecipePack
+  id: SurgeryStaticShitmed
+  recipes:
+  - BoneGel
+  - MedicalStitches
+  - Bonesetter
+
+- type: latheRecipePack
+  id: MedicalBoardsStaticShitmed
+  recipes:
+  - OperatingTableCircuitboard
+
+## Dynamic
+
+- type: latheRecipePack
+  id: Surgery
+  recipes:
+  - EnergyScalpel
+  - AdvancedRetractor
+  - EnergyCautery
+  - AdvancedBoneGel
+  - OmnimedTool
+
+- type: latheRecipePack
+  id: MedicalBoardsShitmed
+  recipes:
+  - AutodocCircuitboard
+  - MedicalBiofabMachineBoard

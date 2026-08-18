@@ -6,11 +6,18 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 - type: latheRecipe
-  parent: BaseGoldCircuitboardRecipe
+  parent: [ BaseGoldCircuitboardRecipe, BaseMedicalMachineRecipeCategory ]
   id: AutodocCircuitboard
   result: AutodocCircuitboard
 
 - type: latheRecipe
-  parent: BaseGoldCircuitboardRecipe
+  parent: [ BaseGoldCircuitboardRecipe, BaseMedicalMachineRecipeCategory ]
   id: OperatingTableCircuitboard
   result: OperatingTableCircuitboard
+
+# iss14: the medical biofabricator board is unobtainable upstream in Goob-Station
+# (flatpack only). Given a printable recipe so a lost machine can be replaced.
+- type: latheRecipe
+  parent: [ BaseGoldCircuitboardRecipe, BaseMedicalMachineRecipeCategory ]
+  id: MedicalBiofabMachineBoard
+  result: MedicalBiofabMachineBoard

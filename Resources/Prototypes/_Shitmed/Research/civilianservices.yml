@@ -40,6 +40,7 @@
   - AdvancedBoneGel # Shitmed
   # - BorgModuleDefibrillator # Goobstation, medical cyborgs start with this
   - BorgModuleAdvancedSurgery # Shitmed
+  - MedicalBiofabMachineBoard # iss14 - replacement board for the roundstart biofabricator
   technologyPrerequisites:
   - AdvancedEntertainment
 

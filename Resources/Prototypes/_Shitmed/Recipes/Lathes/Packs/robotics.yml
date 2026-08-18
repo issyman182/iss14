@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Shitmed - surgery cyborg module packs (from Goob-Station _Goobstation/Recipes/Lathes/Packs/robotics.yml).
+
+## Static
+
+- type: latheRecipePack
+  id: BorgModulesStaticShitmed
+  recipes:
+  - BorgModuleSurgery
+
+## Dynamic
+
+- type: latheRecipePack
+  id: BorgModulesShitmed
+  recipes:
+  - BorgModuleAdvancedSurgery

@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Shitmed - cybernetic limb/organ recipe packs (from Goob-Station _Goobstation/Recipes/Lathes/Packs/robotics.yml,
+# medical.yml and security.yml). Gated behind the BasicCybernetics/AdvancedCybernetics technologies.
+
+## Dynamic
+
+- type: latheRecipePack
+  id: BasicCybernetics
+  recipes:
+  - LeftArmCybernetic
+  - RightArmCybernetic
+  - LeftHandCybernetic
+  - RightHandCybernetic
+  - LeftLegCybernetic
+  - RightLegCybernetic
+  - LeftFootCybernetic
+  - RightFootCybernetic
+  - BasicCyberneticEyes
+  - BasicCyberneticHeart
+  - BasicCyberneticLungs
+  - BasicCyberneticLiver
+
+- type: latheRecipePack
+  id: AdvancedCybernetics
+  recipes:
+  - UpgradedCyberneticHeart
+  - UpgradedCyberneticLungs
+  - JawsOfLifeLeftArm
+  - JawsOfLifeRightArm
+  - SpeedLeftLeg
+  - SpeedRightLeg
+  - DexLeftHand
+  - DexRightHand
+  - DiagnosticCyberneticEyes
+
+- type: latheRecipePack
+  id: MedicalCybernetics
+  recipes:
+  - MedicalCyberneticEyes
+
+- type: latheRecipePack
+  id: SecurityCybernetics
+  parent: MedicalCybernetics
+  recipes:
+  - SecurityCyberneticEyes
