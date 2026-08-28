@@ -11,7 +11,7 @@ namespace Content.Server.Body.Systems;
 /// <see cref="ChemicalOrganDamage"/> (drinking, smoking, drugs) while the body is alive.
 /// A light bender heals back on their own; sustained abuse outpaces the regen and needs surgery.
 /// </summary>
-public sealed class OrganChemicalRegenSystem : EntitySystem
+public sealed partial class OrganChemicalRegenSystem : EntitySystem
 {
     [Dependency] private MobStateSystem _mobState = default!;
     [Dependency] private TraumaSystem _trauma = default!;
