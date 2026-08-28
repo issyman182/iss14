@@ -10,9 +10,9 @@ namespace Content.Server.Atmos.EntitySystems;
 /// iss14: upstream moved pressure immunity to a status effect, but Shitmed organs grant it as a
 /// plain component through their <c>onAdd</c> list, which cannot apply a status effect.
 /// </remarks>
-public sealed class PressureImmunitySystem : EntitySystem
+public sealed partial class PressureImmunitySystem : EntitySystem
 {
-    [Dependency] private readonly BarotraumaSystem _barotrauma = default!;
+    [Dependency] private BarotraumaSystem _barotrauma = default!;
 
     public override void Initialize()
     {

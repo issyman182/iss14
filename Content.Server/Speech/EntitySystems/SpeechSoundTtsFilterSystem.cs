@@ -11,7 +11,7 @@ namespace Content.Server.Speech.EntitySystems;
 /// iss14: <see cref="SpeechSoundSystem"/> lives in Shared and cannot reach the server-only TTS system,
 /// so the filtering is applied through <see cref="SpeechSoundFilterEvent"/>.
 /// </remarks>
-public sealed class SpeechSoundTtsFilterSystem : EntitySystem
+public sealed partial class SpeechSoundTtsFilterSystem : EntitySystem
 {
     [Dependency] private TTSSystem _tts = default!;
 

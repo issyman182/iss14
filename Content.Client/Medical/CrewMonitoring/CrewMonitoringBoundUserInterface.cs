@@ -6,7 +6,7 @@ using Robust.Shared.Player; // iss14 (from Starlight)
 
 namespace Content.Client.Medical.CrewMonitoring;
 
-public sealed class CrewMonitoringBoundUserInterface : BoundUserInterface
+public sealed partial class CrewMonitoringBoundUserInterface : BoundUserInterface
 {
     [Dependency] private ISharedPlayerManager _playerManager = default!; // iss14 (from Starlight)
 

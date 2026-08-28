@@ -13,7 +13,7 @@ namespace Content.Server.Nutrition.EntitySystems;
 /// iss14: Grows mobs (sprite scale, fixtures and melee damage) as they eat whitelisted food.
 /// See <see cref="ClothGrowthComponent"/>.
 /// </summary>
-public sealed class ClothGrowthSystem : EntitySystem
+public sealed partial class ClothGrowthSystem : EntitySystem
 {
     [Dependency] private EntityWhitelistSystem _whitelist = default!;
     [Dependency] private SharedScaleVisualsSystem _scaleVisuals = default!;

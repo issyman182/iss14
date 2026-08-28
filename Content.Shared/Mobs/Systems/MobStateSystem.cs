@@ -20,7 +20,6 @@ public partial class MobStateSystem : EntitySystem
     [Dependency] private DamageableSystem _damageable = default!;
     [Dependency] private ConsciousnessSystem _consciousness = default!; // Shitmed Change
     [Dependency] private SharedPopupSystem _popup = default!;
-    private ISawmill _sawmill = default!;
 
     [Dependency] private EntityQuery<MobStateComponent> _mobStateQuery = default!;
 
