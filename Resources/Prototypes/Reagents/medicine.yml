@@ -327,6 +327,15 @@
   metabolisms:
     Bloodstream:
       effects:
+      # iss14: too much epi strains the heart - it is a crit med, not a free stimulant
+      - !type:ChemicalOrganDamage
+        probability: 0.2
+        conditions:
+        - !type:ReagentCondition
+          reagent: Epinephrine
+          min: 20
+        slots: [ heart ]
+        amount: 0.1
       - !type:AdjustReagent
         conditions:
         - !type:ReagentCondition

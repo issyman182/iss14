@@ -539,3 +539,16 @@ entity-effect-disarm =
         [1] Disarms
         *[other] disarms
     } the entity
+
+# iss14: chemical organ damage (drinking, smoking, drug abuse)
+entity-effect-guidebook-chemical-organ-damage =
+    { $chance ->
+        [1] { $deltasign ->
+                [1] Damages
+                *[-1] Repairs
+            }
+        *[other] { $deltasign ->
+                [1] damage
+                *[-1] repair
+            }
+    } the { $organs }

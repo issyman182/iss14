@@ -1,3 +1,4 @@
+# iss14: hard stimulants strain the heart (see the ChemicalOrganDamage entries below)
 - type: reagent
   id: Desoxyephedrine
   name: reagent-name-desoxyephedrine
@@ -18,6 +19,15 @@
           types:
             Poison: 0.55
             Blunt: 1.1 # meant to be slightly more than tricordrazine heals
+      # iss14: meth strains the heart
+      - !type:ChemicalOrganDamage
+        probability: 0.15
+        conditions:
+        - !type:ReagentCondition
+          reagent: Desoxyephedrine
+          min: 5
+        slots: [ heart ]
+        amount: 0.1
       # OD
       - !type:HealthChange
         conditions:
@@ -157,6 +167,15 @@
     Bloodstream:
       effects:
       # Main effects
+      # iss14: combat stimulants strain the heart
+      - !type:ChemicalOrganDamage
+        probability: 0.15
+        conditions:
+        - !type:ReagentCondition
+          reagent: Stimulants
+          min: 5
+        slots: [ heart ]
+        amount: 0.1
       - !type:MovementSpeedModifier
         walkSpeedModifier: 1.25
         sprintSpeedModifier: 1.25
@@ -260,6 +279,16 @@
   flavor: bitter
   color: "#C0C0C0"
   physicalDesc: reagent-physical-desc-strong-smelling
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.1
+      effects:
+      # iss14: smoking slowly wears down the lungs. Light damage regenerates on its
+      # own; chain smoking needs surgery.
+      - !type:ChemicalOrganDamage
+        probability: 0.15
+        slots: [ lungs ]
+        amount: 0.1
   plantMetabolism:
   - !type:PlantAdjustHealth
     amount: -5
