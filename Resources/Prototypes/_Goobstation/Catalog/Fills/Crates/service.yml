@@ -7,3 +7,23 @@
   - type: StorageFill
     contents:
     - id: SlotMachineFlatpack
+
+- type: entity
+  id: CrateCoinFlipper
+  parent: CrateGenericSteel
+  name: coin flipper crate
+  description: A crate with a coin flipper inside, 50/50 odds are good!
+  components:
+  - type: StorageFill
+    contents:
+    - id: CoinFlipperFlatPack
+
+- type: entity
+  id: CrateClawMachine
+  parent: CrateGenericSteel
+  name: claw machine crate
+  description: A crate with a claw machine inside, plushies included with every purchase!
+  components:
+  - type: StorageFill
+    contents:
+    - id: ClawMachineFlatPack

@@ -12,3 +12,9 @@ advertisement-slotmachine-3 = ONE MORE SPIN!!
 advertisement-slotmachine-4 = Ignore rehab, they just don't want to see you succeed!
 advertisement-slotmachine-5 = One more game, then you can quit!
 advertisement-slotmachine-6 = Step right up and give me a spin!
+
+coinflipper-win = Winner! You won {$amount} spesos!
+
+clawmachine-fail-self = You mess up and drop the plushie!
+clawmachine-fail-other = {$user} messes up and drops the plushie!
+clawmachine-fail-generic = The plushie falls out of the claw, how disappointing...
