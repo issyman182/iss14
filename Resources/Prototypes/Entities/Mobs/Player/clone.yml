@@ -45,14 +45,13 @@
   - TemperatureDamage
   - TemperatureSpeed
   # traits
+  # Clumsy and Muted are status effects upstream now, so they are not component names any more.
   - BlackAndWhiteOverlay
-  - Clumsy
   - Deaf
   - HardOfHearing
   - ImpairedMobility
   # - LegsParalyzed (you get healed)
   - LightweightDrunk
-  - Muted
   - Narcolepsy
   - Pacified
   - Paracusia
