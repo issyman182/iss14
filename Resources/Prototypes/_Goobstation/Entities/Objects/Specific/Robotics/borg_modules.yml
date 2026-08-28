@@ -1,0 +1,20 @@
+# Ported from Goobstation. The health analyzer hand was dropped and the swappable
+# PKA slot whitelists by tag instead of Goob's PressureDamageChange component,
+# which does not exist here.
+
+- type: entity
+  id: BorgModulePKA
+  parent: [ BaseBorgModuleCargo, BaseProviderBorgModule ]
+  name: proto-kinetic cyborg module
+  description: A cargo module containing a proto-kinetic accelerator for clearing out asteroid and fauna alike.
+  components:
+  - type: Sprite
+    layers:
+    - state: cargo
+    - state: icon-pka
+      sprite: _Goobstation/Objects/Specific/Robotics/borgmodule.rsi
+  - type: ItemBorgModule
+    hands:
+    - item: WeaponProtoKineticAccelerator
+  - type: BorgModuleIcon
+    icon: { sprite: Objects/Weapons/Guns/Basic/kinetic_accelerator.rsi, state: icon }

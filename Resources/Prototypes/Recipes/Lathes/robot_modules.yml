@@ -54,6 +54,11 @@
   id: BorgModuleAdvancedMining
   result: BorgModuleAdvancedMining
 
+- type: latheRecipe # iss14: Goob PKA module for salvage borgs
+  parent: BaseBorgModuleRecipe
+  id: BorgModulePKA
+  result: BorgModulePKA
+
 # Engineering Modules
 
 - type: latheRecipe

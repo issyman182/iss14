@@ -37,6 +37,7 @@
 - type: latheRecipePack
   id: BorgModules
   recipes:
+  - BorgModulePKA # iss14
   - BorgModuleAdvancedCleaning
   - BorgModuleAdvancedTool
   - BorgModuleAdvancedClowning
