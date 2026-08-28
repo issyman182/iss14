@@ -63,6 +63,7 @@
   - BackwardsAccent
   - BarkAccent
   - BleatingAccent
+  - CharactersAccent # iss14: Swedish accent trait
   - DamagedSiliconAccent
   - FrenchAccent
   - FrontalLisp

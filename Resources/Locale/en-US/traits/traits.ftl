@@ -86,3 +86,7 @@ trait-missing-right-leg-desc = You lost your right leg somewhere along the way. 
 
 trait-lobotomized-name = Lobotomized
 trait-lobotomized-desc = At some point someone put a drill to your skull, and you haven't been the same since. You are clumsy and your speech is... unusual. Brain surgery could fix you up.
+
+# iss14: ported from Trauma-Station
+trait-swedish-name = Swedish
+trait-swedish-desc = A horrible mutation originating from the distant past. Makes you speak like a real svede.
