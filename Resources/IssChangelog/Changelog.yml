@@ -2,15 +2,21 @@ Name: Changelog
 Order: 0
 Entries:
 - author: issyman182
-  version: iss14:1.8.4
+  version: iss14:1.8.3
   time: '2026-08-28'
   changes:
-  - message: 'The casino grows: the coin flipper (double-or-nothing on your whole stack), the claw machine (free to play, plushie prizes - emag it at your own risk) and the QM''s personal high roller slot machine joined the slot machine. Coin flipper and claw machine are in cargo''s service catalogue.'
+  - message: Updated upstream Space Station 14 to the 2026-08-28 build (491 new upstream changes across two merges) and the game engine (RobustToolbox) from 283.1.0 to 289.0.0.
+    type: Tweak
+  - message: 'The station casino has arrived, ported from Goobstation: the slot machine (feed it spesos and pull the lever), the coin flipper (double-or-nothing on your whole stack), the free-to-play claw machine with plushie prizes (emag it at your own risk) and the QM''s personal high roller slot machine. Cargo sells the slot machine, coin flipper and claw machine as flatpack crates in the service catalogue.'
     type: Add
   - message: 'Your organs now care about your lifestyle: heavy drinking wears down the liver and kidneys, smoking wears down the lungs, and stimulant abuse (meth, hyperzine, too much epinephrine) strains the heart. Light damage heals back on its own after a while - sustained abuse builds up damage, causes pain and eventually needs surgery.'
     type: Add
   - message: Organ damage from wounds actually works now - organ integrity and severity were calculated wrong, so organs never degraded (and being shot in the liver could even heal it).
     type: Fix
+  - message: 'Surgery, cybernetics and augment recipes can actually be printed now: the exosuit fabricator, medical techfab, security techfab and circuit imprinter carry the recipes their research unlocks. The medical biofabricator is obtainable too - the CMO locker holds a flatpack and a replacement board is printable.'
+    type: Fix
+  - message: The Tend Bruise Wounds and Tend Burn Wounds surgeries are disabled - fully healing brute or burn damage on the operating table was too strong.
+    type: Remove
   - message: New Swedish speech trait, ported from Trauma-Station. Bork bork.
     type: Add
   - message: Salvage cyborgs can get a proto-kinetic accelerator module, unlocked by the Salvage Weapons research and printed at the exosuit fabricator.
@@ -21,17 +27,6 @@ Entries:
     type: Fix
   - message: The Mass Hallucinations event no longer occurs randomly.
     type: Tweak
-  id: 18
-- author: issyman182
-  version: iss14:1.8.3
-  time: '2026-08-28'
-  changes:
-  - message: Updated upstream Space Station 14 to the 2026-08-28 build (119 new upstream changes merged).
-    type: Tweak
-  - message: Updated the game engine (RobustToolbox) from 288.1.0 to 289.0.0.
-    type: Tweak
-  - message: 'Slot machine, ported from Goobstation: feed it a stack of spesos, pull the lever and gamble your paycheck away. Cargo can order one from the service catalogue for 1000 spesos - the crate holds a flatpack you deploy wherever you want your casino.'
-    type: Add
   - message: Arachnids could not spawn at all after the upstream merge, and cloning no longer spams errors about the clumsy and mute traits.
     type: Fix
   id: 17
