@@ -44,4 +44,7 @@
   tierPrerequisites:
     1: 0
     2: 0.75
-    3: 0.75
+    # iss14: the Shitmed medical techs nearly doubled the tier-2 pool (8 -> 14), which
+    # silently raised the 75% gate from 6 to 11 techs - tier 3 (speed boots etc.) had
+    # become unreachable in a normal round. 0.45 restores the old ~6-tech requirement.
+    3: 0.45

@@ -37,7 +37,7 @@
   equipment:
     id: CEPDA
     eyes: ClothingEyesGlassesMeson
-    ears: ClothingHeadsetCE
+    ears: ClothingHeadsetAltEngineering # iss14: over-ear headset instead of the basic CE headset
     belt: ClothingBeltUtilityEngineering
   storage:
     back:

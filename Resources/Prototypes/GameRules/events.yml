@@ -13,7 +13,7 @@
     - id: GreytideVirus
     - id: IonStorm # its calm like 90% of the time smh
     - id: KudzuGrowth
-    - id: MassHallucinations
+    #- id: MassHallucinations # iss14: disabled - annoying with no counterplay; admins can still trigger it
     - id: MouseMigration
     - id: PowerGridCheck
     - id: RandomSentience
