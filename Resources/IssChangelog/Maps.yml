@@ -2,6 +2,13 @@ Name: Maps
 Order: 2
 Entries:
 - author: issyman182
+  version: iss14:1.8.3
+  time: '2026-08-28'
+  changes:
+  - message: Elkridge, Packed, Plasma and Saltern are back in sync with upstream, so they pick up all the upstream map fixes again. The Peer Review Console is still on each of them.
+    type: Tweak
+  id: 3
+- author: issyman182
   version: iss14:1.8.0
   time: '2026-07-18'
   changes:

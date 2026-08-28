@@ -2,6 +2,19 @@ Name: Changelog
 Order: 0
 Entries:
 - author: issyman182
+  version: iss14:1.8.3
+  time: '2026-08-28'
+  changes:
+  - message: Updated upstream Space Station 14 to the 2026-08-28 build (119 new upstream changes merged).
+    type: Tweak
+  - message: Updated the game engine (RobustToolbox) from 288.1.0 to 289.0.0.
+    type: Tweak
+  - message: 'Slot machine, ported from Goobstation: feed it a stack of spesos, pull the lever and gamble your paycheck away. Cargo can order one from the service catalogue for 1000 spesos - the crate holds a flatpack you deploy wherever you want your casino.'
+    type: Add
+  - message: Arachnids could not spawn at all after the upstream merge, and cloning no longer spams errors about the clumsy and mute traits.
+    type: Fix
+  id: 17
+- author: issyman182
   version: iss14:1.8.2
   time: '2026-07-25'
   changes:

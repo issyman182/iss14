@@ -1,0 +1,9 @@
+- type: entity
+  id: CrateSlotMachine
+  parent: CrateGenericSteel
+  name: slot machine crate
+  description: A crate with a slot machine inside, everything you need to start your own gambling addiction!
+  components:
+  - type: StorageFill
+    contents:
+    - id: SlotMachineFlatpack
