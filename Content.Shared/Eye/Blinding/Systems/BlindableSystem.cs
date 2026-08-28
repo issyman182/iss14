@@ -102,9 +102,15 @@ public sealed partial class BlindableSystem : EntitySystem
             || !_body.TryGetBodyOrganEntityComps<EyesComponent>((blindable, body), out var eyes))
             return;
 
-        // for now
+        // iss14: mirror the current eye damage into the organ modifier instead of only creating it
+        // once - repeated adjustments (and heals, e.g. oculine) never updated the old modifier.
         foreach (var eye in eyes)
-            _trauma.TryCreateOrganDamageModifier(eye.Owner, amount, blindable.Owner, "BlindableDamage", eye.Comp2);
+        {
+            if (blindable.Comp.EyeDamage <= 0)
+                _trauma.TryRemoveOrganDamageModifier(eye.Owner, blindable.Owner, "BlindableDamage", eye.Comp2);
+            else
+                _trauma.TrySetOrganDamageModifier(eye.Owner, blindable.Comp.EyeDamage, blindable.Owner, "BlindableDamage", eye.Comp2);
+        }
     }
 
     // Alternative version of the method intended to be used with Eye Organs, so that you can just pass in

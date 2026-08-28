@@ -207,11 +207,13 @@ public partial class TraumaSystem
     {
         var oldIntegrity = organ.OrganIntegrity;
 
-        if (organ.IntegrityModifiers.Count > 0)
-            organ.OrganIntegrity = FixedPoint2.Clamp(organ.IntegrityModifiers
-                .Aggregate(FixedPoint2.Zero, (current, modifier) => current + modifier.Value),
-                0,
-                organ.IntegrityCap);
+        // iss14: modifiers are accumulated DAMAGE, integrity is what remains of the cap.
+        // (Upstream Shitmed assigned the raw modifier sum as the integrity, which made any small
+        // wound crash the organ to near zero while huge "destroy" modifiers clamped it back to
+        // full health, and severities never updated - organ damage effectively did not work.)
+        var totalDamage = organ.IntegrityModifiers
+            .Aggregate(FixedPoint2.Zero, (current, modifier) => current + modifier.Value);
+        organ.OrganIntegrity = FixedPoint2.Clamp(organ.IntegrityCap - totalDamage, 0, organ.IntegrityCap);
 
         if (oldIntegrity != organ.OrganIntegrity)
         {
@@ -225,8 +227,12 @@ public partial class TraumaSystem
             }
         }
 
-        var nearestSeverity = organ.OrganSeverity;
-        foreach (var (severity, value) in organ.IntegrityThresholds.OrderByDescending(kv => kv.Value))
+        // iss14: pick the severity with the lowest threshold the integrity still fits under,
+        // e.g. thresholds Normal: 21 / Damaged: 9 / Destroyed: 0 mean >9 is Normal, (0, 9] is
+        // Damaged and 0 is Destroyed. The old descending loop always stopped at the first
+        // (highest) threshold, so organs stayed "Normal" no matter how mangled they were.
+        var nearestSeverity = OrganSeverity.Normal;
+        foreach (var (severity, value) in organ.IntegrityThresholds.OrderBy(kv => kv.Value))
         {
             if (organ.OrganIntegrity > value)
                 continue;
