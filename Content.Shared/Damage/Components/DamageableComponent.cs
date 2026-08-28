@@ -100,11 +100,13 @@ public sealed class DamageableComponentState(
     DamageSpecifier damage,
     ProtoId<DamageContainerPrototype>? damageContainerId, // Shitmed Change
     ProtoId<DamageModifierSetPrototype>? modifierSetId,
+    ProtoId<DisplacementDataPrototype>? displacement,
     FixedPoint2? healthBarThreshold) // Shitmed Change
     : ComponentState
 {
     public readonly DamageSpecifier Damage = damage;
     public readonly ProtoId<DamageContainerPrototype>? DamageContainerID = damageContainerId; // Shitmed Change
     public readonly ProtoId<DamageModifierSetPrototype>? ModifierSetId = modifierSetId;
+    public readonly ProtoId<DisplacementDataPrototype>? Displacement = displacement;
     public readonly FixedPoint2? HealthBarThreshold = healthBarThreshold; // Shitmed Change
 }

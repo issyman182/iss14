@@ -218,6 +218,7 @@ public sealed partial class DamageableSystem
             _netMan.IsServer ? ent.Comp.Damage : ent.Comp.Damage.Clone(),
             ent.Comp.DamageContainerID, // Shitmed Change
             ent.Comp.DamageModifierSetId,
+            ent.Comp.Displacement,
             ent.Comp.HealthBarThreshold // Shitmed Change
         );
     }
@@ -229,6 +230,7 @@ public sealed partial class DamageableSystem
 
         ent.Comp.DamageContainerID = state.DamageContainerID; // Shitmed Change
         ent.Comp.DamageModifierSetId = state.ModifierSetId;
+        ent.Comp.Displacement = state.Displacement;
         ent.Comp.HealthBarThreshold = state.HealthBarThreshold; // Shitmed Change
 
         // Has the damage actually changed?

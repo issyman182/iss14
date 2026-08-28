@@ -13,7 +13,7 @@ namespace Content.Server.Speech.EntitySystems;
 /// </remarks>
 public sealed class SpeechSoundTtsFilterSystem : EntitySystem
 {
-    [Dependency] private readonly TTSSystem _tts = default!;
+    [Dependency] private TTSSystem _tts = default!;
 
     public override void Initialize()
     {

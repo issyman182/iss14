@@ -360,7 +360,6 @@
           type: [ Slime, Cybernetic ] # Shitmed - Cybernetic Organs
           inverted: true
         emote: Laugh
-        showInChat: true
         probability: 0.1
       - !type:Emote
         minScale: 0.2
@@ -369,7 +368,6 @@
           type: [ Slime, Cybernetic ] # Shitmed - Cybernetic Organs
           inverted: true
         emote: Scream
-        showInChat: true
         probability: 0.01
       - !type:PopupMessage
         minScale: 0.5
