@@ -165,6 +165,7 @@
     tags:
     - Meat
     - Organ
+    - Trash # ISS14, should make organs trashbaggable
 
 - type: entity
   id: BaseHumanOrgan
