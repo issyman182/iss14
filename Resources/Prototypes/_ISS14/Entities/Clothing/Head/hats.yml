@@ -1,0 +1,14 @@
+- type: entity
+  parent: ClothingHeadBase
+  id: ClothingHeadHatCapotain
+  name: Capotain hat
+  description: The top hat's grandfather.
+  components:
+  - type: Sprite
+    sprite: _ISS14/Clothing/Head/Hats/capotain.rsi
+  - type: Clothing
+    sprite: _ISS14/Clothing/Head/Hats/capotain.rsi
+  - type: Tag
+    tags:
+    - ClothMade
+    - WhitelistChameleon

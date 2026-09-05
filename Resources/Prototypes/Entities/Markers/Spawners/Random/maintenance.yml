@@ -32,6 +32,7 @@
       - id: ClothingUnderSocksBee
       - id: ClothingUnderSocksCoder
       - id: ClothingHeadHatSquid
+      - id: ClothingHeadHatCapotain #ISS14
       # Animal Masks
       - !type:GroupSelector
         children:
