@@ -40,6 +40,17 @@
     ClothingUniformColorRainbow: 2
     ClothingUnderSocksCoder: 2
     ClothingUnderSocksBee: 2
+    ClothingNeckCloakAce: 2 #ISS14 START
+    ClothingNeckCloakAro: 2
+    ClothingNeckCloakAroace: 2
+    ClothingNeckCloakBi: 2
+    ClothingNeckCloakEnby: 2
+    ClothingNeckCloakGay: 2
+    ClothingNeckCloakIntersex: 2
+    ClothingNeckCloakPan: 2
+    ClothingNeckCloakLesbian: 2 
+    ClothingNeckCloakIntersex: 2
+    ClothingNeckCloakTrans: 2 #ISS14 END
   contrabandInventory:
     ClothingNeckScarfStripedLesbianLong: 2
     ClothingUniformJumpskirtColorRainbow: 2
