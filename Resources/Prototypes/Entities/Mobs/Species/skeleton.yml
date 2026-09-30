@@ -71,6 +71,7 @@
     groups:
       Flammable: [ Touch ]
       Extinguish: [ Touch ]
+      Acidic: [ Touch ] # upstream #46160: skeletons are no longer immune to acid
     reactions:
     - reagents: [ Water, SpaceCleaner ]
       methods: [ Touch ]

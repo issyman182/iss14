@@ -513,6 +513,10 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
             || !SolutionContainer.ResolveSolution(ent.Owner, ent.Comp.BloodSolutionName, ref ent.Comp.BloodSolution, out var bloodSol))
             return false;
 
+        // Upstream (#45465): zombies etc. cannot regain blood.
+        if (!ent.Comp.BloodIncreaseEnabled && amount > 0)
+            return false;
+
         //  SHITMED CHANGE: We dont really care if the reagent was added in its entirety, just whether or not it could take more blood.
         if (amount >= 0)
         {
@@ -655,6 +659,33 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
 
         if (currentVolume > 0)
             SolutionContainer.TryAddReagent(ent.Comp.BloodSolution.Value, ent.Comp.BloodReagent, currentVolume, null, GetEntityBloodData(ent));
+    }
+
+    /// <summary>
+    /// Change how much blood is recovered in a bloodstream. (Upstream #45465, ported to the fork's bloodstream.)
+    /// </summary>
+    public void ChangeBloodRefreshAmount(Entity<BloodstreamComponent?> ent, FixedPoint2 amount)
+    {
+        if (!Resolve(ent, ref ent.Comp, logMissing: false))
+            return;
+
+        if (amount < 0f)
+            amount = 0f;
+
+        ent.Comp.BloodRefreshAmount = amount;
+        DirtyField(ent, ent.Comp, nameof(BloodstreamComponent.BloodRefreshAmount));
+    }
+
+    /// <summary>
+    /// Change whether or not blood can be increased in a bloodstream. (Upstream #45465, ported to the fork's bloodstream.)
+    /// </summary>
+    public void ChangeBloodIncreaseEnabled(Entity<BloodstreamComponent?> ent, bool status = true)
+    {
+        if (!Resolve(ent, ref ent.Comp, logMissing: false))
+            return;
+
+        ent.Comp.BloodIncreaseEnabled = status;
+        DirtyField(ent, ent.Comp, nameof(BloodstreamComponent.BloodIncreaseEnabled));
     }
 
     /// <summary>

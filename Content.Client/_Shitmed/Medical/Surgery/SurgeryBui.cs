@@ -14,7 +14,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 using Content.Client._Shitmed.Choice.UI;
-using Content.Client.Administration.UI.CustomControls;
+using Content.Client.Stylesheets;
+using Content.Client.UserInterface.Controls;
 using Content.Shared._Shitmed.Medical.Surgery;
 using Content.Shared.Body.Components;
 using Content.Shared.Body.Part;
@@ -227,7 +228,7 @@ public sealed partial class SurgeryBui : BoundUserInterface
             label.Set(msg, null);
 
             _window.Steps.AddChild(label);
-            _window.Steps.AddChild(new HSeparator { Margin = new Thickness(0, 0, 0, 1) });
+            _window.Steps.AddChild(new Separator { StyleClasses = { StyleClass.LowDivider }, Margin = new Thickness(0, 0, 0, 1) });
         }
         foreach (var stepId in surgery.Comp.Steps)
             AddStep(stepId, netPart, surgeryId);

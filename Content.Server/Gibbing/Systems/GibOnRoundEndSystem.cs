@@ -1,4 +1,4 @@
-﻿using Content.Shared.Body.Systems;
+using Content.Shared.Body.Systems;
 using Content.Shared.GameTicking;
 using Content.Shared.Gibbing.Components;
 using Content.Shared.Mind;

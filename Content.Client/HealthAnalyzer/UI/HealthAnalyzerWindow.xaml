@@ -1,7 +1,6 @@
 <controls:FancyWindow
     xmlns="https://spacestation14.io"
     xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
-    xmlns:customControls="clr-namespace:Content.Client.Administration.UI.CustomControls"
     MinWidth="800"
     MinHeight="525"> <!-- Shitmed Change -->
     <BoxContainer Orientation="Vertical" VerticalExpand="True">
@@ -242,7 +241,7 @@
 
                 </BoxContainer>
             </ScrollContainer>
-            <customControls:VSeparator VerticalExpand="True" StyleClasses="LowDivider" />
+            <controls:Separator VerticalExpand="True" StyleClasses="LowDivider" Orientation="Vertical" />
             <!-- Shitmed Change Start -->
             <ScrollContainer
                 Margin="16 16 16 16"

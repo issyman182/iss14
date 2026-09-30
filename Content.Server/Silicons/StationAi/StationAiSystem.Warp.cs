@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Content.Shared.Follower;
 using Content.Shared.Follower.Components;
 using Content.Shared.Humanoid;
-using Content.Shared.Medical.SuitSensor;
 using Content.Shared.Medical.SuitSensors;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Popups;
@@ -162,8 +161,8 @@ public sealed partial class StationAiSystem
             if (sensor.Mode != SuitSensorMode.SensorCords)
                 continue;
 
-            var status = _suitSensors.GetSensorState((sensorUid, sensor, xform));
-            if (status?.Coordinates == null)
+            var sensorState = _suitSensors.GetSensorState((sensorUid, sensor, xform));
+            if (sensorState is not { } status || status.Coordinates == null)
                 continue;
 
             var ownerUid = GetEntity(status.OwnerUid);

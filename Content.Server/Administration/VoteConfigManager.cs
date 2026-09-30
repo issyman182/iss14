@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-using Content.Server.GameTicking.Presets;
+using Content.Shared.GameTicking.Prototypes;
 using Content.Server.Maps;
 using Content.Shared.Administration;
 using Content.Shared.CCVar;

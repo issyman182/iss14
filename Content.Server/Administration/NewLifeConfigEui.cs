@@ -1,5 +1,6 @@
 using System.Linq;
 using Content.Server.Antag.Components;
+using Content.Shared.Antag.Components; // iss14: AntagSelectionComponent moved to shared upstream
 using Content.Server.Administration.Managers;
 using Content.Server.EUI;
 using Content.Server.NewLife;

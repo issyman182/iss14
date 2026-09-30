@@ -1,17 +1,15 @@
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using Content.Server.Administration;
 using Content.Server.Administration.Managers;
 using Content.Server.Discord.WebhookMessages;
 using Content.Server.GameTicking;
-using Content.Server.GameTicking.Presets;
 using Content.Server.Roles;
 using Content.Server.RoundEnd;
 using Content.Shared.CCVar;
 using Content.Shared.Chat;
-using Content.Shared.GameTicking;
 using Content.Shared.Database;
+using Content.Shared.GameTicking;
+using Content.Shared.GameTicking.Prototypes;
 using Content.Shared.Maps;
 using Content.Shared.Players;
 using Content.Shared.Players.PlayTimeTracking;
@@ -32,7 +30,7 @@ namespace Content.Server.Voting.Managers
 
         private VotingSystem? _votingSystem;
         private RoleSystem? _roleSystem;
-        private GameTicker? _gameTicker;
+        private ServerGameTicker? _gameTicker;
 
         private static readonly Dictionary<StandardVoteType, CVarDef<bool>> VoteTypesToEnableCVars = new()
         {
@@ -59,7 +57,7 @@ namespace Content.Server.Voting.Managers
             else
                 _adminLogger.Add(LogType.Vote, LogImpact.Medium, $"Initiated a {voteType.ToString()} vote");
 
-            _gameTicker = _entityManager.EntitySysManager.GetEntitySystem<GameTicker>();
+            _gameTicker = _entityManager.EntitySysManager.GetEntitySystem<ServerGameTicker>();
 
             bool timeoutVote = true;
 
@@ -202,7 +200,7 @@ namespace Content.Server.Voting.Managers
                             // iss14: skip the post-round wait timer. If the round already ended,
                             // restart straight away; otherwise end it with a short countdown.
                             _chatManager.DispatchServerAnnouncement(Loc.GetString("ui-vote-restart-now-succeeded"));
-                            var gameTicker = _entityManager.EntitySysManager.GetEntitySystem<GameTicker>();
+                            var gameTicker = _entityManager.EntitySysManager.GetEntitySystem<ServerGameTicker>();
                             if (gameTicker.RunLevel == GameRunLevel.PostRound)
                             {
                                 gameTicker.RestartRound();
@@ -294,7 +292,7 @@ namespace Content.Server.Voting.Managers
                         Loc.GetString("ui-vote-gamemode-win", ("winner", Loc.GetString(presets[picked]))));
                 }
                 _adminLogger.Add(LogType.Vote, LogImpact.Medium, $"Preset vote finished: {picked}");
-                var ticker = _entityManager.EntitySysManager.GetEntitySystem<GameTicker>();
+                var ticker = _entityManager.EntitySysManager.GetEntitySystem<ServerGameTicker>();
                 ticker.SetGamePreset(picked);
             };
         }
@@ -341,7 +339,7 @@ namespace Content.Server.Voting.Managers
                 }
 
                 _adminLogger.Add(LogType.Vote, LogImpact.Medium, $"Map vote finished: {picked.MapName}");
-                var ticker = _entityManager.EntitySysManager.GetEntitySystem<GameTicker>();
+                var ticker = _entityManager.EntitySysManager.GetEntitySystem<ServerGameTicker>();
                 if (ticker.CanUpdateMap())
                 {
                     if (_gameMapManager.CheckMapExists(picked.ID))

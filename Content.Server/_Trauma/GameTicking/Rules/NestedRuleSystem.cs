@@ -2,9 +2,9 @@
 // Ported from Trauma-Station.
 
 using Content.Server._Trauma.GameTicking.Rules.Components;
-using Content.Server.GameTicking.Rules;
 using Content.Shared.EntityTable;
 using Content.Shared.GameTicking.Components;
+using Content.Shared.GameTicking.Rules;
 
 namespace Content.Server._Trauma.GameTicking.Rules;
 
@@ -12,11 +12,11 @@ public sealed partial class NestedRuleSystem : GameRuleSystem<NestedRuleComponen
 {
     [Dependency] private EntityTableSystem _entityTable = default!;
 
-    protected override void Started(EntityUid uid, NestedRuleComponent comp, GameRuleComponent gameRule, GameRuleStartedEvent args)
+    protected override void Started(Entity<NestedRuleComponent, GameRuleComponent> ent, ref GameRuleStartedEvent args)
     {
-        base.Started(uid, comp, gameRule, args);
+        base.Started(ent, ref args);
 
-        var rules = _entityTable.GetSpawns(comp.Rules);
+        var rules = _entityTable.GetSpawns(ent.Comp1.Rules);
         foreach (var rule in rules)
         {
             GameTicker.StartGameRule(rule);

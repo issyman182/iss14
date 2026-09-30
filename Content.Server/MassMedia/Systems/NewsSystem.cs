@@ -41,8 +41,8 @@ public sealed partial class NewsSystem : SharedNewsSystem
     [Dependency] private CartridgeLoaderSystem _cartridgeLoaderSystem = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private PopupSystem _popup = default!;
-    [Dependency] private StationSystem _station = default!;
-    [Dependency] private GameTicker _ticker = default!;
+    [Dependency] private ServerStationSystem _station = default!;
+    [Dependency] private ServerGameTicker _ticker = default!;
     [Dependency] private IChatManager _chatManager = default!;
     [Dependency] private DiscordWebhook _discord = default!;
     [Dependency] private DiscordLinkManager _discordLink = default!; // iss14: news to discord channel

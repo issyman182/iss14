@@ -1,4 +1,4 @@
-﻿using Content.Server.Players.PlayTimeTracking;
+using Content.Server.Players.PlayTimeTracking;
 using Content.Shared.Administration;
 using Content.Shared.Localizations;
 using Content.Shared.Players.PlayTimeTracking;

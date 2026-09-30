@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Content.Server.Administration;
 using Content.Server.Antag;
 using Content.Server.Antag.Components;
+using Content.Shared.Antag.Components; // iss14: AntagSelectionComponent moved to shared upstream
 using Content.Server.Chat.Managers;
 using Content.Server.GameTicking;
 using Content.Server.RoundEnd;
@@ -30,7 +31,7 @@ namespace Content.Server.NewLife;
 public sealed partial class NewLifeSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
-    [Dependency] private GameTicker _gameTicker = default!;
+    [Dependency] private ServerGameTicker _gameTicker = default!; // iss14: upstream split GameTicker into shared + ServerGameTicker
     [Dependency] private RoundEndSystem _roundEnd = default!;
     [Dependency] private SharedGhostSystem _ghost = default!;
     [Dependency] private IChatManager _chat = default!;

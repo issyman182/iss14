@@ -83,10 +83,10 @@ namespace Content.Client.Ghost
 
             // Drive the New Life button countdown once a second (server only dirties the ghost on state changes,
             // which isn't enough for a smoothly ticking timer).
-            if (Player is not { } player || _gameTiming.CurTime < _nextGuiTick)
+            if (Player is not { } player || GameTiming.CurTime < _nextGuiTick)
                 return;
 
-            _nextGuiTick = _gameTiming.CurTime + TimeSpan.FromSeconds(1);
+            _nextGuiTick = GameTiming.CurTime + TimeSpan.FromSeconds(1);
             // iss14 fix: PlayerUpdated rebuilds the whole warp window every second; only refresh the New Life button.
             NewLifeUpdated?.Invoke(player);
         }

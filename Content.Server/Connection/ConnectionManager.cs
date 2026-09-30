@@ -65,7 +65,7 @@ namespace Content.Server.Connection
         [Dependency] private IEntityManager _entityManager = default!;
         [Dependency] private UserMigrationManager _migration = default!;
 
-        private GameTicker? _ticker;
+        private ServerGameTicker? _ticker;
 
         private ISawmill _sawmill = default!;
         private readonly Dictionary<NetUserId, TimeSpan> _temporaryBypasses = [];
@@ -296,7 +296,7 @@ namespace Content.Server.Connection
                 }
             }
 
-            _ticker ??= _entityManager.SystemOrNull<GameTicker>();
+            _ticker ??= _entityManager.SystemOrNull<ServerGameTicker>();
             var wasInGame = _ticker != null &&
                             _ticker.PlayerGameStatuses.TryGetValue(userId, out var status) &&
                             status == PlayerGameStatus.JoinedGame;

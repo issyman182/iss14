@@ -48,20 +48,20 @@ public sealed partial class ChatSystem
                 speech = proto;
         }
 
-        name = FormattedMessage.EscapeText(name);
+        var messageName = ChatNameLinks ? $"[textlink=\"{FormattedMessage.EscapeStringParameter(name)}\" entity=\"{GetNetEntity(source)}\" entitynamecolor=\"true\"]" : FormattedMessage.EscapeText(name);
 
         var verb = Loc.GetString(_random.Pick(speech.SpeechVerbStrings));
         var wrapId = speech.Bold ? "chat-manager-entity-say-bold-wrap-message" : "chat-manager-entity-say-wrap-message";
 
         var wrappedMessage = Loc.GetString(wrapId,
-            ("entityName", name),
+            ("entityName", messageName),
             ("verb", verb),
             ("fontType", speech.FontId),
             ("fontSize", speech.FontSize),
             ("message", FormattedMessage.EscapeText(message)));
 
         // Pass the raw pieces so hard-of-hearing listeners past their clear range can be given a garbled variant.
-        var obfuscation = new SpeechObfuscationData(message, wrapId, name, verb, speech.FontId, speech.FontSize);
+        var obfuscation = new SpeechObfuscationData(message, wrapId, messageName, verb, speech.FontId, speech.FontSize);
 
         SendInVoiceRange(ChatChannel.Local, message, wrappedMessage, source, range, obfuscation: obfuscation);
 
@@ -250,7 +250,7 @@ public sealed partial class ChatSystem
     private void SendLOOC(EntityUid source, ICommonSession player, string message, bool hideChat)
     {
         var name = FormattedMessage.EscapeText(Identity.Name(source, EntityManager));
-
+        name = ChatNameLinks ? $"[textlink=\"{FormattedMessage.EscapeStringParameter(name)}\" entity=\"{GetNetEntity(source)}\" color=\"{ChatChannel.LOOC.TextColor().ToHex()}\"]": FormattedMessage.EscapeText(name);
         if (_adminManager.IsAdmin(player))
         {
             if (!_adminLoocEnabled) return;
@@ -275,18 +275,19 @@ public sealed partial class ChatSystem
             return;
 
         var clients = GetDeadChatClients();
-        var playerName = Name(source);
         string wrappedMessage;
         if (_adminManager.IsAdmin(player))
         {
+            var userName = ChatNameLinks ? $"[textlink=\"{FormattedMessage.EscapeStringParameter(player.Channel.UserName)}\" entity=\"{GetNetEntity(source)}\" color=\"{ChatChannel.Dead.TextColor().ToHex()}\"]" : FormattedMessage.EscapeText(player.Channel.UserName);
             wrappedMessage = Loc.GetString("chat-manager-send-admin-dead-chat-wrap-message",
                 ("adminChannelName", Loc.GetString("chat-manager-admin-channel-name")),
-                ("userName", player.Channel.UserName),
+                ("userName", (userName)),
                 ("message", FormattedMessage.EscapeText(message)));
             _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Admin dead chat from {source}: {message}");
         }
         else
         {
+            var playerName = ChatNameLinks ? $"[textlink=\"{FormattedMessage.EscapeStringParameter(Name(source))}\" entity=\"{GetNetEntity(source)}\" color=\"{ChatChannel.Dead.TextColor().ToHex()}\"]" : FormattedMessage.EscapeText(Name(source));
             wrappedMessage = Loc.GetString("chat-manager-send-dead-chat-wrap-message",
                 ("deadChannelName", Loc.GetString("chat-manager-dead-channel-name")),
                 ("playerName", (playerName)),

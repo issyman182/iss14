@@ -1,4 +1,4 @@
-﻿using Content.Shared._Shitmed.Damage; // Shitmed Change
+using Content.Shared._Shitmed.Damage; // Shitmed Change
 using Content.Shared._Shitmed.Targeting; // Shitmed Change
 using Content.Shared.Damage;
 using Content.Shared.Damage.Components;

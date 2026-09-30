@@ -973,17 +973,19 @@
     iconGroups:
     - CommandIconGroup
     - SecurityIconGroup
-    - ResearchIconGroup
     - CargoIconGroup
     - EngineeringIconGroup
     - MedicalIconGroup
+    - ScienceIconGroup
     - ServiceIconGroup
+    - TheatreIconGroup
     - CivilianIconGroup
-    - EntertainerIconGroup
     - SiliconIconGroup
-    - BlankIconGroup
-    - ThreatIconGroup
     - CentCommIconGroup
+    - TaskForceIconGroup
+    - AntagonistIconGroup
+    - MiscIconGroup
+    - BlankIconGroup
   - type: UIRequiresLock
   - type: ActivatableUI
     key: enum.AgentIDCardUiKey.Key
@@ -1421,17 +1423,19 @@
     iconGroups:
     - CommandIconGroup
     - SecurityIconGroup
-    - ResearchIconGroup
     - CargoIconGroup
     - EngineeringIconGroup
     - MedicalIconGroup
+    - ScienceIconGroup
     - ServiceIconGroup
+    - TheatreIconGroup
     - CivilianIconGroup
-    - EntertainerIconGroup
     - SiliconIconGroup
-    - BlankIconGroup
-    - ThreatIconGroup
     - CentCommIconGroup
+    - TaskForceIconGroup
+    - AntagonistIconGroup
+    - MiscIconGroup
+    - BlankIconGroup
     - AdminIconGroup
   - type: ActivatableUI
     key: enum.AgentIDCardUiKey.Key

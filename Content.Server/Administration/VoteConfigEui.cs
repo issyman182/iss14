@@ -1,7 +1,7 @@
 using System.Linq;
 using Content.Server.Administration.Managers;
 using Content.Server.EUI;
-using Content.Server.GameTicking.Presets;
+using Content.Shared.GameTicking.Prototypes;
 using Content.Shared.Administration;
 using Content.Shared.Eui;
 using Content.Shared.Maps;

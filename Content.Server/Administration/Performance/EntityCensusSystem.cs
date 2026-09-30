@@ -1,5 +1,5 @@
 using System.Linq;
-using Content.Server.GameTicking.Events;
+using Content.Shared.GameTicking.Events;
 using Content.Shared.Administration;
 using Content.Shared.GameTicking;
 using Robust.Shared.Timing;

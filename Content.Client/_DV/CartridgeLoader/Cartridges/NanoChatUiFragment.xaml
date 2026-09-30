@@ -12,7 +12,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 <cartridges:NanoChatUiFragment
     xmlns="https://spacestation14.io"
     xmlns:cartridges="clr-namespace:Content.Client._DV.CartridgeLoader.Cartridges"
-    xmlns:customControls="clr-namespace:Content.Client.Administration.UI.CustomControls"
     xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
     Orientation="Vertical"
     HorizontalExpand="True"
@@ -135,7 +134,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
                 </ScrollContainer>
             </PanelContainer>
 
-            <customControls:VSeparator Margin="3 0" />
+            <controls:Separator StyleClasses="LowDivider" Orientation="Vertical" Margin="3 0" />
 
             <!-- Right panel: Current chat -->
             <PanelContainer StyleClasses="AngleRect"

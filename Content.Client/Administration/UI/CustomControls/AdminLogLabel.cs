@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Content.Client.UserInterface.Controls;
 using Content.Shared.Administration.Logs;
 using Content.Shared.Database;
 using Robust.Client.Graphics;
@@ -28,7 +29,7 @@ public sealed class AdminLogLabel : PanelContainer
     private readonly List<string> _playerNames;
     private bool _colored;
 
-    public AdminLogLabel(ref SharedAdminLog log, HSeparator separator, List<string> playerNames)
+    public AdminLogLabel(ref SharedAdminLog log, Separator separator, List<string> playerNames)
     {
         Log = log;
         Separator = separator;
@@ -47,7 +48,7 @@ public sealed class AdminLogLabel : PanelContainer
     // 'new' intentionally shadows Control.Log (the base sawmill, unused here).
     public new SharedAdminLog Log { get; }
 
-    public HSeparator Separator { get; }
+    public Separator Separator { get; }
 
     public void SetColored(bool colored)
     {

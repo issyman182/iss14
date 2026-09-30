@@ -12,7 +12,7 @@
   components:
   - type: TimedSpawner
     prototypes:
-    - MobGiantSpider
+    - MobGiantSpiderTarantula # upstream #46156 renamed MobGiantSpider
     intervalSeconds: 60
     minimumEntitiesSpawned: 1
     maximumEntitiesSpawned: 1
