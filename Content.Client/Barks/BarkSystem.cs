@@ -107,6 +107,30 @@ public sealed partial class BarkSystem : EntitySystem
     {
         base.Update(frameTime);
 
+        // iss14 fix: prune entries whose source or audio entity is gone, so the dictionary doesn't grow forever.
+        if (_playingSounds.Count > 0)
+        {
+            List<NetEntity>? stale = null;
+            foreach (var (netSource, audioUid) in _playingSounds)
+            {
+                if (TryGetEntity(netSource, out var source) && !TerminatingOrDeleted(source.Value)
+                    && !TerminatingOrDeleted(audioUid))
+                    continue;
+
+                stale ??= new List<NetEntity>();
+                stale.Add(netSource);
+            }
+
+            if (stale != null)
+            {
+                foreach (var netSource in stale)
+                {
+                    if (_playingSounds.Remove(netSource, out var audioUid) && !TerminatingOrDeleted(audioUid))
+                        _sharedAudio.Stop(audioUid);
+                }
+            }
+        }
+
         for (var i = _activeBarks.Count - 1; i >= 0; i--)
         {
             var bark = _activeBarks[i];
@@ -140,21 +164,25 @@ public sealed partial class BarkSystem : EntitySystem
 
         if (proto.Predictable)
         {
-            var hashCode = character.GetHashCode();
+            // iss14 fix: char.GetHashCode() is negative for chars >= U+8000, giving negative indices/pitch.
+            var hashCode = (int) character;
 
             if (sound is ResolvedCollectionSpecifier collection && collection.Collection != null)
             {
                 var soundCollection = _prototypeManager.Index<SoundCollectionPrototype>(collection.Collection);
-                var index = hashCode % soundCollection.PickFiles.Count;
-                sound = new ResolvedCollectionSpecifier(collection.Collection, index);
+                if (soundCollection.PickFiles.Count > 0)
+                {
+                    var index = hashCode % soundCollection.PickFiles.Count;
+                    sound = new ResolvedCollectionSpecifier(collection.Collection, index);
+                }
             }
 
             var minPitchInt = (int) (proto.MinPitch * 100);
             var maxPitchInt = (int) (proto.MaxPitch * 100);
-            var pitchRangeInt = maxPitchInt - minPitchInt;
+            var pitchRangeInt = Math.Abs(maxPitchInt - minPitchInt);
             if (pitchRangeInt != 0)
             {
-                var predictablePitchInt = hashCode % pitchRangeInt + minPitchInt;
+                var predictablePitchInt = hashCode % pitchRangeInt + Math.Min(minPitchInt, maxPitchInt);
                 var predictablePitch = predictablePitchInt / 100f;
                 audioParams = audioParams.WithPitchScale(predictablePitch);
             }

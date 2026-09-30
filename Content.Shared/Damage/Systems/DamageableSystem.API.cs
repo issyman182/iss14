@@ -1100,7 +1100,11 @@ public sealed partial class DamageableSystem
         ent.Comp.DamageModifierSetId = damageModifierSetId;
 
         foreach (var (id, part) in _body.GetBodyChildren(ent)) // Goobstation
-            EnsureComp<DamageableComponent>(id).DamageModifierSetId = damageModifierSetId;
+        {
+            var partDamageable = EnsureComp<DamageableComponent>(id);
+            partDamageable.DamageModifierSetId = damageModifierSetId;
+            Dirty(id, partDamageable); // iss14 fix: network the part's new modifier set
+        }
 
         Dirty(ent);
     }

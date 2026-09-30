@@ -531,7 +531,8 @@ public sealed partial class RespiratorSystem : EntitySystem
         if (ent.Comp.SuffocationCycles >= 2)
             _adminLogger.Add(LogType.Asphyxiation, $"{ToPrettyString(ent):entity} stopped suffocating");
 
-        _damageableSys.TryChangeDamage(ent, ent.Comp.DamageRecovery);
+        // iss14 fix: DamageRecovery is applied by OnStopSuffocating (targetPart All, ignoreBlockers);
+        // applying it here as well healed the recovery amount twice.
 
         var ev = new StopSuffocatingEvent();
         RaiseLocalEvent(ent, ref ev);

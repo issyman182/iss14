@@ -97,6 +97,11 @@ public sealed partial class PainSystem : EntitySystem
             if (TerminatingOrDeleted(ent))
                 continue;
 
+            // iss14 fix: don't enqueue a job every tick per nerve system.
+            if (_timing.CurTime < nerveSystem.NextPainUpdate)
+                continue;
+
+            nerveSystem.NextPainUpdate = _timing.CurTime + nerveSystem.PainUpdateInterval;
             _painJobQueue.EnqueueJob(new PainTimerJob(this, (ent, nerveSystem), PainJobTime));
         }
     }

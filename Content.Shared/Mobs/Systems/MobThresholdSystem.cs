@@ -300,13 +300,14 @@ public sealed partial class MobThresholdSystem : EntitySystem
             {
                 foreach (var woundable in _wound.GetAllWoundableChildren(parentRootPart.Value))
                 {
+                    // iss14 fix: read each woundable's own damage, not the root part's, for every child.
                     if (woundable.Comp.WoundableIntegrity >= woundable.Comp.IntegrityCap
-                        || !TryComp<DamageableComponent>(parentRootPart.Value, out var damageable)
-                        || _damageable.GetTotalDamage((parentRootPart.Value, damageable)) == 0) // iss14: Access-safe damage read
+                        || !TryComp<DamageableComponent>(woundable.Owner, out var damageable)
+                        || _damageable.GetTotalDamage((woundable.Owner, damageable)) == 0) // iss14: Access-safe damage read
                         continue;
 
                     var bodyPart = _body.GetTargetBodyPart(woundable);
-                    var modifiedDamage = _damageable.GetAllDamage((parentRootPart.Value, damageable)) / ent1DeadThreshold.Value * ent2DeadThreshold.Value; // iss14: Access-safe damage read
+                    var modifiedDamage = _damageable.GetAllDamage((woundable.Owner, damageable)) / ent1DeadThreshold.Value * ent2DeadThreshold.Value; // iss14: Access-safe damage read
                     if (!entWoundablesDamage.TryAdd(bodyPart, modifiedDamage))
                         entWoundablesDamage[bodyPart] += modifiedDamage;
                 }
@@ -493,7 +494,10 @@ public sealed partial class MobThresholdSystem : EntitySystem
         var checkedEv = new MobThresholdsChecked(); // iss14
         RaiseLocalEvent(body, ref checkedEv);
 
-        UpdateAlerts(body, mobState.CurrentState, thresholds, null, Comp<BodyComponent>(body));
+        if (!TryComp<BodyComponent>(body, out var bodyComp)) // iss14 fix: don't throw on bodiless entities
+            return;
+
+        UpdateAlerts(body, mobState.CurrentState, thresholds, null, bodyComp);
     }
     // Shitmed Change End
 

@@ -106,6 +106,18 @@ public sealed class SearchableDropdown : Button
         }
     }
 
+    // iss14 fix: the popup lives in the modal root, not under this control, so it must be torn down explicitly.
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+
+        if (disposing)
+        {
+            _popup.Close();
+            _popup.Dispose();
+        }
+    }
+
     // Must be a content type for the sandbox; CreatePopup rejects engine types like Popup itself.
     private sealed class DropdownPopup : Popup
     {

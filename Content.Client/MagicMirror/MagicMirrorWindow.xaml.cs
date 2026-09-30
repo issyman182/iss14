@@ -21,9 +21,15 @@ public sealed partial class MagicMirrorWindow : DefaultWindow
     public Action<int>? OnFacialHairSlotRemoved;
     public Action? OnFacialHairSlotAdded;
 
+    // iss14 fix: single "no hair" label toggled on/off instead of appending a new one per state update.
+    private readonly Label _noHairLabel;
+
     public MagicMirrorWindow()
     {
         RobustXamlLoader.Load(this);
+
+        _noHairLabel = new Label { Text = Loc.GetString("magic-mirror-component-activate-user-has-no-hair"), Visible = false };
+        AddChild(_noHairLabel);
 
         HairPicker.OnMarkingSelect += args => OnHairSelected!(args);
         HairPicker.OnColorChanged += args => OnHairColorChanged!(args);
@@ -41,9 +47,6 @@ public sealed partial class MagicMirrorWindow : DefaultWindow
         HairPicker.UpdateData(state.Hair, state.Species, state.HairSlotTotal);
         FacialHairPicker.UpdateData(state.FacialHair, state.Species, state.FacialHairSlotTotal);
 
-        if (!HairPicker.Visible && !FacialHairPicker.Visible)
-        {
-            AddChild(new Label { Text = Loc.GetString("magic-mirror-component-activate-user-has-no-hair") });
-        }
+        _noHairLabel.Visible = !HairPicker.Visible && !FacialHairPicker.Visible;
     }
 }

@@ -8,6 +8,7 @@ using Content.Shared._Shitmed.DoAfter;
 using Content.Shared._Shitmed.Medical.Surgery.Traumas.Components;
 using Content.Shared._Shitmed.Medical.Surgery.Wounds.Components;
 using Content.Shared._Shitmed.Weapons.Melee.Events;
+using Content.Shared.Body.Systems; // iss14 fix: relayed event wrappers
 using Content.Shared._Shitmed.Weapons.Ranged.Events;
 using Content.Shared.Body.Components;
 using Content.Shared.Body.Part;
@@ -30,6 +31,9 @@ public partial class TraumaSystem
         SubscribeLocalEvent<BoneComponent, BoneIntegrityChangedEvent>(OnBoneIntegrityChanged);
         SubscribeLocalEvent<BoneComponent, GetDoAfterDelayMultiplierEvent>(OnGetDoAfterDelayMultiplier);
         SubscribeLocalEvent<BoneComponent, AttemptHandsMeleeEvent>(OnAttemptHandsMelee);
+        // iss14 fix: the body part relay wraps these into BoneRelayedEvent<T>; subscribe to that form too.
+        SubscribeLocalEvent<BoneComponent, BoneRelayedEvent<GetDoAfterDelayMultiplierEvent>>(OnGetDoAfterDelayMultiplierRelayed);
+        SubscribeLocalEvent<BoneComponent, BoneRelayedEvent<AttemptHandsMeleeEvent>>(OnAttemptHandsMeleeRelayed);
         SubscribeLocalEvent<BoneComponent, AttemptHandsShootEvent>(OnAttemptHandsShoot);
     }
 
@@ -103,6 +107,17 @@ public partial class TraumaSystem
             BoneSeverity.Broken => 0.75f,
             _ => 1f,
         };
+    }
+
+    // iss14 fix: unwrap relayed events (inner events are classes, so mutating args.Args mutates the original).
+    private void OnGetDoAfterDelayMultiplierRelayed(Entity<BoneComponent> bone, ref BoneRelayedEvent<GetDoAfterDelayMultiplierEvent> args)
+    {
+        OnGetDoAfterDelayMultiplier(bone, ref args.Args);
+    }
+
+    private void OnAttemptHandsMeleeRelayed(Entity<BoneComponent> bone, ref BoneRelayedEvent<AttemptHandsMeleeEvent> args)
+    {
+        OnAttemptHandsMelee(bone, ref args.Args);
     }
 
     private void OnAttemptHandsMelee(Entity<BoneComponent> bone, ref AttemptHandsMeleeEvent args)
@@ -313,7 +328,9 @@ public partial class TraumaSystem
             if (!TryComp<WoundableComponent>(legEntity, out var legWoundable))
                 continue;
 
-            if (!TryComp<BoneComponent>(legWoundable.Bone.ContainedEntities.First(), out var boneComp))
+            // iss14 fix: guard an empty bone container instead of throwing on First().
+            if (legWoundable.Bone.ContainedEntities.Count == 0
+                || !TryComp<BoneComponent>(legWoundable.Bone.ContainedEntities[0], out var boneComp))
                 continue;
 
             // Get the foot penalty
@@ -326,7 +343,9 @@ public partial class TraumaSystem
 
             if (footEnt != null)
             {
-                if (TryComp<BoneComponent>(legWoundable.Bone.ContainedEntities.FirstOrNull(), out var footBone))
+                // iss14 fix: read the foot's bone, not the leg's.
+                if (TryComp<WoundableComponent>(footEnt.Value.Id, out var footWoundable)
+                    && TryComp<BoneComponent>(footWoundable.Bone.ContainedEntities.FirstOrNull(), out var footBone))
                 {
                     penalty = footBone.BoneSeverity switch
                     {
@@ -369,6 +388,9 @@ public partial class TraumaSystem
                     break;
             }
         }
+
+        if (bodyComp.RequiredLegs <= 0) // iss14 fix: avoid divide-by-zero / nonsense speeds
+            return;
 
         rawWalkSpeed /= bodyComp.RequiredLegs;
         walkSpeed /= bodyComp.RequiredLegs;

@@ -229,7 +229,17 @@ public sealed partial class GameTicker
 
     private void TryResetPreset()
     {
-        if (ResetCountdown is null || ResetCountdown-- > 0)
+        // iss14 fix: when an admin gamemode profile is active, re-roll a random preset from it every
+        // round restart (previously it was only rolled once at server start). An admin-set preset with a
+        // pending reset countdown (setgamepreset <rounds>) still takes precedence until it expires.
+        if (ResetCountdown is null)
+        {
+            if (_voteConfig.GetActivePresetSet() != null)
+                InitializeGamePreset();
+            return;
+        }
+
+        if (ResetCountdown-- > 0)
             return;
 
         InitializeGamePreset();

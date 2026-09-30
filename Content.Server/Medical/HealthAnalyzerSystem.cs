@@ -286,9 +286,13 @@ public sealed partial class HealthAnalyzerSystem : EntitySystem
     public void UpdateScannedUser(EntityUid healthAnalyzer, EntityUid target, bool scanMode, HealthAnalyzerMode mode, EntityUid? part = null) // Shitmed Change
     {
         // Shitmed Change Start
+        // iss14 fix: like upstream, anything with DamageableComponent can be scanned; a missing
+        // BodyComponent just means the body-part specific sections (wounds/bleeding) come back empty.
         if (!_uiSystem.HasUi(healthAnalyzer, HealthAnalyzerUiKey.Key)
-            || !TryComp<BodyComponent>(target, out var body))
+            || !HasComp<DamageableComponent>(target))
             return;
+
+        TryComp<BodyComponent>(target, out var body);
 
         var bodyTemperature = float.NaN;
 
@@ -374,7 +378,7 @@ public sealed partial class HealthAnalyzerSystem : EntitySystem
 
     // Shitmed Change Start
     private void FetchBodyData(EntityUid target,
-        BodyComponent body,
+        BodyComponent? body, // iss14 fix: nullable, bodyless targets get empty data
         out Dictionary<NetEntity, List<WoundableTraumaData>> traumas,
         out Dictionary<NetEntity, FixedPoint2> pain,
         out Dictionary<TargetBodyPart, bool> bleeding)
@@ -383,26 +387,33 @@ public sealed partial class HealthAnalyzerSystem : EntitySystem
         pain = new();
         bleeding = new();
 
-        if (body.RootContainer.ContainedEntity is not { } rootPart)
+        if (body?.RootContainer.ContainedEntity is not { } rootPart)
             return;
 
         foreach (var (woundable, component) in _woundSystem.GetAllWoundableChildren(rootPart))
         {
-            traumas.Add(GetNetEntity(woundable), FetchTraumaData(woundable, component));
-            pain.Add(GetNetEntity(woundable), FetchPainData(woundable, component));
-            bleeding.Add(_bodySystem.GetTargetBodyPart(woundable), component.Bleeds > 0);
+            // iss14 fix: use the indexer / merge instead of Add so two woundables mapping to the same
+            // key (e.g. duplicate parts of the same TargetBodyPart) don't throw ArgumentException.
+            traumas[GetNetEntity(woundable)] = FetchTraumaData(woundable, component);
+            pain[GetNetEntity(woundable)] = FetchPainData(woundable, component);
+            var partKey = _bodySystem.GetTargetBodyPart(woundable);
+            bleeding[partKey] = bleeding.GetValueOrDefault(partKey) || component.Bleeds > 0;
         }
     }
 
-    private Dictionary<TargetBodyPart, bool> FetchBleedData(BodyComponent body)
+    private Dictionary<TargetBodyPart, bool> FetchBleedData(BodyComponent? body) // iss14 fix: nullable
     {
         var bleeding = new Dictionary<TargetBodyPart, bool>();
 
-        if (body.RootContainer.ContainedEntity is not { } rootPart)
+        if (body?.RootContainer.ContainedEntity is not { } rootPart)
             return bleeding;
 
         foreach (var (woundable, component) in _woundSystem.GetAllWoundableChildren(rootPart))
-            bleeding.Add(_bodySystem.GetTargetBodyPart(woundable), component.Bleeds > 0);
+        {
+            // iss14 fix: merge duplicate keys instead of throwing.
+            var partKey = _bodySystem.GetTargetBodyPart(woundable);
+            bleeding[partKey] = bleeding.GetValueOrDefault(partKey) || component.Bleeds > 0;
+        }
 
         return bleeding;
     }

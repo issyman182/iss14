@@ -85,6 +85,9 @@ public abstract partial class SharedGodmodeSystem : EntitySystem
     {
         // Rejuv to cover other stuff
         RaiseLocalEvent(uid, new RejuvenateEvent());
+
+        foreach (var (id, _) in _bodySystem.GetBodyChildren(uid)) // iss14 fix: mirror DisableGodmode's body part recursion
+            EnableGodmode(id);
     }
 
     public virtual void DisableGodmode(EntityUid uid, GodmodeComponent? godmode = null)

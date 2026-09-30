@@ -129,6 +129,20 @@ public sealed partial class DisplacementMapSystem : EntitySystem
 
         if (_sprite.RemoveLayer(sprite.AsNullable(), displacementLayerKey, false))
         {
+            // iss14: the displaced layer may already have been removed (e.g. a marking being cleared);
+            // in that case there is no shader to reset and indexing sprite[key] would throw.
+#pragma warning disable CS0618 // the object-keyed lookup has no SpriteSystem equivalent yet
+            var displacedLayerExists = key switch
+            {
+                Enum enumKey => _sprite.LayerMapTryGet(sprite.AsNullable(), enumKey, out _, false),
+                string stringKey => _sprite.LayerMapTryGet(sprite.AsNullable(), stringKey, out _, false),
+                _ => sprite.Comp.LayerMapTryGet(key, out _),
+            };
+#pragma warning restore CS0618
+
+            if (!displacedLayerExists)
+                return true;
+
             //TODO : this is a kinda janky workaround for the fact that the current rendering pipeline does not have
             //proper support for multiple shaders on a given layer (or an ubershader to handle stacking all of the effects well)
             //Same reason as where the displacement is added initially

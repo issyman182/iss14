@@ -308,7 +308,8 @@ public sealed partial class HumanoidProfileEditor
         }
 
         // iss14: keep the voice matching the new sex's default like upstream does
-        if (_prototypeManager.TryIndex(Profile!.Species, out var sexSpeciesProto))
+        // iss14 fix: Profile may be null here (upstream uses ?.) - TryIndex(ProtoId?) handles null.
+        if (_prototypeManager.TryIndex(Profile?.Species, out var sexSpeciesProto))
             SetVoice(sexSpeciesProto.DefaultSoundsBySex[(int)newSex]);
 
         UpdateGenderControls();

@@ -60,7 +60,7 @@ public sealed partial class PassiveDamageSystem : EntitySystem
             // Goobstation
             if (comp.AllowedStates == null || !TryComp<MobStateComponent>(uid, out var mobState))
             {
-                _damageable.TryChangeDamage(uid, comp.Damage, true, false, damage);
+                _damageable.TryChangeDamage(uid, comp.Damage, true, false, damage, targetPart: TargetBodyPart.All, splitDamage: comp.SplitBehavior); // iss14 fix: same targeting as the AllowedStates branch
                 continue; // iss14: Goob has `return;` here, which skips every other entity for the tick
             }
 

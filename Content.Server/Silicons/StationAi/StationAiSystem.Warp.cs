@@ -115,6 +115,36 @@ public sealed partial class StationAiSystem
             return;
         }
 
+        // iss14 fix: the target is client-supplied; only allow entities the AI would have been offered
+        // (same station, crew inside camera view, or a warp point), otherwise the AI could follow/warp to
+        // any entity in the game.
+        if (!TryGetCore(actor, out var coreEntity) || coreEntity.Comp == null)
+        {
+            _warpSawmill.Warning($"Station AI {Name(actor)} ({actor}) requested a warp but is not inserted into a core.");
+            return;
+        }
+
+        var aiStation = _station.GetOwningStation(coreEntity.Owner);
+        var allowed = new List<StationAiWarpTarget>();
+        CollectCrewWarpTargets(actor, aiStation, allowed);
+        CollectLocationWarpTargets(actor, aiStation, coreEntity.Comp.RemoteEntity, allowed);
+
+        var valid = false;
+        foreach (var candidate in allowed)
+        {
+            if (candidate.Target != msg.Target)
+                continue;
+
+            valid = true;
+            break;
+        }
+
+        if (!valid)
+        {
+            _warpSawmill.Warning($"Station AI {Name(actor)} ({actor}) attempted to warp to non-offered entity {Name(target)} ({target}).");
+            return;
+        }
+
         if (!TryWarpEyeToEntity(actor, target))
             _warpSawmill.Debug($"Station AI {Name(actor)} ({actor}) warp to {Name(target)} ({target}) rejected by TryWarpEyeToEntity.");
     }

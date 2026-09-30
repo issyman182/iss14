@@ -244,8 +244,11 @@ public sealed partial class RoleRequirementOverrideManager
 
         if (_enabled)
         {
-            var appliedJobs = _jobs.ToDictionary(kv => kv.Key, kv => kv.Value.ToHashSet());
-            var appliedAntags = _antags.ToDictionary(kv => kv.Key, kv => kv.Value.ToHashSet());
+            // iss14 fix: the edited lists only hold time requirements (the DTO can't represent anything
+            // else), so re-attach the prototype's non-time requirements (whitelist, age, etc.) when
+            // applying, otherwise overriding a job's timers silently dropped them.
+            var appliedJobs = _jobs.ToDictionary(kv => kv.Key, kv => WithPreservedRequirements(kv.Key, kv.Value, isAntag: false));
+            var appliedAntags = _antags.ToDictionary(kv => kv.Key, kv => WithPreservedRequirements(kv.Key, kv.Value, isAntag: true));
             roleSystem.SetRuntimeRequirementOverride(appliedJobs, appliedAntags);
         }
         else
@@ -254,6 +257,39 @@ public sealed partial class RoleRequirementOverrideManager
         }
 
         BroadcastOverride();
+    }
+
+    /// <summary>
+    /// iss14 fix: the override list plus every prototype requirement that
+    /// <see cref="RoleRequirementDto.FromRequirement"/> cannot represent (non-time requirements).
+    /// </summary>
+    private HashSet<JobRequirement> WithPreservedRequirements(string id, List<JobRequirement> overrides, bool isAntag)
+    {
+        var set = overrides.ToHashSet();
+
+        // Prototype Requirements are [Access]-restricted to SharedRoleSystem; go through its accessor.
+        var roleSystem = _entity.System<SharedRoleSystem>();
+        HashSet<JobRequirement>? protoReqs = null;
+        if (isAntag)
+        {
+            if (_proto.TryIndex<AntagPrototype>(id, out var antag))
+                protoReqs = roleSystem.GetDefaultRequirements(antag);
+        }
+        else if (_proto.TryIndex<JobPrototype>(id, out var job))
+        {
+            protoReqs = roleSystem.GetDefaultRequirements(job);
+        }
+
+        if (protoReqs == null)
+            return set;
+
+        foreach (var req in protoReqs)
+        {
+            if (RoleRequirementDto.FromRequirement(req) == null)
+                set.Add(req);
+        }
+
+        return set;
     }
 
     #endregion

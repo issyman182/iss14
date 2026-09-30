@@ -1,6 +1,7 @@
 using Content.Client.Administration.Managers;
 using Content.Client.Audio.Midi;
 using Content.Client.Changelog;
+using Content.Client.DebugConsole;
 using Content.Client.Chat.Managers;
 using Content.Client.Clickable;
 using Content.Client.DebugMon;
@@ -45,6 +46,7 @@ namespace Content.Client.IoC
             collection.Register<IStylesheetManager, StylesheetManager>();
             collection.Register<IScreenshotHook, ScreenshotHook>();
             collection.Register<FullscreenHook, FullscreenHook>();
+            collection.Register<DebugConsoleCopyManager>(); // iss14
             collection.Register<IClickMapManager, ClickMapManager>();
             collection.Register<IClientAdminManager, ClientAdminManager>();
             collection.Register<ISharedAdminManager, ClientAdminManager>();

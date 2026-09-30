@@ -302,4 +302,16 @@ public sealed partial class NanoChatUiFragment : BoxContainer
         UpdateMessages(state.Messages);
         LookupView.UpdateContactList(state);
     }
+
+    // iss14 fix: the popup is a separate window, not a child of this fragment, so close and dispose it with us.
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+
+        if (disposing)
+        {
+            _newChatPopup.Close();
+            _newChatPopup.Dispose();
+        }
+    }
 }

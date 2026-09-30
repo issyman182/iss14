@@ -8,6 +8,7 @@ using Content.Shared.Damage.Systems;
 using Content.Shared.FixedPoint;
 using Content.Shared.GameTicking;
 using Content.Shared.Mobs;
+using Content.Shared.Mobs.Components;
 using Robust.Shared.ContentPack;
 using Robust.Shared.Player;
 using Robust.Shared.Network;
@@ -54,6 +55,13 @@ public sealed partial class RoundStatsSystem : EntitySystem
         // claimed by the mob-state systems, and Robust allows only one directed sub per (comp, event).
         SubscribeLocalEvent<MobStateChangedEvent>(OnMobStateChanged);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart);
+        // iss14 fix: drop per-victim attribution when the victim entity goes away.
+        SubscribeLocalEvent<MobStateComponent, EntityTerminatingEvent>(OnVictimTerminating);
+    }
+
+    private void OnVictimTerminating(Entity<MobStateComponent> ent, ref EntityTerminatingEvent args)
+    {
+        _damageToVictim.Remove(ent.Owner);
     }
 
     private void OnRoundRestart(RoundRestartCleanupEvent ev)
@@ -103,6 +111,11 @@ public sealed partial class RoundStatsSystem : EntitySystem
             stats.DamagePlayers += amount;
 
         // Record cumulative damage to this victim for later kill attribution.
+        // iss14 fix: only mobs can die, so only track mobs; otherwise every damaged wall/window/item
+        // accumulated an entry for the whole round.
+        if (!HasComp<MobStateComponent>(uid))
+            return;
+
         if (!_damageToVictim.TryGetValue(uid, out var sources))
             _damageToVictim[uid] = sources = new Dictionary<NetUserId, FixedPoint2>();
         sources[attackerId] = sources.GetValueOrDefault(attackerId) + amount;

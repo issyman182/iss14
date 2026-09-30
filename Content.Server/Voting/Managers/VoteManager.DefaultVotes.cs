@@ -626,6 +626,14 @@ namespace Content.Server.Voting.Managers
         {
             var timeout = timeoutOverride ?? TimeSpan.FromSeconds(_cfg.GetCVar(CCVars.VoteSameTypeTimeout));
             _standardVoteTimeout[type] = _timing.RealTime + timeout;
+
+            // iss14 fix: Restart and RestartNow are both restart votes and share one timeout bucket, so a
+            // failed vote of either kind can't be immediately re-called as the other.
+            if (type == StandardVoteType.Restart)
+                _standardVoteTimeout[StandardVoteType.RestartNow] = _timing.RealTime + timeout;
+            else if (type == StandardVoteType.RestartNow)
+                _standardVoteTimeout[StandardVoteType.Restart] = _timing.RealTime + timeout;
+
             DirtyCanCallVoteAll();
         }
 

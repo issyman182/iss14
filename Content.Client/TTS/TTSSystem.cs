@@ -66,7 +66,7 @@ public sealed partial class TTSSystem : EntitySystem
         Subs.CVar(_cfg, CCVars.TtsReadAnnouncements, _ => SendSuppressionState());
         // iss14: the boot-time send never reached the server (client isn't connected yet at system
         // init) - send on connect instead so the server learns the prefs of every joining player.
-        _net.Connected += (_, _) => SendSuppressionState();
+        _net.Connected += OnNetConnected; // iss14 fix: named handler so Shutdown can unsubscribe it.
 
         _chat = _ui.GetUIController<ChatUIController>();
         _chat.MessageAdded += OnChatMessage;
@@ -85,9 +85,16 @@ public sealed partial class TTSSystem : EntitySystem
             _cfg.GetCVar(CCVars.TtsReadAnnouncements)));
     }
 
+    // iss14 fix: named handler for INetManager.Connected so it can be unsubscribed on Shutdown.
+    private void OnNetConnected(object? sender, NetChannelArgs args)
+    {
+        SendSuppressionState();
+    }
+
     public override void Shutdown()
     {
         base.Shutdown();
+        _net.Connected -= OnNetConnected;
         if (_chat != null)
             _chat.MessageAdded -= OnChatMessage;
     }

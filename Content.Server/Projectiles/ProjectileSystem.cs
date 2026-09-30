@@ -79,8 +79,9 @@ public sealed partial class ProjectileSystem : SharedProjectileSystem
                 targetPart = TargetBodyPart.Chest;
         }
 
-        if (_damageableSystem.TryChangeDamage((target, damageableComponent), ev.Damage, out var damage, component.IgnoreResistances, origin: component.Shooter, targetPart: targetPart)
-            && Exists(component.Shooter))
+        // iss14 fix: don't require a live shooter for the hit branch (upstream behaviour); projectiles from
+        // deleted shooters (grenades, despawned turrets) must still be spent/penetrate normally.
+        if (_damageableSystem.TryChangeDamage((target, damageableComponent), ev.Damage, out var damage, component.IgnoreResistances, origin: component.Shooter, targetPart: targetPart))
         {
             if (!Deleted(target))
             {

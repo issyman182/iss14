@@ -53,10 +53,7 @@ public sealed partial class GhostGui : UIWidget
     {
         ReturnToBodyButton.Disabled = !canReturnToBody ?? true;
 
-        NewLifeButton.Visible = newLife.Show;
-        NewLifeButton.Disabled = !newLife.Enabled;
-        if (newLife.Show)
-            NewLifeButton.Text = newLife.Text;
+        UpdateNewLife(newLife);
 
         if (roles != null)
         {
@@ -71,6 +68,15 @@ public sealed partial class GhostGui : UIWidget
         }
 
         TargetWindow.Populate();
+    }
+
+    /// <summary>iss14 fix: refresh only the New Life button (used by the per-second countdown tick).</summary>
+    public void UpdateNewLife(GhostNewLifeInfo newLife)
+    {
+        NewLifeButton.Visible = newLife.Show;
+        NewLifeButton.Disabled = !newLife.Enabled;
+        if (newLife.Show)
+            NewLifeButton.Text = newLife.Text;
     }
 
     protected override void Dispose(bool disposing)

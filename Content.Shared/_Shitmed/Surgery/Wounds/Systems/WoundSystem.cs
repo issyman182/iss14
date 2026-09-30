@@ -145,7 +145,8 @@ public sealed partial class WoundSystem : EntitySystem
                 || !_body.TryGetRootPart(ent, out var rootPart, body: body))
                 continue;
 
-            body.HealAt += TimeSpan.FromSeconds(1f / _medicalHealingTickrate);
+            // iss14 fix: schedule from now, not from the (initially zero) previous value, so it can't lag behind and heal every tick.
+            body.HealAt = _timing.CurTime + TimeSpan.FromSeconds(1f / _medicalHealingTickrate);
             foreach (var woundable in GetAllWoundableChildren(rootPart.Value))
                 if (woundable.Comp.CanHealDamage || woundable.Comp.CanHealBleeds)
                     _woundJobQueue.EnqueueJob(new WoundJob(this, woundable, ent, WoundJobTime));
@@ -390,11 +391,10 @@ public sealed partial class WoundSystem : EntitySystem
             RaiseLocalEvent(uid, ref ev);
 
             var bodySeverity = FixedPoint2.Zero;
-            if (TryComp<BodyPartComponent>(uid, out var bodyPart) && bodyPart.Body.HasValue)
+            // iss14 fix: a missing BodyComponent only skips the body event; the rest of the state must still be applied.
+            if (TryComp<BodyPartComponent>(uid, out var bodyPart) && bodyPart.Body.HasValue
+                && TryComp<BodyComponent>(bodyPart.Body.Value, out var bodyComp))
             {
-                if (!TryComp<BodyComponent>(bodyPart.Body.Value, out var bodyComp))
-                    return;
-
                 var rootPart = bodyComp.RootContainer?.ContainedEntity;
                 if (rootPart.HasValue)
                 {

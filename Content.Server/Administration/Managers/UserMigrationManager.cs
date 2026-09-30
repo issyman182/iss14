@@ -39,8 +39,8 @@ public sealed partial class UserMigrationManager : IPostInjectInit
 
     /// <summary>
     /// Called for every connecting user. If an older account with the same username exists and the new
-    /// connection demonstrably belongs to the same person (shared HWID or IP), their data is migrated
-    /// automatically. A name-only match is instead recorded as <see cref="MigrationStatus.Pending"/> for an
+    /// connection demonstrably belongs to the same person (shared HWID), their data is migrated
+    /// automatically. A name-only or IP-only match is instead recorded as <see cref="MigrationStatus.Pending"/> for an
     /// admin to review — never auto-applied, to avoid account takeover via username re-registration.
     /// </summary>
     public async Task TryAutoMigrateAsync(
@@ -67,6 +67,7 @@ public sealed partial class UserMigrationManager : IPostInjectInit
             PlayerRecord? matched = null;
             var matchReason = string.Empty;
             PlayerRecord? nameOnly = null;
+            var pendingReason = "name-only"; // iss14 fix: "ip" when the pending candidate also shares the IP
 
             foreach (var candidate in candidates)
             {
@@ -84,11 +85,17 @@ public sealed partial class UserMigrationManager : IPostInjectInit
                     break;
                 }
 
+                // iss14 fix: a bare IP match is not proof of identity (shared NAT, VPNs, dynamic ranges), so it
+                // is no longer auto-applied. It is recorded as a pending migration for admin review instead,
+                // preferring an IP match over a name-only match as the pending candidate.
                 if (address != null && candidate.LastSeenAddress != null && candidate.LastSeenAddress.Equals(address))
                 {
-                    matched = candidate;
-                    matchReason = "ip";
-                    break;
+                    if (pendingReason != "ip")
+                    {
+                        nameOnly = candidate;
+                        pendingReason = "ip";
+                    }
+                    continue;
                 }
 
                 // Records come back newest-first, so the first one is the best name-only fallback.
@@ -117,10 +124,10 @@ public sealed partial class UserMigrationManager : IPostInjectInit
             {
                 await _db.AddMigrationLogAsync(NewLog(
                     nameOnly, newUserId, userName, automatic: true,
-                    MigrationStatus.Pending, MigrationScope.Auto, "name-only", performedBy: null, detail: null));
+                    MigrationStatus.Pending, MigrationScope.Auto, pendingReason, performedBy: null, detail: null));
 
                 _sawmill.Info(
-                    $"Recorded pending migration {nameOnly.UserId} -> {newUserId} (name-only match for {userName})");
+                    $"Recorded pending migration {nameOnly.UserId} -> {newUserId} ({pendingReason} match for {userName})");
                 _chat.SendAdminAlert(Loc.GetString("migration-alert-pending", ("user", userName)));
             }
         }
@@ -181,6 +188,10 @@ public sealed partial class UserMigrationManager : IPostInjectInit
 
         if (_players.TryGetSessionById(new NetUserId(log.TargetUserId), out _))
             return new MigrationOutcome(false, Loc.GetString("migration-error-target-online"));
+
+        // iss14 fix: same as PerformManualAsync, an online source session would clobber the migrated data.
+        if (_players.TryGetSessionById(new NetUserId(log.SourceUserId), out _))
+            return new MigrationOutcome(false, Loc.GetString("migration-error-source-online"));
 
         // Merge when approving so any data on the (possibly active) new account isn't discarded.
         var detail = await _db.MigrateUserDataAsync(log.SourceUserId, log.TargetUserId, log.Scope, merge: true);

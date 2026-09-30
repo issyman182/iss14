@@ -209,7 +209,8 @@ public sealed partial class IdPermissionsWindow : DefaultWindow
         if (jobIndex < 0)
             jobIndex = _jobPrototypeIds.IndexOf(DefaultJob);
 
-        JobPresetOptionButton.SelectId(jobIndex);
+        if (jobIndex >= 0) // iss14 fix: SelectId throws on an unknown id.
+            JobPresetOptionButton.SelectId(jobIndex);
 
         _lastFullName = state.FullName;
         _lastJobTitle = state.JobTitle;

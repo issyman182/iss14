@@ -130,6 +130,26 @@ public partial class SharedBodySystem
 
         // Goobstation change
         SubscribeLocalEvent<BodyPartComponent, DestructionEventArgs>(OnBodyPartDestructed);
+
+        // iss14 fix: UpdateMovementSpeed reads LimbParalyzedComponent, so refresh when it's added/removed.
+        SubscribeLocalEvent<LimbParalyzedComponent, ComponentStartup>(OnLimbParalyzedStartup);
+        SubscribeLocalEvent<LimbParalyzedComponent, ComponentShutdown>(OnLimbParalyzedShutdown);
+    }
+
+    private void OnLimbParalyzedStartup(Entity<LimbParalyzedComponent> ent, ref ComponentStartup args)
+    {
+        OnLimbParalyzedChanged(ent);
+    }
+
+    private void OnLimbParalyzedShutdown(Entity<LimbParalyzedComponent> ent, ref ComponentShutdown args)
+    {
+        OnLimbParalyzedChanged(ent);
+    }
+
+    private void OnLimbParalyzedChanged(Entity<LimbParalyzedComponent> ent)
+    {
+        if (TryComp<BodyPartComponent>(ent, out var part) && part.Body is { } body)
+            UpdateMovementSpeed(body);
     }
 
     private void OnBodyPartDestructed(Entity<BodyPartComponent> ent, ref DestructionEventArgs args)

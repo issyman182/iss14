@@ -58,6 +58,10 @@ public sealed partial class NanoChatCartridgeSystem : EntitySystem
 
         SubscribeLocalEvent<NanoChatCartridgeComponent, CartridgeUiReadyEvent>(OnUiReady);
         SubscribeLocalEvent<NanoChatCartridgeComponent, CartridgeMessageEvent>(OnMessage);
+        // iss14 fix: UpdateClosed was never called, so IsClosed on the card never tracked the PDA/program
+        // state (messages to the selected chat were never flagged unread once the PDA was closed).
+        SubscribeLocalEvent<NanoChatCartridgeComponent, CartridgeDeactivatedEvent>(OnDeactivated);
+        SubscribeLocalEvent<CartridgeLoaderComponent, BoundUIClosedEvent>(OnLoaderUiClosed);
 
         Subs.CVar(_cfgManager, CCVars.MaxNameLength, value => _maxNameLength = value, true);
         Subs.CVar(_cfgManager, CCVars.MaxIdJobLength, value => _maxIdJobLength = value, true);
@@ -75,6 +79,23 @@ public sealed partial class NanoChatCartridgeSystem : EntitySystem
 
         // if you switch to another program or close the pda UI, allow notifications for the selected chat
         _nanoChat.SetClosed((card, card.Comp), loader.ActiveProgram != ent.Owner || !_ui.IsUiOpen(pda, PdaUiKey.Key));
+    }
+
+    // iss14 fix: raised before the loader clears ActiveProgram, so mark the card closed explicitly.
+    private void OnDeactivated(Entity<NanoChatCartridgeComponent> ent, ref CartridgeDeactivatedEvent args)
+    {
+        if (GetCardEntity(args.Loader.Owner, out var card))
+            _nanoChat.SetClosed((card, card.Comp), true);
+    }
+
+    // iss14 fix: when the PDA UI is closed, the active NanoChat program (if any) counts as closed.
+    private void OnLoaderUiClosed(EntityUid uid, CartridgeLoaderComponent loader, BoundUIClosedEvent args)
+    {
+        if (!PdaUiKey.Key.Equals(args.UiKey))
+            return;
+
+        if (loader.ActiveProgram is { } program && TryComp<NanoChatCartridgeComponent>(program, out var nanoChat))
+            UpdateClosed((program, nanoChat));
     }
 
     public override void Update(float frameTime)
@@ -568,6 +589,7 @@ public sealed partial class NanoChatCartridgeSystem : EntitySystem
         // iss14: the reworked CartridgeLoader relays events to every installed program,
         // so background registration no longer exists (or is needed).
         UpdateUI(ent, args.Loader);
+        UpdateClosed(ent); // iss14 fix: program is now in the foreground with the UI open
     }
 
     private void UpdateUI(Entity<NanoChatCartridgeComponent> ent, EntityUid loader)

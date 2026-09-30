@@ -253,7 +253,7 @@ public sealed partial class HealingSystem : EntitySystem
             .Any(damageKey => _wounds.GetWoundableSeverityPoint(
                 targetedPart.Value,
                 damageGroup: GetDamageGroupByType(damageKey),
-                healable: true) > 0 || partDamage.DamageDict[damageKey].Value > 0))
+                healable: true) > 0 || (partDamage.DamageDict.TryGetValue(damageKey, out var partValue) && partValue.Value > 0))) // iss14 fix: part may lack this damage type
             return true;
 
         if (healing.BloodlossModifier == 0)

@@ -77,6 +77,11 @@ public sealed partial class PartStatusSystem : EntitySystem
     {
         var entity = GetEntity(message.Uid);
 
+        // iss14 fix: the entity is client-supplied; only allow a player to query their own body,
+        // otherwise anyone could pull the injury summary of (and spam messages at) any other player.
+        if (args.SenderSession.AttachedEntity != entity)
+            return;
+
         if (_mobStateSystem.IsIncapacitated(entity) ||
             !TryComp<ActorComponent>(entity, out var actor) ||
             !_bodySystem.TryGetRootPart(entity, out var rootPart))

@@ -80,15 +80,18 @@ public sealed partial class PlayerRecordsEui : BaseEui
         StateDirty();
     }
 
-    private static PlayerRecordEntry Map(PlayerRecordInfo info)
+    private PlayerRecordEntry Map(PlayerRecordInfo info)
     {
         var r = info.Record;
+        // iss14 fix: like upstream's player panel, connection identifiers (last seen IP) are only shown
+        // to admins with the Ban flag, not to every Moderator.
+        var canSeeAddress = _admins.HasAdminFlag(Player, AdminFlags.Ban);
         return new PlayerRecordEntry(
             r.UserId,
             r.LastSeenUserName,
             r.FirstSeenTime.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
             r.LastSeenTime.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
-            r.LastSeenAddress?.ToString() ?? "?",
+            canSeeAddress ? r.LastSeenAddress?.ToString() ?? "?" : "-",
             info.OverallPlaytime,
             info.BanCount,
             info.MigratedFrom,

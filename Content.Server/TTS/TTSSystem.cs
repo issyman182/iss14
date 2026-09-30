@@ -4,11 +4,14 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
+using Content.Server.Players.RateLimiting;
 using Content.Shared.Administration.Logs;
 using Content.Shared.CCVar;
 using Content.Shared.Database;
 using Content.Shared.Humanoid;
+using Content.Shared.Players.RateLimiting;
 using Content.Shared.TTS;
 using Robust.Shared.Configuration;
 using Robust.Shared.Enums;
@@ -32,12 +35,24 @@ public sealed partial class TTSSystem : EntitySystem
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private IPrototypeManager _proto = default!;
     [Dependency] private ISharedAdminLogManager _adminLogger = default!;
+    [Dependency] private PlayerRateLimitManager _rateLimit = default!; // iss14 fix
 
     private readonly HttpClient _http = new();
+
+    // iss14 fix: per-player request rate limit (see CCVars.TtsRateLimitPeriod / TtsRateLimitCount).
+    private const string RateLimitKey = "Tts";
+
+    // iss14 fix: cap on concurrent backend requests so a burst of clients can't pile up unbounded
+    // HTTP calls / audio buffers. Requests over the cap are dropped (client falls back to gibberish).
+    private const int MaxInFlightRequests = 32;
+    private int _inFlight;
 
     // Cache of synthesized audio keyed by "speakertext".
     private readonly Dictionary<string, byte[]> _cache = new();
     private const int CacheCap = 2048;
+    // iss14 fix: also bound the cache by total PCM bytes, not just entry count.
+    private const long CacheByteCap = 256L * 1024 * 1024;
+    private long _cacheBytes;
 
     // Completed audio jobs, produced on background threads and drained on the main thread.
     private readonly ConcurrentQueue<JobResult> _results = new();
@@ -71,6 +86,10 @@ public sealed partial class TTSSystem : EntitySystem
         SubscribeNetworkEvent<RequestTtsEvent>(OnRequestTts);
         SubscribeNetworkEvent<TtsSuppressionStateEvent>(OnClientState);
         Subs.CVar(_cfg, CCVars.TtsVoiceGenders, OnGenderMapChanged, true);
+
+        // iss14 fix: rate-limit synthesis requests per player.
+        _rateLimit.Register(RateLimitKey,
+            new RateLimitRegistration(CCVars.TtsRateLimitPeriod, CCVars.TtsRateLimitCount, null));
     }
 
     #region Built-in sound suppression
@@ -127,10 +146,23 @@ public sealed partial class TTSSystem : EntitySystem
         if (text.Length == 0 || text.Length > _cfg.GetCVar(CCVars.TtsMaxMessageLength))
             return;
 
+        // iss14 fix: per-player rate limit; excess requests are silently dropped.
+        if (args.SenderSession.Status == SessionStatus.Disconnected
+            || _rateLimit.CountAction(args.SenderSession, RateLimitKey) != RateLimitStatus.Allowed)
+            return;
+
         var url = _cfg.GetCVar(CCVars.TtsApiUrl);
         if (string.IsNullOrWhiteSpace(url))
         {
             // No backend configured: tell the client to use gibberish instead of going silent.
+            _results.Enqueue(JobResult.Fallback(args.SenderSession, ev));
+            return;
+        }
+
+        // iss14 fix: cap concurrent backend requests; fall back to gibberish when saturated.
+        if (_inFlight >= MaxInFlightRequests)
+        {
+            Log.Warning($"TTS in-flight request cap ({MaxInFlightRequests}) reached, dropping request from {args.SenderSession}");
             _results.Enqueue(JobResult.Fallback(args.SenderSession, ev));
             return;
         }
@@ -541,13 +573,22 @@ public sealed partial class TTSSystem : EntitySystem
     private async Task ProcessRequestAsync(
         string url, string speaker, string text, ICommonSession session, RequestTtsEvent? request, Action<bool, string>? testCallback)
     {
-        var (audio, error) = await SynthesizeAsync(url, speaker, text);
+        // iss14 fix: track in-flight requests (incremented synchronously before the first await).
+        Interlocked.Increment(ref _inFlight);
+        try
+        {
+            var (audio, error) = await SynthesizeAsync(url, speaker, text);
 
-        // Test requests don't represent real backend health, so don't flip the health state on them.
-        if (testCallback == null)
-            _mainThread.Enqueue(() => ReportHealth(url, error));
+            // Test requests don't represent real backend health, so don't flip the health state on them.
+            if (testCallback == null)
+                _mainThread.Enqueue(() => ReportHealth(url, error));
 
-        _results.Enqueue(new JobResult(session, request, audio, error, testCallback));
+            _results.Enqueue(new JobResult(session, request, audio, error, testCallback));
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _inFlight);
+        }
     }
 
     private void ReportHealth(string url, string? error)
@@ -614,9 +655,18 @@ public sealed partial class TTSSystem : EntitySystem
 
             lock (_cache)
             {
-                if (_cache.Count >= CacheCap)
+                // iss14 fix: evict everything when either the entry count or the total byte cap is hit
+                // (simple, matches the existing clear-all style; a lone oversized clip is still cached once).
+                if (_cache.Count >= CacheCap || _cacheBytes + audio.Length > CacheByteCap)
+                {
                     _cache.Clear();
+                    _cacheBytes = 0;
+                }
+
+                if (_cache.TryGetValue(key, out var existing))
+                    _cacheBytes -= existing.Length;
                 _cache[key] = audio;
+                _cacheBytes += audio.Length;
             }
 
             return (audio, null);

@@ -98,7 +98,7 @@ namespace Content.Shared.Movement.Systems
             Vector2 vector2 = DirVecForButtons(buttons);
             Vector2i vector2i = new Vector2i((int) vector2.X, (int) vector2.Y);
             Direction dir = (vector2i == Vector2i.Zero) ? Direction.Invalid : vector2i.AsDirection();
-            var moveEvent = new MoveInputEvent(entity, buttons, dir, buttons != 0);
+            var moveEvent = new MoveInputEvent(entity, entity.Comp.HeldMoveButtons, dir, buttons != 0); // iss14 fix: OldMovement is the previous buttons, as upstream
             // Shitmed Change End
             entity.Comp.HeldMoveButtons = buttons;
             RaiseLocalEvent(entity, ref moveEvent);
@@ -340,11 +340,7 @@ namespace Content.Shared.Movement.Systems
                 return;
             }
 
-            // Shitmed Change Start
-            var moverEntity = new Entity<InputMoverComponent>(entity.Owner, entity.Comp);
-            var moveEvent = new MoveInputEvent(moverEntity, entity.Comp.HeldMoveButtons, dir, state);
-            RaiseLocalEvent(entity, ref moveEvent);
-            // Shitmed Change End
+            // iss14 fix: removed the duplicate MoveInputEvent raise here; SetMoveInput (via SetVelocityDirection) raises it once per input change.
 
             // For stuff like "Moving out of locker" or the likes
             // We'll relay a movement input to the parent.

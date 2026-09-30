@@ -127,25 +127,16 @@ public partial class PainSystem
         if (!Resolve(uid, ref nerveSys, false))
             return false;
 
-        // Create a modifier for WoundPain
-        var woundModifier = new PainModifier(
+        // iss14 fix: Goob semantics - one modifier of the requested painType under the caller's key, TryAdd (no silent overwrite/double-count).
+        var modifier = new PainModifier(
             change,
-            MetaData(nerveUid).EntityPrototype!.ID,
-            PainDamageTypes.WoundPain,
+            MetaData(nerveUid).EntityPrototype?.ID ?? identifier,
+            painType,
             _timing.CurTime + time
         );
 
-        // Create a modifier for TraumaticPain
-        var traumaModifier = new PainModifier(
-            change,
-            MetaData(nerveUid).EntityPrototype!.ID,
-            PainDamageTypes.TraumaticPain,
-            _timing.CurTime + time
-        );
-
-        // Add both modifiers
-        nerveSys.Modifiers[(nerveUid, $"{identifier}_wound")] = woundModifier;
-        nerveSys.Modifiers[(nerveUid, $"{identifier}_trauma")] = traumaModifier;
+        if (!nerveSys.Modifiers.TryAdd((nerveUid, identifier), modifier))
+            return false;
 
         var ev = new PainModifierAddedEvent(uid, nerveUid, change);
         RaiseLocalEvent(uid, ref ev);
@@ -237,7 +228,7 @@ public partial class PainSystem
 
         var modifierToSet =
             modifier with { Change = change };
-        nerve.PainFeelingModifiers[(nerveUid, identifier)] = modifierToSet;
+        nerve.PainFeelingModifiers[(effectOwner, identifier)] = modifierToSet; // iss14 fix: write back under the key we read
 
         UpdatePainFeels(nerveUid);
 
@@ -271,7 +262,7 @@ public partial class PainSystem
 
         var modifierToSet =
             modifier with { Change = change, Time = _timing.CurTime + time ?? modifier.Time };
-        nerve.PainFeelingModifiers[(nerveUid, identifier)] = modifierToSet;
+        nerve.PainFeelingModifiers[(effectOwner, identifier)] = modifierToSet; // iss14 fix: write back under the key we read
 
         UpdatePainFeels(nerveUid);
 
@@ -305,7 +296,7 @@ public partial class PainSystem
 
         var modifierToSet =
             modifier with { Change = change ?? modifier.Change, Time = _timing.CurTime + time };
-        nerve.PainFeelingModifiers[(nerveUid, identifier)] = modifierToSet;
+        nerve.PainFeelingModifiers[(effectOwner, identifier)] = modifierToSet; // iss14 fix: write back under the key we read
 
         UpdatePainFeels(nerveUid);
 

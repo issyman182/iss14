@@ -38,6 +38,10 @@ public partial class ConsciousnessSystem
         if (!TryComp<ConsciousnessComponent>(body, out var consciousness))
             return false;
 
+        // iss14 fix: an unassigned nerve system is default (EntityUid.Invalid) - don't hand that out as valid.
+        if (consciousness.NerveSystem.Owner == EntityUid.Invalid || !Exists(consciousness.NerveSystem.Owner))
+            return false;
+
         nerveSys = consciousness.NerveSystem;
         return true;
     }

@@ -1549,26 +1549,6 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -3.1778932,0.68124765
-    - type: Storage
-      storedItems:
-        270:
-          position: 0,0
-          _rotation: South
-        271:
-          position: 1,0
-          _rotation: South
-        272:
-          position: 2,0
-          _rotation: South
-    - type: ContainerContainer
-      containers:
-        storagebase: !type:Container
-          ents:
-          - 270
-          - 271
-          - 272
-          showEnts: False
-          occludes: True
 - proto: PillHyronalin
   entities:
   - uid: 249
@@ -1596,24 +1576,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -1.5819619,0.17803133
-  - uid: 270
-    components:
-    - type: Transform
-      parent: 264
-    - type: Physics
-      canCollide: False
-  - uid: 271
-    components:
-    - type: Transform
-      parent: 264
-    - type: Physics
-      canCollide: False
-  - uid: 272
-    components:
-    - type: Transform
-      parent: 264
-    - type: Physics
-      canCollide: False
 - proto: PlasmaReinforcedWindowDirectional
   entities:
   - uid: 7

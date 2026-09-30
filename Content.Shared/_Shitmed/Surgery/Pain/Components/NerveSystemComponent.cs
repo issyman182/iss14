@@ -72,6 +72,13 @@ public sealed partial class NerveSystemComponent : Component
     public TimeSpan ReactionUpdateTime;
     public TimeSpan NextCritScream;
 
+    // iss14 fix: throttle the per-tick PainTimerJob enqueue.
+    [DataField]
+    public TimeSpan PainUpdateInterval = TimeSpan.FromSeconds(0.5f);
+
+    [ViewVariables]
+    public TimeSpan NextPainUpdate;
+
     [DataField("painShockStun")]
     public TimeSpan PainShockStunTime = TimeSpan.FromSeconds(2f);
 

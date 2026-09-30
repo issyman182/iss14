@@ -25,7 +25,7 @@ public sealed class WizdenContentFreeze : GameTest
         var protoMan = server.ProtoMan;
 
         var recipesCount = protoMan.Count<FoodRecipePrototype>();
-        var recipesLimit = 218;
+        var recipesLimit = 222; // iss14: 4 fork recipes on top of the upstream 218 freeze
 
         if (recipesCount > recipesLimit)
         {

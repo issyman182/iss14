@@ -24,6 +24,9 @@ public sealed partial class TtsConfigEui : BaseEui
     private string _status = string.Empty;
     private bool _open;
 
+    // iss14 fix: placeholder shown in the panel instead of the real tts.api_token.
+    private const string TokenMask = "********";
+
     public TtsConfigEui()
     {
         IoCManager.InjectDependencies(this);
@@ -84,7 +87,8 @@ public sealed partial class TtsConfigEui : BaseEui
             _cfg.GetCVar(CCVars.TtsApiUrl),
             _cfg.GetCVar(CCVars.TtsSpeakersUrl),
             _cfg.GetCVar(CCVars.TtsModelsUrl),
-            _cfg.GetCVar(CCVars.TtsApiToken),
+            // iss14 fix: never ship the real bearer token to the client; show a mask when one is set.
+            string.IsNullOrEmpty(_cfg.GetCVar(CCVars.TtsApiToken)) ? string.Empty : TokenMask,
             _cfg.GetCVar(CCVars.TtsDefaultSpeaker),
             _cfg.GetCVar(CCVars.TtsModel),
             _cfg.GetCVar(CCVars.TtsSpeed),
@@ -148,7 +152,11 @@ public sealed partial class TtsConfigEui : BaseEui
                 _cfg.SetCVar(CCVars.TtsModelsUrl, m.Value.Trim());
                 break;
             case TtsConfigField.ApiToken:
-                _cfg.SetCVar(CCVars.TtsApiToken, m.Value.Trim());
+                // iss14 fix: the client only ever sees the mask (or empty). Only apply a real new value so a
+                // focus-exit on the untouched field doesn't overwrite the stored token with the mask.
+                var newToken = m.Value.Trim();
+                if (newToken.Length != 0 && newToken != TokenMask)
+                    _cfg.SetCVar(CCVars.TtsApiToken, newToken);
                 break;
             case TtsConfigField.DefaultSpeaker:
                 _cfg.SetCVar(CCVars.TtsDefaultSpeaker, m.Value.Trim());

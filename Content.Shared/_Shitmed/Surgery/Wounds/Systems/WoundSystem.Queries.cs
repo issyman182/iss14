@@ -50,7 +50,18 @@ public sealed partial class WoundSystem
     public IEnumerable<Entity<WoundableComponent>> GetAllWoundableChildren(EntityUid targetEntity,
         WoundableComponent? targetWoundable = null)
     {
+        // iss14 fix: guard against cycles in ChildWoundables (would otherwise recurse forever / stack overflow).
+        return GetAllWoundableChildren(targetEntity, targetWoundable, new HashSet<EntityUid>());
+    }
+
+    private IEnumerable<Entity<WoundableComponent>> GetAllWoundableChildren(EntityUid targetEntity,
+        WoundableComponent? targetWoundable,
+        HashSet<EntityUid> visited)
+    {
         if (!Resolve(targetEntity, ref targetWoundable, false))
+            yield break;
+
+        if (!visited.Add(targetEntity))
             yield break;
 
         foreach (var childEntity in targetWoundable.ChildWoundables)
@@ -58,7 +69,7 @@ public sealed partial class WoundSystem
             if (!TryComp(childEntity, out WoundableComponent? childWoundable))
                 continue;
 
-            foreach (var value in GetAllWoundableChildren(childEntity, childWoundable))
+            foreach (var value in GetAllWoundableChildren(childEntity, childWoundable, visited))
                 yield return value;
         }
 

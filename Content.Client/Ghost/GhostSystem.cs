@@ -49,6 +49,8 @@ namespace Content.Client.Ghost
 
         public event Action<GhostComponent>? PlayerRemoved;
         public event Action<GhostComponent>? PlayerUpdated;
+        /// <summary>iss14 fix: raised once a second to tick the New Life countdown without a full GUI rebuild.</summary>
+        public event Action<GhostComponent>? NewLifeUpdated;
         public event Action<GhostComponent>? PlayerAttached;
         public event Action? PlayerDetached;
         public event Action<GhostWarpsResponseEvent>? GhostWarpsResponse;
@@ -85,7 +87,8 @@ namespace Content.Client.Ghost
                 return;
 
             _nextGuiTick = _gameTiming.CurTime + TimeSpan.FromSeconds(1);
-            PlayerUpdated?.Invoke(player);
+            // iss14 fix: PlayerUpdated rebuilds the whole warp window every second; only refresh the New Life button.
+            NewLifeUpdated?.Invoke(player);
         }
 
         private void OnStartup(EntityUid uid, GhostComponent component, ComponentStartup args)

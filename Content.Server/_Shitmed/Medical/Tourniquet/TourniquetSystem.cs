@@ -244,7 +244,17 @@ public sealed partial class TourniquetSystem : EntitySystem
         if (tourniquetedBodyPart == null)
             return;
 
-        var bodyPartComp = Comp<BodyPartComponent>(tourniquetedBodyPart.Value);
+        // iss14 fix: the tourniqueted part may have been severed/deleted since; don't throw, just finish
+        // removing the tourniquet gracefully.
+        if (!TryComp<BodyPartComponent>(tourniquetedBodyPart.Value, out var bodyPartComp))
+        {
+            _container.Remove(args.Used.Value, container);
+            _hands.TryPickupAnyHand(args.User, args.Used.Value);
+            tourniquet.BodyPartTorniqueted = null;
+            args.Handled = true;
+            return;
+        }
+
         if (tourniquet.BlockedBodyParts.Contains(bodyPartComp.PartType))
         {
             foreach (var woundEnt in _wound.GetWoundableWounds(tourniquetedBodyPart.Value))

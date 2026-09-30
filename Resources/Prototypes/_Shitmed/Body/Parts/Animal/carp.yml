@@ -8,7 +8,7 @@
 
 - type: entity
   abstract: true
-  parent: PartBase
+  parent: BasePart # iss14 fix: PartBase is the metal-rod material base in this repo, not a body part
   id: PartCarpBase
   components:
   - type: Sprite

@@ -4,6 +4,7 @@ using Content.Shared._Shitmed.Medical.Surgery.Traumas;
 using Content.Shared._Shitmed.Medical.Surgery.Traumas.Components;
 using Content.Shared._Shitmed.Medical.Surgery.Wounds.Components;
 using Content.Shared._Shitmed.Weapons.Melee.Events;
+using Content.Shared.Body.Systems; // iss14 fix: relayed event wrappers
 using Content.Shared._Shitmed.Weapons.Ranged.Events;
 using Content.Shared.Body.Part;
 using Content.Shared.Damage;
@@ -36,6 +37,9 @@ public sealed partial class WoundSystem
         SubscribeLocalEvent<WoundableComponent, DamageChangedEvent>(OnDamageChanged);
         SubscribeLocalEvent<WoundableComponent, GetDoAfterDelayMultiplierEvent>(OnGetDoAfterDelayMultiplier);
         SubscribeLocalEvent<WoundableComponent, AttemptHandsMeleeEvent>(OnAttemptHandsMelee);
+        // iss14 fix: body-level relay wraps these events, so subscribe to the wrapped form too.
+        SubscribeLocalEvent<WoundableComponent, BodyPartRelayedEvent<GetDoAfterDelayMultiplierEvent>>(OnGetDoAfterDelayMultiplierRelayed);
+        SubscribeLocalEvent<WoundableComponent, BodyPartRelayedEvent<AttemptHandsMeleeEvent>>(OnAttemptHandsMeleeRelayed);
         SubscribeLocalEvent<WoundableComponent, AttemptHandsShootEvent>(OnAttemptHandsShoot);
         SubscribeLocalEvent<TraumaInflicterComponent, TraumaBeingRemovedEvent>(OnTraumaBeingRemoved);
     }
@@ -250,6 +254,17 @@ public sealed partial class WoundSystem
             args.Handled = true;
             args.Cancel();
         }
+    }
+
+    // iss14 fix: unwrap relayed events (inner events are classes, so mutating args.Args mutates the original).
+    private void OnGetDoAfterDelayMultiplierRelayed(EntityUid uid, WoundableComponent component, ref BodyPartRelayedEvent<GetDoAfterDelayMultiplierEvent> args)
+    {
+        OnGetDoAfterDelayMultiplier(uid, component, ref args.Args);
+    }
+
+    private void OnAttemptHandsMeleeRelayed(EntityUid uid, WoundableComponent component, ref BodyPartRelayedEvent<AttemptHandsMeleeEvent> args)
+    {
+        OnAttemptHandsMelee(uid, component, ref args.Args);
     }
 
     private void OnAttemptHandsShoot(EntityUid uid, WoundableComponent component, ref AttemptHandsShootEvent args)

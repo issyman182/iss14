@@ -39,7 +39,7 @@ public sealed partial class CCVars
     ///     Optional bearer token sent as the Authorization header to the TTS endpoint.
     /// </summary>
     public static readonly CVarDef<string> TtsApiToken =
-        CVarDef.Create("tts.api_token", "", CVar.SERVER | CVar.ARCHIVE);
+        CVarDef.Create("tts.api_token", "", CVar.SERVER | CVar.ARCHIVE | CVar.CONFIDENTIAL); // iss14 fix: keep out of logs/dumps
 
     /// <summary>
     ///     Backend voice used for any message whose voice has no explicit mapping
@@ -68,6 +68,20 @@ public sealed partial class CCVars
     /// </summary>
     public static readonly CVarDef<int> TtsMaxMessageLength =
         CVarDef.Create("tts.max_message_length", 400, CVar.SERVER | CVar.ARCHIVE);
+
+    // iss14 fix: per-player rate limit for TTS synthesis requests (PlayerRateLimitManager needs CVars).
+
+    /// <summary>
+    ///     Period (seconds) over which <see cref="TtsRateLimitCount"/> TTS requests are allowed per player.
+    /// </summary>
+    public static readonly CVarDef<float> TtsRateLimitPeriod =
+        CVarDef.Create("tts.rate_limit_period", 2f, CVar.SERVER | CVar.ARCHIVE);
+
+    /// <summary>
+    ///     How many TTS synthesis requests a player may send per <see cref="TtsRateLimitPeriod"/>.
+    /// </summary>
+    public static readonly CVarDef<int> TtsRateLimitCount =
+        CVarDef.Create("tts.rate_limit_count", 8, CVar.SERVER | CVar.ARCHIVE);
 
     /// <summary>
     ///     Seconds of silence inserted between queued TTS utterances so voices don't run together.

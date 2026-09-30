@@ -268,7 +268,8 @@ public sealed partial class RoleTimesEui : BaseEui
         return met ?? true;
     }
 
-    public override void HandleMessage(EuiMessageBase msg)
+    // iss14 fix: async so the offline DB write completes before the times are reloaded.
+    public override async void HandleMessage(EuiMessageBase msg)
     {
         base.HandleMessage(msg);
 
@@ -290,6 +291,9 @@ public sealed partial class RoleTimesEui : BaseEui
             if (!_playTime.TryGetTrackerTimes(session, out var live))
                 return; // Play time data not loaded yet; refuse rather than risk a clobbered write.
 
+            // iss14 fix: flush the active trackers first so the unflushed time since the last update is
+            // already in `current`; otherwise SaveSession's flush added it on top of the absolute value.
+            _playTime.FlushTracker(session);
             var current = live.GetValueOrDefault(set.Tracker);
             _playTime.AddTimeToTracker(session, set.Tracker, time - current);
             _playTime.SaveSession(session);
@@ -298,7 +302,8 @@ public sealed partial class RoleTimesEui : BaseEui
         {
             // Offline: no in-memory state, so write the absolute value straight to the DB.
             // UpdatePlayTimes does a replace (not an increment), which is exactly what we want.
-            _ = _db.UpdatePlayTimes([new PlayTimeUpdate(_target.UserId, set.Tracker, time)]);
+            // iss14 fix: await so LoadTimes below reads the written value.
+            await _db.UpdatePlayTimes([new PlayTimeUpdate(_target.UserId, set.Tracker, time)]);
         }
 
         _adminLog.Add(LogType.Action, LogImpact.Medium,

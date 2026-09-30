@@ -326,6 +326,19 @@ public sealed partial class HumanoidAppearanceSystem : SharedHumanoidAppearanceS
             }
 
             var layerId = $"{marking.MarkingId}-{rsi.RsiState}";
+
+            // iss14: remove any displacement layer that referenced this marking layer, or the
+            // renderer falls over on orphaned CopyToShaderParameters keys (wizden #40135).
+            // The Vulps must be shaved.
+            //
+            // This MUST happen before the marking layer itself is removed: EnsureDisplacementIsNotOnSprite
+            // resets the shader on the layer it was displacing (sprite[layerId]), which throws
+            // KeyNotFoundException if that layer is already gone. It also removes a layer, which shifts
+            // indices, so the marking layer's index is looked up afterwards. It runs even when the
+            // marking layer is already missing so no orphaned "-displacement" layer is left behind.
+            if (prototype.CanBeDisplaced)
+                _displacement.EnsureDisplacementIsNotOnSprite(spriteEnt, layerId);
+
             if (!_sprite.LayerMapTryGet(spriteEnt.AsNullable(), layerId, out var index, false))
             {
                 continue;
@@ -333,12 +346,6 @@ public sealed partial class HumanoidAppearanceSystem : SharedHumanoidAppearanceS
 
             _sprite.LayerMapRemove(spriteEnt.AsNullable(), layerId);
             _sprite.RemoveLayer(spriteEnt.AsNullable(), index);
-
-            // iss14: remove any displacement layer that referenced this marking layer, or the
-            // renderer falls over on orphaned CopyToShaderParameters keys (wizden #40135).
-            // The Vulps must be shaved.
-            if (prototype.CanBeDisplaced)
-                _displacement.EnsureDisplacementIsNotOnSprite(spriteEnt, layerId);
         }
     }
     private void ApplyMarking(MarkingPrototype markingPrototype,

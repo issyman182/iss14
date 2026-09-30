@@ -143,7 +143,9 @@ public sealed partial class NewLifeSystem : EntitySystem
             var user = actor.PlayerSession.UserId;
             // Only players who actually died this life are eligible — keeps observers / admin-ghosts out.
             var hasDeath = _deathTimes.TryGetValue(user, out var death);
-            var eligibleTime = hasDeath ? death + cooldown : _timing.CurTime;
+            // iss14 fix: use a constant for "never died" so the component isn't dirtied every sync
+            // (the button is hidden anyway when remaining == 0, so the time is unused client-side).
+            var eligibleTime = hasDeath ? death + cooldown : TimeSpan.Zero;
             // 0 = none/feature off/never died (button hidden); -1 = unlimited.
             var remaining = !enabled || !hasDeath
                 ? 0

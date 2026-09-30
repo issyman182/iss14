@@ -670,5 +670,14 @@ namespace Content.Client.HealthAnalyzer.UI
             _spriteSystem.LayerSetScale((sprite.Owner, sprite.Comp), layer, new Vector2(3f, 3f));
         }
         // Shitmed Change End
+
+        // iss14 fix: delete the last body-doll preview entity when the window goes away.
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            if (disposing && !_entityManager.Deleted(_spriteViewEntity))
+                _entityManager.QueueDeleteEntity(_spriteViewEntity);
+        }
     }
 }

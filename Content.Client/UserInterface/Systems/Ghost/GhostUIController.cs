@@ -43,6 +43,7 @@ public sealed partial class GhostUIController : UIController, IOnSystemChanged<G
     {
         system.PlayerRemoved += OnPlayerRemoved;
         system.PlayerUpdated += OnPlayerUpdated;
+        system.NewLifeUpdated += OnNewLifeUpdated; // iss14 fix
         system.PlayerAttached += OnPlayerAttached;
         system.PlayerDetached += OnPlayerDetached;
         system.GhostWarpsResponse += OnWarpsResponse;
@@ -53,6 +54,7 @@ public sealed partial class GhostUIController : UIController, IOnSystemChanged<G
     {
         system.PlayerRemoved -= OnPlayerRemoved;
         system.PlayerUpdated -= OnPlayerUpdated;
+        system.NewLifeUpdated -= OnNewLifeUpdated; // iss14 fix
         system.PlayerAttached -= OnPlayerAttached;
         system.PlayerDetached -= OnPlayerDetached;
         system.GhostWarpsResponse -= OnWarpsResponse;
@@ -110,6 +112,12 @@ public sealed partial class GhostUIController : UIController, IOnSystemChanged<G
     private void OnPlayerUpdated(GhostComponent component)
     {
         UpdateGui();
+    }
+
+    // iss14 fix: per-second countdown tick only touches the New Life button instead of rebuilding the warp list.
+    private void OnNewLifeUpdated(GhostComponent component)
+    {
+        Gui?.UpdateNewLife(BuildNewLifeInfo());
     }
 
     private void OnPlayerAttached(GhostComponent component)

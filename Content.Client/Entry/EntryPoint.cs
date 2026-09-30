@@ -1,5 +1,6 @@
 using Content.Client.Administration.Managers;
 using Content.Client.Changelog;
+using Content.Client.DebugConsole;
 using Content.Client.Chat.Managers;
 using Content.Client.DebugMon;
 using Content.Client.Eui;
@@ -80,6 +81,7 @@ namespace Content.Client.Entry
         [Dependency] private IEntitySystemManager _entitySystemManager = default!;
         [Dependency] private ClientsidePlaytimeTrackingManager _clientsidePlaytimeManager = default!;
         [Dependency] private ClientFeedbackManager _feedbackManager = null!;
+        [Dependency] private DebugConsoleCopyManager _debugConsoleCopy = default!; // iss14
 
         public override void PreInit()
         {
@@ -174,6 +176,7 @@ namespace Content.Client.Entry
             _documentParsingManager.Initialize();
             _titleWindowManager.Initialize();
             _feedbackManager.Initialize();
+            _debugConsoleCopy.Initialize(); // iss14
 
             _baseClient.RunLevelChanged += (_, args) =>
             {

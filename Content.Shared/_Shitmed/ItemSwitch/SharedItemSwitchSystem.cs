@@ -65,6 +65,9 @@ public abstract partial class SharedItemSwitchSystem : EntitySystem
 
     private void OnInit(Entity<ItemSwitchComponent> ent, ref ComponentInit args)
     {
+        if (_netManager.IsClient) // iss14 fix: don't churn containers/components during client entity init; server state arrives anyway
+            return;
+
         Switch((ent, ent.Comp), ent.Comp.State, predicted: ent.Comp.Predictable);
     }
 

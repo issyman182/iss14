@@ -210,7 +210,8 @@ public partial class NavMapControl : MapGridControl
             if (TrackedEntitySelectedAction == null && MapClickedAction == null)
                 return;
 
-            if (Xform == null || _physics == null || TrackedEntities.Count == 0)
+            // iss14 fix: don't bail on an empty tracked list - MapClickedAction must still fire.
+            if (Xform == null || _physics == null)
                 return;
 
             // If the cursor has moved a significant distance, exit
@@ -257,7 +258,10 @@ public partial class NavMapControl : MapGridControl
                 }
 
                 if (closestDistance <= MaxSelectableDistance && closestEntity.IsValid())
+                {
                     TrackedEntitySelectedAction.Invoke(closestEntity);
+                    return; // iss14 fix: a blip click shouldn't also fire MapClickedAction.
+                }
             }
 
             // iss14 (from Starlight)

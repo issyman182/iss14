@@ -27,6 +27,9 @@ public partial class SharedBodySystem
         SubscribeLocalEvent<BodyPartComponent, GetDoAfterDelayMultiplierEvent>(RelayBoneEvent);
         SubscribeLocalEvent<BodyComponent, AttemptHandsMeleeEvent>(RelayBodyPartEvent);
         SubscribeLocalEvent<BodyPartComponent, AttemptHandsMeleeEvent>(RelayBoneEvent);
+        // iss14 fix: events arriving at a part from the body relay are wrapped; forward the inner event on to bones.
+        SubscribeLocalEvent<BodyPartComponent, BodyPartRelayedEvent<GetDoAfterDelayMultiplierEvent>>(RelayWrappedBoneEvent);
+        SubscribeLocalEvent<BodyPartComponent, BodyPartRelayedEvent<AttemptHandsMeleeEvent>>(RelayWrappedBoneEvent);
 
     }
 
@@ -48,6 +51,18 @@ public partial class SharedBodySystem
     protected void RelayBoneEvent<T>(EntityUid uid, BodyPartComponent component, T args) where T : IBoneRelayEvent
     {
         RelayEvent((uid, component), args);
+    }
+
+    // iss14 fix: unwrap a body-part relayed event and relay its inner event to this part's bones only.
+    // The body relay already raised the wrapped event on the parent part (RaiseOnParent), so don't walk up again.
+    protected void RelayWrappedBoneEvent<T>(EntityUid uid, BodyPartComponent component, BodyPartRelayedEvent<T> args) where T : IBoneRelayEvent
+    {
+        if (!TryComp<WoundableComponent>(uid, out var woundable))
+            return;
+
+        var ev = new BoneRelayedEvent<T>(args.Args);
+        foreach (var bone in woundable.Bone.ContainedEntities)
+            RaiseLocalEvent(bone, ev);
     }
 
     public void RelayEvent<T>(Entity<BodyComponent> body, ref T args) where T : IBodyPartRelayEvent

@@ -151,7 +151,7 @@ public sealed partial class WoundableVisualsSystem : VisualizerSystem<WoundableV
     #region Layer Management
     private void RemoveWoundableLayers(Entity<SpriteComponent?> ent, WoundableVisualsComponent visuals)
     {
-        if (visuals.DamageOverlayGroups == null || !Resolve(ent,ref ent.Comp))
+        if (visuals.DamageOverlayGroups == null || !Resolve(ent, ref ent.Comp, false)) // iss14 fix: bodies without a sprite (test dummies) are not an error
             return;
 
         foreach (var (group, _) in visuals.DamageOverlayGroups)

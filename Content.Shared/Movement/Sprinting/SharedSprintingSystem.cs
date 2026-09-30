@@ -211,8 +211,9 @@ public abstract partial class SharedSprintingSystem : EntitySystem
 
     private void OnMobStateChangedEvent(EntityUid uid, SprinterComponent component, ref MobStateChangedEvent args)
     {
+        // iss14 fix: force-stop the sprint when going crit/dead, not when returning to alive.
         if (!component.IsSprinting
-            || args.NewMobState is MobState.Critical or MobState.Dead)
+            || args.NewMobState is not (MobState.Critical or MobState.Dead))
             return;
 
         ToggleSprint(args.Target, component, false, gracefulStop: false);

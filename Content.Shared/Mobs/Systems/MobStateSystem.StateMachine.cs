@@ -102,10 +102,13 @@ public partial class MobStateSystem
         RaiseLocalEvent(target, ev, true);
 
         // Shitmed Change Start
-        if (_consciousness.TryGetNerveSystem(target, out var nerveSys))
+        // iss14 fix: directed raise only (broadcast would re-run every broadcast MobStateChanged subscriber), skip invalid nerve systems.
+        if (_consciousness.TryGetNerveSystem(target, out var nerveSys)
+            && nerveSys.Value.Owner != EntityUid.Invalid
+            && Exists(nerveSys.Value.Owner))
         {
             var ev1 = new MobStateChangedEvent(target, component, oldState, newState, origin);
-            RaiseLocalEvent(nerveSys.Value, ev1, true);
+            RaiseLocalEvent(nerveSys.Value, ev1);
 
             // to handle consciousness related stuff. sorry
         }
