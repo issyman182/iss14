@@ -247,16 +247,43 @@ public sealed partial class ChatSystem : SharedChatSystem
         ICommonSession? player = null
         )
     {
+        TrySendInGameOOCMessageInternal(source, message, type, hideChat, shell, player, null);
+    }
+
+    /// <summary>
+    /// iss14: like <see cref="TrySendInGameOOCMessage"/> but appends trusted markup (e.g. an inline GIF tag) to the
+    /// displayed line. Never pass client-controlled text as the suffix.
+    /// </summary>
+    /// <returns>True if the message was actually broadcast.</returns>
+    public bool TrySendInGameOOCMessageWithMarkup(
+        EntityUid source,
+        string message,
+        InGameOOCChatType type,
+        ICommonSession player,
+        string wrappedMarkupSuffix)
+    {
+        return TrySendInGameOOCMessageInternal(source, message, type, false, null, player, wrappedMarkupSuffix);
+    }
+
+    private bool TrySendInGameOOCMessageInternal(
+        EntityUid source,
+        string message,
+        InGameOOCChatType type,
+        bool hideChat,
+        IConsoleShell? shell,
+        ICommonSession? player,
+        string? wrappedMarkupSuffix)
+    {
         if (!CanSendInGame(message, shell, player))
-            return;
+            return false;
 
         if (player != null && _chatManager.HandleRateLimit(player) != RateLimitStatus.Allowed)
-            return;
+            return false;
 
         // It doesn't make any sense for a non-player to send in-game OOC messages, whereas non-players may be sending
         // in-game IC messages.
         if (player?.AttachedEntity is not { Valid: true } entity || source != entity)
-            return;
+            return false;
 
         message = SanitizeInGameOOCMessage(message);
 
@@ -272,23 +299,23 @@ public sealed partial class ChatSystem : SharedChatSystem
 
         // If crit player LOOC is disabled, don't send the message at all.
         if (!_critLoocEnabled && _mobStateSystem.IsCritical(source))
-            return;
+            return false;
 
         // Systems can differentiate Looc and DeadChat by type, and cancel the speak attempt if necessary.
         var ev = new InGameOocMessageAttemptEvent(player, sendType);
         RaiseLocalEvent(source, ref ev, true);
         if (ev.Cancelled)
-            return;
+            return false;
 
         switch (sendType)
         {
             case InGameOOCChatType.Dead:
-                SendDeadChat(source, player, message, hideChat);
-                break;
+                return SendDeadChat(source, player, message, hideChat, wrappedMarkupSuffix);
             case InGameOOCChatType.Looc:
-                SendLOOC(source, player, message, hideChat);
-                break;
+                return SendLOOC(source, player, message, hideChat, wrappedMarkupSuffix);
         }
+
+        return false;
     }
 }
 

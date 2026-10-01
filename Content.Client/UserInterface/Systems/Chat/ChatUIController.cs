@@ -918,6 +918,24 @@ public sealed partial class ChatUIController : UIController
         return MapLocalIfGhost(PreferredChannel);
     }
 
+    /// <summary>
+    /// iss14: the channel currently selected in the main chat box (or any registered chat box as a fallback).
+    /// Used by the GIF picker to post to whatever channel the player is typing in.
+    /// </summary>
+    public ChatSelectChannel GetSelectedChannel()
+    {
+        foreach (var chat in _chats)
+        {
+            if (chat.Main)
+                return chat.SelectedChannel;
+        }
+
+        foreach (var chat in _chats)
+            return chat.SelectedChannel;
+
+        return GetPreferredChannel();
+    }
+
     public void NotifyChatTextChange()
     {
         _typingIndicator?.ClientChangedChatText();

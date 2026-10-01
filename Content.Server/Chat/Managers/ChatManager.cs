@@ -254,45 +254,46 @@ private ISawmill? _sawmill = default!;
     /// <param name="player">The player sending the message.</param>
     /// <param name="message">The message.</param>
     /// <param name="type">The type of message.</param>
-    public void TrySendOOCMessage(ICommonSession player, string message, OOCChatType type)
+    public bool TrySendOOCMessage(ICommonSession player, string message, OOCChatType type, string? wrappedMarkupSuffix = null)
     {
         if (HandleRateLimit(player) != RateLimitStatus.Allowed)
-            return;
+            return false;
 
         // Check if message exceeds the character limit
         if (message.Length > MaxMessageLength)
         {
             DispatchServerMessage(player, Loc.GetString("chat-manager-max-message-length-exceeded-message", ("limit", MaxMessageLength)));
-            return;
+            return false;
         }
 
         switch (type)
         {
             case OOCChatType.OOC:
-                SendOOC(player, message);
-                break;
+                return SendOOC(player, message, wrappedMarkupSuffix);
             case OOCChatType.Admin:
                 SendAdminChat(player, message);
-                break;
+                return true;
         }
+
+        return false;
     }
 
     #endregion
 
     #region Private API
 
-    private void SendOOC(ICommonSession player, string message)
+    private bool SendOOC(ICommonSession player, string message, string? wrappedMarkupSuffix = null)
     {
         if (_adminManager.IsAdmin(player))
         {
             if (!_adminOocEnabled)
             {
-                return;
+                return false;
             }
         }
         else if (!_oocEnabled)
         {
-            return;
+            return false;
         }
 
         Color? colorOverride = null;
@@ -307,10 +308,15 @@ private ISawmill? _sawmill = default!;
             wrappedMessage = Loc.GetString("chat-manager-send-ooc-patron-wrap-message", ("patronColor", patronColor),("playerName", player.Name), ("message", FormattedMessage.EscapeText(message)));
         }
 
+        // iss14: trusted inline markup (GIF tag) goes on the displayed line only.
+        if (wrappedMarkupSuffix != null)
+            wrappedMessage += wrappedMarkupSuffix;
+
         //TODO: player.Name color, this will need to change the structure of the MsgChatMessage
         ChatMessageToAll(ChatChannel.OOC, message, wrappedMessage, EntityUid.Invalid, hideChat: false, recordReplay: true, colorOverride: colorOverride, author: player.UserId);
         _discordLink.SendMessage(message, player.Name, ChatChannel.OOC);
         _adminLogger.Add(LogType.Chat, LogImpact.Low, $"OOC from {player:Player}: {message}");
+        return true;
     }
 
     private void SendAdminChat(ICommonSession player, string message)

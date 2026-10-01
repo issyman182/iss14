@@ -85,15 +85,17 @@ public sealed partial class RoleReqEditorEui : BaseEui
 
         // Show jobs that belong to a department (the playable set, matching the lobby), plus any job that
         // currently has an override even if it has no department.
+        // iss14: also show department-less jobs that ship with requirements (e.g. the hidden GifSender
+        // pseudo-job that gates GIF chat), so admins can tune them here.
         var jobInfos = new List<RoleReqJobInfo>();
         foreach (var job in _proto.EnumeratePrototypes<JobPrototype>())
         {
             var hasDept = jobToDept.TryGetValue(job.ID, out var dept);
-            if (!hasDept && !_overrides.IsOverridden(job.ID))
+            var reqs = _overrides.GetEffectiveRequirements(job);
+            if (!hasDept && !_overrides.IsOverridden(job.ID) && reqs.Count == 0)
                 continue;
 
             var entries = new List<RoleReqEntry>();
-            var reqs = _overrides.GetEffectiveRequirements(job);
             for (var i = 0; i < reqs.Count; i++)
                 entries.Add(BuildEntry(i, reqs[i], trackerToJobName));
 

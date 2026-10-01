@@ -19,7 +19,12 @@ namespace Content.Server.Chat.Managers
 
         void DispatchServerMessage(ICommonSession player, string message, bool suppressLog = false);
 
-        void TrySendOOCMessage(ICommonSession player, string message, OOCChatType type);
+        /// <param name="wrappedMarkupSuffix">
+        ///     iss14: optional trusted markup appended to the wrapped (displayed) message only, e.g. an inline GIF tag.
+        ///     Never pass client-controlled text here.
+        /// </param>
+        /// <returns>iss14: true if the message was actually broadcast.</returns>
+        bool TrySendOOCMessage(ICommonSession player, string message, OOCChatType type, string? wrappedMarkupSuffix = null);
 
         void SendHookOOC(string sender, string message);
         void SendHookAdmin(string sender, string message);

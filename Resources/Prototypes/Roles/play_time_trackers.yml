@@ -150,3 +150,7 @@
 
 - type: playTimeTracker
   id: JobWarden
+
+# iss14: GIFs in chat via GifSnap - tracker for the hidden GifSender pseudo-job (never accrues time).
+- type: playTimeTracker
+  id: JobGifSender

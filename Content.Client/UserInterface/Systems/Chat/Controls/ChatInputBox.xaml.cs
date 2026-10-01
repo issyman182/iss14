@@ -1,6 +1,9 @@
+using Content.Client.UserInterface.Systems.Gifs;
+using Content.Shared.CCVar;
 using Content.Shared.Chat;
 using Content.Shared.Input;
 using Robust.Client.UserInterface.Controls;
+using Robust.Shared.Configuration;
 
 namespace Content.Client.UserInterface.Systems.Chat.Controls;
 
@@ -14,6 +17,9 @@ public class ChatInputBox : PanelContainer
     public readonly ChannelSelectorButton ChannelSelector;
     public readonly HistoryLineEdit Input;
     public readonly ChannelFilterButton FilterButton;
+    // iss14: GIFs in chat via GifSnap - opens the GIF picker; only shown when the server enables GIFs.
+    public readonly Button GifButton;
+    private readonly IConfigurationManager _cfg;
     protected readonly BoxContainer Container;
     protected ChatChannel ActiveChannel { get; private set; } = ChatChannel.Local;
 
@@ -42,6 +48,17 @@ public class ChatInputBox : PanelContainer
             StyleClasses = { StyleClassChatLineEdit }
         };
         Container.AddChild(Input);
+        GifButton = new Button
+        {
+            Name = "GifButton",
+            Text = Loc.GetString("gifs-chat-button"),
+            ToolTip = Loc.GetString("gifs-chat-button-tooltip"),
+            StyleClasses = { StyleClassChatFilterOptionButton },
+        };
+        GifButton.OnPressed += _ => UserInterfaceManager.GetUIController<GifPickerUIController>().Toggle();
+        Container.AddChild(GifButton);
+        _cfg = IoCManager.Resolve<IConfigurationManager>();
+        GifButton.Visible = _cfg.GetCVar(CCVars.GifsEnabled);
         FilterButton = new ChannelFilterButton
         {
             Name = "FilterButton",
@@ -55,6 +72,23 @@ public class ChatInputBox : PanelContainer
     private void UpdateActiveChannel(ChatSelectChannel selectedChannel)
     {
         ActiveChannel = (ChatChannel) selectedChannel;
+    }
+
+    private void OnGifsEnabledChanged(bool enabled)
+    {
+        GifButton.Visible = enabled;
+    }
+
+    protected override void EnteredTree()
+    {
+        base.EnteredTree();
+        _cfg.OnValueChanged(CCVars.GifsEnabled, OnGifsEnabledChanged, true);
+    }
+
+    protected override void ExitedTree()
+    {
+        base.ExitedTree();
+        _cfg.UnsubValueChanged(CCVars.GifsEnabled, OnGifsEnabledChanged);
     }
 
     private static string GetChatboxInfoPlaceholder()

@@ -247,32 +247,37 @@ public sealed partial class ChatSystem
     }
 
     // ReSharper disable once InconsistentNaming
-    private void SendLOOC(EntityUid source, ICommonSession player, string message, bool hideChat)
+    private bool SendLOOC(EntityUid source, ICommonSession player, string message, bool hideChat, string? wrappedMarkupSuffix = null)
     {
         var name = FormattedMessage.EscapeText(Identity.Name(source, EntityManager));
         name = ChatNameLinks ? $"[textlink=\"{FormattedMessage.EscapeStringParameter(name)}\" entity=\"{GetNetEntity(source)}\" color=\"{ChatChannel.LOOC.TextColor().ToHex()}\"]": FormattedMessage.EscapeText(name);
         if (_adminManager.IsAdmin(player))
         {
-            if (!_adminLoocEnabled) return;
+            if (!_adminLoocEnabled) return false;
         }
-        else if (!_loocEnabled) return;
+        else if (!_loocEnabled) return false;
 
         // If crit player LOOC is disabled, don't send the message at all.
         if (!_critLoocEnabled && _mobStateSystem.IsCritical(source))
-            return;
+            return false;
 
         var wrappedMessage = Loc.GetString("chat-manager-entity-looc-wrap-message",
             ("entityName", name),
             ("message", FormattedMessage.EscapeText(message)));
 
+        // iss14: trusted inline markup (GIF tag) goes on the displayed line only.
+        if (wrappedMarkupSuffix != null)
+            wrappedMessage += wrappedMarkupSuffix;
+
         SendInVoiceRange(ChatChannel.LOOC, message, wrappedMessage, source, hideChat ? ChatTransmitRange.HideChat : ChatTransmitRange.Normal, player.UserId);
         _adminLogger.Add(LogType.Chat, LogImpact.Low, $"LOOC from {source}: {message}");
+        return true;
     }
 
-    private void SendDeadChat(EntityUid source, ICommonSession player, string message, bool hideChat)
+    private bool SendDeadChat(EntityUid source, ICommonSession player, string message, bool hideChat, string? wrappedMarkupSuffix = null)
     {
         if (!_adminManager.IsAdmin(player) && !_deadChatEnabled)
-            return;
+            return false;
 
         var clients = GetDeadChatClients();
         string wrappedMessage;
@@ -295,6 +300,11 @@ public sealed partial class ChatSystem
             _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Dead chat from {source}: {message}");
         }
 
+        // iss14: trusted inline markup (GIF tag) goes on the displayed line only.
+        if (wrappedMarkupSuffix != null)
+            wrappedMessage += wrappedMarkupSuffix;
+
         _chatManager.ChatMessageToMany(ChatChannel.Dead, message, wrappedMessage, source, hideChat, true, clients.ToList(), author: player.UserId);
+        return true;
     }
 }

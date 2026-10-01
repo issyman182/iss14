@@ -1,0 +1,12 @@
+# iss14: GIFs in chat via GifSnap
+# Hidden pseudo-job whose requirements gate sending GIFs in OOC/LOOC (see the gifs.role CVar).
+# Never selectable or spawned; admins tune the requirement in the role-requirement editor.
+- type: job
+  id: GifSender
+  name: job-name-gif-sender
+  description: job-description-gif-sender
+  playTimeTracker: JobGifSender
+  setPreference: false
+  requirements:
+    - !type:OverallPlaytimeRequirement
+      time: 2h

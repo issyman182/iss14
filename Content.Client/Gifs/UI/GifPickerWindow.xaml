@@ -1,0 +1,23 @@
+<!-- iss14: GIFs in chat via GifSnap -->
+<DefaultWindow xmlns="https://spacestation14.io"
+               Title="{Loc 'gifs-window-title'}"
+               MinSize="360 420"
+               SetSize="360 480">
+    <BoxContainer Orientation="Vertical" SeparationOverride="4">
+        <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+            <LineEdit Name="SearchBox" HorizontalExpand="True" PlaceHolder="{Loc 'gifs-search-placeholder'}"/>
+            <Button Name="SearchButton" Text="{Loc 'gifs-search-button'}"/>
+        </BoxContainer>
+        <Label Name="ChannelLabel" StyleClasses="LabelSubText"/>
+        <ScrollContainer Name="ResultsScroll" VerticalExpand="True" HScrollEnabled="False">
+            <GridContainer Name="ResultsGrid" Columns="3" HorizontalAlignment="Center" Margin="2"/>
+        </ScrollContainer>
+        <Label Name="StatusLabel" StyleClasses="LabelSubText" HorizontalAlignment="Center"/>
+        <BoxContainer Orientation="Horizontal" SeparationOverride="4" HorizontalAlignment="Center">
+            <Button Name="PrevButton" Text="{Loc 'gifs-prev-page'}" Disabled="True"/>
+            <Label Name="PageLabel" Margin="8 0" VerticalAlignment="Center"/>
+            <Button Name="NextButton" Text="{Loc 'gifs-next-page'}" Disabled="True"/>
+        </BoxContainer>
+        <Label Name="AttributionLabel" StyleClasses="LabelSubText" HorizontalAlignment="Center" Text="{Loc 'gifs-attribution'}"/>
+    </BoxContainer>
+</DefaultWindow>
