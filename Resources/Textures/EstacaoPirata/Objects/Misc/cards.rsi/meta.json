@@ -1,0 +1,216 @@
+{
+  "version": 1,
+  "copyright": "coookies369",
+  "license": "CC-BY-SA-3.0",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    {
+      "name": "clubs1"
+    },
+    {
+      "name": "clubs2"
+    },
+    {
+      "name": "clubs3"
+    },
+    {
+      "name": "clubs4"
+    },
+    {
+      "name": "clubs5"
+    },
+    {
+      "name": "clubs6"
+    },
+    {
+      "name": "clubs7"
+    },
+    {
+      "name": "clubs8"
+    },
+    {
+      "name": "clubs9"
+    },
+    {
+      "name": "clubs10"
+    },
+    {
+      "name": "clubs11"
+    },
+    {
+      "name": "clubs12"
+    },
+    {
+      "name": "clubs13"
+    },
+    {
+      "name": "diamonds1"
+    },
+    {
+      "name": "diamonds2"
+    },
+    {
+      "name": "diamonds3"
+    },
+    {
+      "name": "diamonds4"
+    },
+    {
+      "name": "diamonds5"
+    },
+    {
+      "name": "diamonds6"
+    },
+    {
+      "name": "diamonds7"
+    },
+    {
+      "name": "diamonds8"
+    },
+    {
+      "name": "diamonds9"
+    },
+    {
+      "name": "diamonds10"
+    },
+    {
+      "name": "diamonds11"
+    },
+    {
+      "name": "diamonds12"
+    },
+    {
+      "name": "diamonds13"
+    },
+    {
+      "name": "hearts1"
+    },
+    {
+      "name": "hearts2"
+    },
+    {
+      "name": "hearts3"
+    },
+    {
+      "name": "hearts4"
+    },
+    {
+      "name": "hearts5"
+    },
+    {
+      "name": "hearts6"
+    },
+    {
+      "name": "hearts7"
+    },
+    {
+      "name": "hearts8"
+    },
+    {
+      "name": "hearts9"
+    },
+    {
+      "name": "hearts10"
+    },
+    {
+      "name": "hearts11"
+    },
+    {
+      "name": "hearts12"
+    },
+    {
+      "name": "hearts13"
+    },
+    {
+      "name": "spades1"
+    },
+    {
+      "name": "spades2"
+    },
+    {
+      "name": "spades3"
+    },
+    {
+      "name": "spades4"
+    },
+    {
+      "name": "spades5"
+    },
+    {
+      "name": "spades6"
+    },
+    {
+      "name": "spades7"
+    },
+    {
+      "name": "spades8"
+    },
+    {
+      "name": "spades9"
+    },
+    {
+      "name": "spades10"
+    },
+    {
+      "name": "spades11"
+    },
+    {
+      "name": "spades12"
+    },
+    {
+      "name": "spades13"
+    },
+    {
+      "name": "joker"
+    },
+    {
+      "name": "back_black"
+    },
+    {
+      "name": "back_nanotrasen"
+    },
+    {
+      "name": "back_syndicate"
+    },
+    {
+      "name": "syndicate_box"
+    },
+    {
+      "name": "syndicate_box_open"
+    },
+    {
+      "name": "syndicate_box_full"
+    },
+    {
+      "name": "black_box"
+    },
+    {
+      "name": "black_box_open"
+    },
+    {
+      "name": "black_box_full"
+    },
+    {
+      "name": "nanotrasen_box"
+    },
+    {
+      "name": "nanotrasen_box_open"
+    },
+    {
+      "name": "nanotrasen_box_full"
+    },
+    
+    {
+      "name": "deck_black_full"
+    },
+    {
+      "name": "deck_nanotrasen_full"
+    },
+    {
+      "name": "deck_syndicate_full"
+    }
+  ]
+}

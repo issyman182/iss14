@@ -208,3 +208,14 @@
     Telecrystal: 1
   categories:
   - UplinkPointless
+
+# Goobstation - EstacaoPirata syndicate deck (ported from Goob-Station)
+- type: listing
+  id: UplinkSyndicateDeck
+  name: uplink-syndicate-deck-name
+  description: uplink-syndicate-deck-desc
+  productEntity: CardBoxSyndicate
+  cost:
+    Telecrystal: 3 # goob
+  categories:
+  - UplinkPointless

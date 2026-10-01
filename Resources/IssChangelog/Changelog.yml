@@ -5,6 +5,19 @@ Entries:
   version: iss14:1.10.0
   time: '2026-10-01'
   changes:
+  - message: 'Playing cards, ported from Goobstation (EstacaoPirata): the games vendor now sells sealed black deck boxes. Open the box to get a 53-card deck - click it to draw the top card, use a card in hand to flip it, and alt-click a deck to shuffle, split it in half or flip the whole deck face up or down. Click a card with another card to form a hand, which fans out in your grip; alt-click a hand to pick a specific card from a radial menu, shuffle it, flip it or turn it back into a deck. The joker is a throwing card.'
+    type: Add
+  - message: 'Poker chips, ported from Goobstation: stackable play money (up to 500 per stack) sold by the games vendor.'
+    type: Add
+  - message: 'An emagged games vendor dispenses a Syndicate deck box, which is also available in the uplink (Pointless, 3 TC). Its joker is a razor-sharp throwing card that injects a stamina toxin and clown chemicals.'
+    type: Add
+  - message: The Quartermaster locker now also holds a High Roller slot machine flatpack.
+    type: Tweak
+  id: 20
+- author: issyman182
+  version: iss14:1.10.0
+  time: '2026-10-01'
+  changes:
   - message: 'New uplink item in the Deception category: the Cybersun MIMIC-5, a weak holo-lattice baton (5 blunt) that can be disguised as any other weapon. Use it in hand or pick "Change disguise" to choose a weapon from a searchable menu; everyone sees the disguise, but it never gains the mimicked weapon''s damage, ammo or abilities.'
     type: Add
   id: 19

@@ -12,6 +12,7 @@
     - id: DoorRemoteCargo
     - id: AstroNavCartridge
     - id: ClothingHandsKnuckleDustersQM
+    - id: SlotMachineHighRollerFlatPack # Goob - gambling
     - id: PlushieLizardJobQuartermaster
       prob: 0.02
 

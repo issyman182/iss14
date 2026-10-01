@@ -1,0 +1,16 @@
+<!--
+iss14: EstacaoPirata playing cards (ported from Goob-Station)
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
+<ui:RadialMenu xmlns="https://spacestation14.io"
+                xmlns:ui="clr-namespace:Content.Client.UserInterface.Controls"
+                BackButtonStyleClass="RadialMenuBackButton"
+                CloseButtonStyleClass="RadialMenuCloseButton"
+                VerticalExpand="True"
+                HorizontalExpand="True"
+                MinSize="450 450">
+
+    <ui:RadialContainer Name="Main" VerticalExpand="True" HorizontalExpand="True" InitialRadius="100" ReserveSpaceForHiddenChildren="False"
+                        InnerRadiusMultiplier="0.8" OuterRadiusMultiplier="1.2" />
+</ui:RadialMenu>
