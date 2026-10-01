@@ -7,6 +7,7 @@ using Content.Server.Administration.Managers;
 using Content.Server.Chat.Systems;
 using Content.Server.Communications;
 using Content.Server.DeviceNetwork.Systems;
+using Content.Server.Doors.Systems;
 using Content.Server.GameTicking;
 using Content.Server.GameTicking.Events;
 using Content.Server.Pinpointer;
@@ -20,6 +21,8 @@ using Content.Shared.Access.Systems;
 using Content.Shared.CCVar;
 using Content.Shared.Database;
 using Content.Shared.DeviceNetwork.Components;
+using Content.Shared.Doors;
+using Content.Shared.Doors.Components;
 using Content.Shared.GameTicking;
 using Content.Shared.GameTicking.Events;
 using Content.Shared.Localizations;
@@ -57,6 +60,7 @@ public sealed partial class EmergencyShuttleSystem : SharedEmergencyShuttleSyste
     [Dependency] private CommunicationsConsoleSystem _commsConsole = default!;
     [Dependency] private DeviceNetworkSystem _deviceNetworkSystem = default!;
     [Dependency] private DockingSystem _dock = default!;
+    [Dependency] private DoorSystem _doorSystem = default!;
     [Dependency] private ServerGameTicker _ticker = default!;
     [Dependency] private IdCardSystem _idSystem = default!;
     [Dependency] private NavMapSystem _navMap = default!;
@@ -434,6 +438,8 @@ public sealed partial class EmergencyShuttleSystem : SharedEmergencyShuttleSyste
         _consoleAccumulator = ConfigManager.GetCVar(CCVars.EmergencyShuttleDockTime);
         EmergencyShuttleArrived = true;
 
+        OpenEscapePodAirlocks();
+
         var query = AllEntityQuery<StationEmergencyShuttleComponent>();
 
         var dockResults = new List<ShuttleDockResult>();
@@ -467,6 +473,37 @@ public sealed partial class EmergencyShuttleSystem : SharedEmergencyShuttleSyste
         }
 
         _commsConsole.UpdateCommsConsoleInterface();
+    }
+
+    /// <summary>
+    /// Opens both sides of every docked escape pod when the emergency shuttle arrives.
+    /// Normal door checks still prevent unpowered, bolted, or welded airlocks from opening.
+    /// </summary>
+    private void OpenEscapePodAirlocks()
+    {
+        var query = EntityQueryEnumerator<DockingComponent, DoorComponent, TransformComponent>();
+
+        while (query.MoveNext(out var uid, out var docking, out var door, out var xform))
+        {
+            if (xform.GridUid is not { } gridUid || !HasComp<EscapePodComponent>(gridUid))
+                continue;
+
+            // Only open pods that are actually docked to something; opening the airlock of a
+            // pod that has already undocked would vent it into space.
+            if (docking.DockedWith is not { } stationDock)
+                continue;
+
+            TryOpenEscapePodAirlock(uid, door);
+
+            if (TryComp<DoorComponent>(stationDock, out var stationDoor))
+                TryOpenEscapePodAirlock(stationDock, stationDoor);
+        }
+    }
+
+    private void TryOpenEscapePodAirlock(EntityUid uid, DoorComponent door)
+    {
+        if (door.State is DoorState.Closed or DoorState.Closing or DoorState.Denying)
+            _doorSystem.TryOpen(uid, door);
     }
 
     private void SetupEmergencyShuttle()
