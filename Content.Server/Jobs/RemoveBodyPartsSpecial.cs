@@ -27,12 +27,22 @@ public sealed partial class RemoveBodyPartsSpecial : JobSpecial
         foreach (var target in Parts)
         {
             // ToList: don't modify the body while enumerating it.
-            foreach (var (partId, _) in body.GetBodyChildrenOfType(mob, target.Part, symmetry: target.Symmetry).ToList())
+            foreach (var (partId, partComp) in body.GetBodyChildrenOfType(mob, target.Part, symmetry: target.Symmetry).ToList())
             {
-                // Detach first so the body updates cleanly (sprite layers, hands, standing),
-                // then delete the severed part instead of leaving it on the floor.
-                if (body.TryDetachPart(partId))
-                    entMan.QueueDeleteEntity(partId);
+                // Detaching a part only raises BodyPartRemovedEvent for that part itself; parts attached
+                // to it (e.g. the hand on an arm) silently leave the body, so the hands system never
+                // removes the usable hand. Detach the deepest parts first (hand, then arm) so every
+                // part gets its removal event while it is still attached to the body.
+                var parts = body.GetBodyPartChildren(partId, partComp).Select(p => p.Id).ToList();
+                parts.Reverse();
+
+                foreach (var part in parts)
+                {
+                    // Detach first so the body updates cleanly (sprite layers, hands, standing),
+                    // then delete the severed part instead of leaving it on the floor.
+                    if (body.TryDetachPart(part))
+                        entMan.QueueDeleteEntity(part);
+                }
             }
         }
     }
