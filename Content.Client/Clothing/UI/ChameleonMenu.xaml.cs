@@ -32,6 +32,14 @@ public sealed partial class ChameleonMenu : DefaultWindow
         Search.OnTextChanged += OnSearchEntered;
     }
 
+    /// <summary>
+    ///     iss14: lets other chameleon UIs (the chameleon weapon) reuse this menu with their own search placeholder.
+    /// </summary>
+    public void SetSearchPlaceholder(string placeholder)
+    {
+        Search.PlaceHolder = placeholder;
+    }
+
     public void UpdateState(IEnumerable<EntProtoId> possibleIds, string? selectedId)
     {
         _possibleIds = possibleIds;

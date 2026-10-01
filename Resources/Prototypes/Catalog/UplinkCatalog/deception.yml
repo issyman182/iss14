@@ -184,3 +184,18 @@
 #  categories:
 #    - UplinkDeception
 #   TODO: Make it so that the traitor can choose which side of the coin is weighted, or if its fair. Lock it like chameleon items.
+
+# iss14: Cybersun MIMIC-5 chameleon weapon
+- type: listing
+  id: UplinkChameleonMimic
+  name: store-listing-mimic5-name
+  description: store-listing-mimic5-desc
+  productEntity: WeaponChameleonMimic
+  icon: { sprite: /Textures/Objects/Weapons/Melee/mimic5.rsi, state: icon }
+  discountCategory: usualDiscounts
+  discountDownTo:
+    Telecrystal: 1
+  cost:
+    Telecrystal: 2
+  categories:
+  - UplinkDeception

@@ -1,0 +1,28 @@
+# iss14: Cybersun MIMIC-5 - a weak baton that can take on the look of any other held weapon.
+# The disguise is purely cosmetic: only sprite, in-hand visuals, name and description are copied.
+- type: entity
+  parent: [BaseItem, BaseSyndicateContraband]
+  id: WeaponChameleonMimic
+  name: Cybersun MIMIC-5
+  description: A matte-black Cybersun telescoping baton with an embedded holo-lattice. Marketing claims it "looks like whatever the customer needs it to look like". Marketing says nothing about it hitting any harder.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Melee/mimic5.rsi
+    state: icon
+  - type: Item
+    size: Small
+    sprite: Objects/Weapons/Melee/mimic5.rsi
+  - type: MeleeWeapon
+    wideAnimationRotation: -135
+    damage:
+      types:
+        Blunt: 5
+    soundHit:
+      collection: MetalThud
+  - type: ChameleonWeapon
+  - type: UserInterface
+    interfaces:
+      enum.ChameleonWeaponUiKey.Key:
+        type: ChameleonWeaponBoundUserInterface
+  - type: StaticPrice
+    price: 1500

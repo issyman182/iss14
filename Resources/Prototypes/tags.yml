@@ -292,6 +292,9 @@
   id: CentrifugeCompatible # Storage whitelist: MachineCentrifuge
 
 - type: Tag
+  id: ChameleonWeaponBlacklist # iss14: tagged weapons are never offered as a disguise by SharedChameleonWeaponSystem (Cybersun MIMIC-5).
+
+- type: Tag
   id: Cheese # MetamorphRecipe: FoodBurgerCheese, FoodBurgerDuck
 
 - type: Tag

@@ -2,6 +2,13 @@ Name: Changelog
 Order: 0
 Entries:
 - author: issyman182
+  version: iss14:1.10.0
+  time: '2026-10-01'
+  changes:
+  - message: 'New uplink item in the Deception category: the Cybersun MIMIC-5, a weak holo-lattice baton (5 blunt) that can be disguised as any other weapon. Use it in hand or pick "Change disguise" to choose a weapon from a searchable menu; everyone sees the disguise, but it never gains the mimicked weapon''s damage, ammo or abilities.'
+    type: Add
+  id: 19
+- author: issyman182
   version: iss14:1.9.0
   time: '2026-10-01'
   changes:
