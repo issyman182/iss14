@@ -172,6 +172,11 @@
   abstract: true
   components:
   - type: Gibbable
+  - type: Tag # ISS14: trashbaggable; kept off the brain so janitors can't sweep up brains
+    tags:
+    - Meat
+    - Organ
+    - Trash
   - type: PhysicalComposition #Goobstation - Recycle update
     materialComposition:
       Biomass: 5
