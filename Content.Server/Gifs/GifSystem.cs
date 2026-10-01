@@ -110,6 +110,25 @@ public sealed partial class GifSystem : EntitySystem
             new RateLimitRegistration(CCVars.GifsRateLimitPeriod, CCVars.GifsRateLimitCount, null));
         _rateLimit.Register(SearchRateLimitKey,
             new RateLimitRegistration(CCVars.GifsSearchRateLimitPeriod, CCVars.GifsSearchRateLimitCount, null));
+
+        // Encoded sheets depend on these settings; drop the in-memory cache when an admin changes them so the next
+        // send re-encodes with the new size/frame/byte limits instead of serving the old encoding.
+        Subs.CVar(_cfg, CCVars.GifsFrameWidth, OnEncodingSettingChanged);
+        Subs.CVar(_cfg, CCVars.GifsFrameHeight, OnEncodingSettingChanged);
+        Subs.CVar(_cfg, CCVars.GifsMaxFrames, OnEncodingSettingChanged);
+        Subs.CVar(_cfg, CCVars.GifsMaxSheetBytes, OnEncodingSettingChanged);
+    }
+
+    private void OnEncodingSettingChanged(int _)
+    {
+        ClearSheetCache();
+    }
+
+    private void ClearSheetCache()
+    {
+        _sheetCache.Clear();
+        _sheetLru.Clear();
+        _sheetCacheBytes = 0;
     }
 
     public override void Shutdown()
@@ -117,6 +136,7 @@ public sealed partial class GifSystem : EntitySystem
         base.Shutdown();
         _playerManager.PlayerStatusChanged -= OnPlayerStatusChanged;
         _http.Dispose();
+        ClearSheetCache();
     }
 
     private void OnPlayerStatusChanged(object? sender, SessionStatusEventArgs e)
@@ -142,11 +162,17 @@ public sealed partial class GifSystem : EntitySystem
         }
     }
 
+    /// <summary>
+    /// Everything this system keeps lives in memory only (no files are ever written); a round restart throws all
+    /// of it away so nothing accumulates on the server over time.
+    /// </summary>
     private void OnRoundRestart(RoundRestartCleanupEvent ev)
     {
         _sentIds.Clear();
         _served.Clear();
-        // The encoded sheet cache is deliberately kept across rounds.
+        _infoCache.Clear();
+        _thumbnailCache.Clear();
+        ClearSheetCache();
     }
 
     private void SendError(ICommonSession session, string locKey)

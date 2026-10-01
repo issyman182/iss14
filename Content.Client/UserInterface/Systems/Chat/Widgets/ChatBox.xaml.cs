@@ -145,7 +145,10 @@ public partial class ChatBox : UIWidget, IEntityLinkClickHandler
         if (GifConstants.ContainsGifTag(message))
         {
             if (ChatInput.FilterButton.Popup.ShowGifs)
-                message += GifLinePadding();
+            {
+                // Always start the GIF on its own line, regardless of how long the name/text before it is.
+                message = message.Replace(" [gif ", "\n[gif ", StringComparison.Ordinal) + GifLinePadding();
+            }
             else
                 message = GifConstants.StripGifTags(message);
         }
@@ -161,8 +164,9 @@ public partial class ChatBox : UIWidget, IEntityLinkClickHandler
     /// iss14: the engine's OutputPanel sizes an entry from font line heights only (RichTextEntry.Update), while an
     /// inline control taller than a line pushes the *following* lines down at draw time (controlYAdvance). So a GIF
     /// control at the end of a line would overlap the next entries. Appending k empty lines makes the entry tall
-    /// enough: with font height H, line height L and the GIF box B (all in px), the entry is H + k*L tall and the
-    /// control's bottom is at ~B, so k = ceil((B - H) / L) suffices; one extra line is added as slack.
+    /// enough. The GIF is placed on its own line (a newline is inserted before the tag), so with line height L and
+    /// the GIF box B (both in px) the control's bottom is at ~L + B below the text; k = ceil((B - H) / L) + 1 empty
+    /// lines after it (H = font height, plus one line of slack) always cover that.
     /// </summary>
     private string GifLinePadding()
     {
