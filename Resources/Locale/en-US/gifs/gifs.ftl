@@ -41,3 +41,11 @@ gifs-error-chat-rejected = Your GIF wasn't sent (chat is disabled or you can't s
 ## Hidden pseudo-job used to gate GIF sending
 job-name-gif-sender = GIF sender
 job-description-gif-sender = Not a real job: its requirements decide who may send GIFs in OOC/LOOC chat.
+
+## Round 2 additions
+# Prefix for GIF errors echoed into the chat panel.
+gifs-chat-error-prefix = GIF: { $error }
+gifs-error-timed-out = You are GIF-muted for { $minutes } more { $minutes ->
+    [one] minute
+   *[other] minutes
+}.

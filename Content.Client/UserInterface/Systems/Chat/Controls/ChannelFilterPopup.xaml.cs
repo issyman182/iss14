@@ -34,6 +34,11 @@ public sealed partial class ChannelFilterPopup : Popup
     public event Action<ChatChannel, bool>? OnChannelFilter;
     public event Action<string>? OnNewHighlights;
 
+    // iss14: GIFs in chat via GifSnap - client-side "show GIFs" filter (persisted in chat.show_gifs).
+    public event Action<bool>? OnGifFilter;
+    private readonly CheckBox _gifsCheckbox;
+    private readonly IConfigurationManager _cfg;
+
     public ChannelFilterPopup()
     {
         RobustXamlLoader.Load(this);
@@ -44,7 +49,16 @@ public sealed partial class ChannelFilterPopup : Popup
 
         // Load highlights if any were saved.
         var cfg = IoCManager.Resolve<IConfigurationManager>();
+        _cfg = cfg;
         string highlights = cfg.GetCVar(CCVars.ChatHighlights);
+
+        _gifsCheckbox = new CheckBox
+        {
+            Text = Loc.GetString("hud-chatbox-channel-filter-gifs"),
+            Pressed = cfg.GetCVar(CCVars.ChatShowGifs),
+        };
+        _gifsCheckbox.OnPressed += GifsCheckboxPressed;
+        FilterVBox.AddChild(_gifsCheckbox);
 
         if (!string.IsNullOrEmpty(highlights))
         {
@@ -107,6 +121,17 @@ public sealed partial class ChannelFilterPopup : Popup
                 FilterVBox.AddChild(checkbox);
             }
         }
+
+        // Keep the GIF filter at the end of the list.
+        _gifsCheckbox.SetPositionLast();
+    }
+
+    public bool ShowGifs => _gifsCheckbox.Pressed;
+
+    private void GifsCheckboxPressed(ButtonEventArgs args)
+    {
+        _cfg.SetCVar(CCVars.ChatShowGifs, _gifsCheckbox.Pressed);
+        OnGifFilter?.Invoke(_gifsCheckbox.Pressed);
     }
 
     public void UpdateHighlights(string highlights)

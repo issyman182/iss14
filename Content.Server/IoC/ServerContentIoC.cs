@@ -63,6 +63,7 @@ internal static class ServerContentIoC
         deps.Register<IAdminLogManager, AdminLogManager>();
         deps.Register<PlayTimeTrackingManager>();
         deps.Register<RoleRequirementOverrideManager>();
+        deps.Register<ChatTimeoutManager>(); // iss14: chat timeouts / GIF mutes
         deps.Register<VoteConfigManager>();
         deps.Register<NewLifeManager>();
         deps.Register<AutoRestartManager>(); // iss14: scheduled auto-restart admin config

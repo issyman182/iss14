@@ -27,7 +27,7 @@ public sealed partial class GifClientSystem : EntitySystem
     /// <summary>Search results from the server, for the picker.</summary>
     public event Action<GifSearchResponseEvent>? SearchResponse;
 
-    /// <summary>Error from the server (localization key), for the picker.</summary>
+    /// <summary>Error from the server, already localized, for the picker and the chat notice.</summary>
     public event Action<string>? Error;
 
     /// <summary>A decoded GIF: one texture holding all frames, plus the precomputed frame rectangles and timing.</summary>
@@ -88,7 +88,7 @@ public sealed partial class GifClientSystem : EntitySystem
         if (!GifConstants.IsValidId(id) || _entries.ContainsKey(id) || !_pending.Add(id))
             return;
 
-        if (_net.ClientConnectState != ClientConnectionState.Connected)
+        if (!_net.IsConnected)
         {
             _pending.Remove(id);
             return;
@@ -117,7 +117,7 @@ public sealed partial class GifClientSystem : EntitySystem
         => SearchResponse?.Invoke(ev);
 
     private void OnError(GifErrorEvent ev)
-        => Error?.Invoke(ev.Message);
+        => Error?.Invoke(Loc.GetString(ev.Message, ("minutes", ev.Minutes)));
 
     private void OnGifData(GifDataEvent ev)
     {

@@ -18,10 +18,18 @@ public sealed partial class CCVars
         CVarDef.Create("gifs.api_url", "https://gifsnap.com/api/v1", CVar.SERVERONLY | CVar.ARCHIVE);
 
     /// <summary>
-    ///     Maximum width (pixels) of a GIF frame as shipped to clients. Larger GIFs are downscaled, keeping aspect.
+    ///     Width (pixels) of the fixed box a GIF occupies in chat. Frames are downscaled (keeping aspect, never
+    ///     upscaled) to fit inside <see cref="GifsFrameWidth"/> x <see cref="GifsFrameHeight"/>. Replicated because
+    ///     the client lays chat lines out with this box before the GIF data arrives.
     /// </summary>
-    public static readonly CVarDef<int> GifsMaxWidth =
-        CVarDef.Create("gifs.max_width", 200, CVar.SERVERONLY | CVar.ARCHIVE);
+    public static readonly CVarDef<int> GifsFrameWidth =
+        CVarDef.Create("gifs.frame_width", 200, CVar.SERVER | CVar.REPLICATED | CVar.ARCHIVE);
+
+    /// <summary>
+    ///     Height (pixels) of the fixed box a GIF occupies in chat. See <see cref="GifsFrameWidth"/>.
+    /// </summary>
+    public static readonly CVarDef<int> GifsFrameHeight =
+        CVarDef.Create("gifs.frame_height", 150, CVar.SERVER | CVar.REPLICATED | CVar.ARCHIVE);
 
     /// <summary>
     ///     Maximum number of frames kept per GIF. Longer animations are subsampled evenly.
@@ -90,4 +98,11 @@ public sealed partial class CCVars
     /// </summary>
     public static readonly CVarDef<string> GifsAllowedChannels =
         CVarDef.Create("gifs.allowed_channels", "OOC,LOOC", CVar.SERVER | CVar.REPLICATED | CVar.ARCHIVE);
+
+    /// <summary>
+    ///     Client-side chat filter: when false, GIF chat lines are shown as plain text ("[GIF] title") without the
+    ///     inline image. Toggled from the chat channel filter popup.
+    /// </summary>
+    public static readonly CVarDef<bool> ChatShowGifs =
+        CVarDef.Create("chat.show_gifs", true, CVar.CLIENTONLY | CVar.ARCHIVE);
 }

@@ -43,6 +43,7 @@ internal sealed partial class ChatManager : IChatManager
     [Dependency] private INetConfigurationManager _netConfigManager = default!;
     [Dependency] private IEntityManager _entityManager = default!;
     [Dependency] private PlayerRateLimitManager _rateLimitManager = default!;
+    [Dependency] private ChatTimeoutManager _timeouts = default!; // iss14
     [Dependency] private ISharedPlayerManager _player = default!;
     [Dependency] private DiscordChatLink _discordLink = default!;
     [Dependency] private ILogManager _logManager = default!;
@@ -257,6 +258,10 @@ private ISawmill? _sawmill = default!;
     public bool TrySendOOCMessage(ICommonSession player, string message, OOCChatType type, string? wrappedMarkupSuffix = null)
     {
         if (HandleRateLimit(player) != RateLimitStatus.Allowed)
+            return false;
+
+        // iss14: chat timeouts cover OOC but not admin chat.
+        if (type == OOCChatType.OOC && IsChatTimedOut(player))
             return false;
 
         // Check if message exceeds the character limit

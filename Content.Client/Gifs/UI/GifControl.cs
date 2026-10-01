@@ -1,26 +1,25 @@
 // iss14: GIFs in chat via GifSnap
 using System.Numerics;
+using Content.Shared.CCVar;
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
+using Robust.Shared.Configuration;
 using Robust.Shared.Timing;
 
 namespace Content.Client.Gifs.UI;
 
 /// <summary>
-/// Inline chat control that animates a GIF from <see cref="GifClientSystem"/>. Shows a placeholder box with the
-/// title until the sprite sheet arrives (and keeps showing it if it never does).
+/// Inline chat control that animates a GIF from <see cref="GifClientSystem"/>. It is always exactly the fixed box
+/// given by <c>gifs.frame_width</c> x <c>gifs.frame_height</c> (so chat lines can be laid out before the sheet
+/// arrives; see <see cref="BoxSize"/>), with the frame drawn fitted and centred inside it. Shows a placeholder panel
+/// with the title until the sprite sheet arrives (and keeps showing it if it never does).
 /// </summary>
 public sealed class GifControl : Control
 {
-    /// <summary>Widest a GIF may render in chat, in virtual pixels.</summary>
-    public const float MaxDisplayWidth = 200f;
-
-    private const float PlaceholderWidth = 120f;
-    private const float PlaceholderHeight = 40f;
-
     private static readonly Color PlaceholderBackground = Color.FromHex("#1f2130");
     private static readonly Color PlaceholderBorder = Color.FromHex("#3c3f58");
+    private static readonly Color LetterboxBackground = Color.FromHex("#14151e").WithAlpha(0.35f);
 
     private readonly string _id;
     private readonly GifClientSystem _gifs;
@@ -29,9 +28,18 @@ public sealed class GifControl : Control
 
     private GifClientSystem.GifEntry? _entry;
 
-    /// <param name="width">Frame width from the markup (0 if unknown), used to size the placeholder.</param>
-    /// <param name="height">Frame height from the markup (0 if unknown), used to size the placeholder.</param>
-    public GifControl(string id, string title, int width, int height, GifClientSystem gifs, IGameTiming timing)
+    /// <summary>Rectangle (in this control's pixel space) the current frame is drawn into; recomputed on resize.</summary>
+    private UIBox2 _frameRect;
+
+    /// <summary>The fixed box (UI units) every GIF occupies in chat, from the replicated CVars.</summary>
+    public static Vector2 BoxSize(IConfigurationManager cfg)
+    {
+        var w = Math.Clamp(cfg.GetCVar(CCVars.GifsFrameWidth), 32, 1024);
+        var h = Math.Clamp(cfg.GetCVar(CCVars.GifsFrameHeight), 32, 1024);
+        return new Vector2(w, h);
+    }
+
+    public GifControl(string id, string title, GifClientSystem gifs, IGameTiming timing, IConfigurationManager cfg)
     {
         _id = id;
         _gifs = gifs;
@@ -39,7 +47,7 @@ public sealed class GifControl : Control
 
         MouseFilter = MouseFilterMode.Stop;
         ToolTip = title;
-        VerticalAlignment = VAlignment.Center;
+        VerticalAlignment = VAlignment.Top;
         RectClipContent = true;
 
         _placeholderLabel = new Label
@@ -52,10 +60,7 @@ public sealed class GifControl : Control
         };
         AddChild(_placeholderLabel);
 
-        // Chat lines are laid out once when added, so size the placeholder to the final frame size when we know it.
-        SetSize = width > 0 && height > 0
-            ? DisplaySize(width, height)
-            : new Vector2(PlaceholderWidth, PlaceholderHeight);
+        SetSize = BoxSize(cfg);
 
         if (_gifs.TryGet(id, out var entry))
             Apply(entry);
@@ -92,35 +97,32 @@ public sealed class GifControl : Control
         Apply(entry);
     }
 
-    private static Vector2 DisplaySize(int frameWidth, int frameHeight)
-    {
-        var scale = Math.Min(1f, MaxDisplayWidth / frameWidth);
-        return new Vector2(MathF.Round(frameWidth * scale), MathF.Round(frameHeight * scale));
-    }
-
     private void Apply(GifClientSystem.GifEntry entry)
     {
         _entry = entry;
         _placeholderLabel.Visible = false;
+        UpdateFrameRect();
+    }
 
-        var size = DisplaySize(entry.FrameWidth, entry.FrameHeight);
-        if (size == SetSize)
+    protected override void Resized()
+    {
+        base.Resized();
+        UpdateFrameRect();
+    }
+
+    /// <summary>Fits the frame inside the box (keep aspect, never upscale past the frame's own size), centred.</summary>
+    private void UpdateFrameRect()
+    {
+        if (_entry == null)
             return;
 
-        SetSize = size;
-        InvalidateMeasure();
-
-        // The chat OutputPanel measures inline controls only when a line is added or the panel is invalidated, so a
-        // size change after the fact (markup without w/h) needs the panel re-laid out. Re-assigning the style box is
-        // its only public way to do that.
-        for (var parent = Parent; parent != null; parent = parent.Parent)
-        {
-            if (parent is not OutputPanel panel)
-                continue;
-
-            panel.StyleBoxOverride = panel.StyleBoxOverride;
-            break;
-        }
+        var box = PixelSizeBox;
+        var scale = Math.Min(UIScale, Math.Min(box.Width / _entry.FrameWidth, box.Height / _entry.FrameHeight));
+        var w = MathF.Round(_entry.FrameWidth * scale);
+        var h = MathF.Round(_entry.FrameHeight * scale);
+        var x = MathF.Round((box.Width - w) / 2f);
+        var y = MathF.Round((box.Height - h) / 2f);
+        _frameRect = new UIBox2(x, y, x + w, y + h);
     }
 
     protected override void Draw(DrawingHandleScreen handle)
@@ -135,7 +137,10 @@ public sealed class GifControl : Control
             return;
         }
 
+        if (_frameRect.Width < box.Width || _frameRect.Height < box.Height)
+            handle.DrawRect(box, LetterboxBackground);
+
         var frame = GifClientSystem.FrameAt(_entry, _timing.RealTime);
-        handle.DrawTextureRectRegion(_entry.Sheet, box, _entry.FrameRegions[frame]);
+        handle.DrawTextureRectRegion(_entry.Sheet, _frameRect, _entry.FrameRegions[frame]);
     }
 }

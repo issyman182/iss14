@@ -28,6 +28,8 @@ hud-chatbox-channel-OOC = OOC
 hud-chatbox-channel-Radio = Radio
 hud-chatbox-channel-Notifications = Notifications
 hud-chatbox-channel-Server = Server
+# iss14: GIFs in chat via GifSnap - client-side GIF filter in the channel filter popup
+hud-chatbox-channel-filter-gifs = GIFs
 hud-chatbox-channel-Visual = Actions
 hud-chatbox-channel-Damage = Damage
 hud-chatbox-channel-Unspecified = Unspecified

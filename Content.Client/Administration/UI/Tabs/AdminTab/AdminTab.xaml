@@ -21,6 +21,7 @@
             <cc:CommandButton Command="combatstats" Text="{Loc admin-player-actions-window-combat-stats}"/>
             <cc:CommandButton Command="newlifeconfig" Text="{Loc admin-player-actions-window-new-life-config}"/>
             <cc:CommandButton Command="ttsconfig" Text="{Loc admin-player-actions-window-tts-config}"/>
+            <cc:CommandButton Command="gifconfig" Text="{Loc admin-player-actions-window-gif-config}"/>
             <cc:CommandButton Command="playerrecords" Text="{Loc admin-player-actions-window-player-records}"/>
             <cc:CommandButton Command="migrations" Text="{Loc admin-player-actions-window-migrations}"/>
             <cc:CommandButton Command="serverperf" Text="{Loc admin-player-actions-window-server-perf}"/>

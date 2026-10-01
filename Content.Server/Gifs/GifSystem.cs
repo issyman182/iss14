@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Content.Server.Administration.Logs;
+using Content.Server.Administration.Managers;
 using Content.Server.Chat.Managers;
 using Content.Server.Chat.Systems;
 using Content.Server.Players.PlayTimeTracking;
@@ -46,6 +47,7 @@ public sealed partial class GifSystem : EntitySystem
     [Dependency] private IAdminLogManager _adminLogger = default!;
     [Dependency] private IPrototypeManager _proto = default!;
     [Dependency] private IPlayerManager _playerManager = default!;
+    [Dependency] private ChatTimeoutManager _timeouts = default!;
 
     private const string SendRateLimitKey = "GifSend";
     private const string SearchRateLimitKey = "GifSearch";
@@ -102,12 +104,12 @@ public sealed partial class GifSystem : EntitySystem
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart);
         _playerManager.PlayerStatusChanged += OnPlayerStatusChanged;
 
+        // The registration's limited-action only fires once per period, so the request handlers reply with the
+        // rate-limit error themselves on every blocked request (a player must never get silence after a click).
         _rateLimit.Register(SendRateLimitKey,
-            new RateLimitRegistration(CCVars.GifsRateLimitPeriod, CCVars.GifsRateLimitCount,
-                session => SendError(session, "gifs-error-rate-limited")));
+            new RateLimitRegistration(CCVars.GifsRateLimitPeriod, CCVars.GifsRateLimitCount, null));
         _rateLimit.Register(SearchRateLimitKey,
-            new RateLimitRegistration(CCVars.GifsSearchRateLimitPeriod, CCVars.GifsSearchRateLimitCount,
-                session => SendError(session, "gifs-error-rate-limited")));
+            new RateLimitRegistration(CCVars.GifsSearchRateLimitPeriod, CCVars.GifsSearchRateLimitCount, null));
     }
 
     public override void Shutdown()
@@ -183,9 +185,15 @@ public sealed partial class GifSystem : EntitySystem
             query = query[..GifConstants.MaxQueryLength];
         var page = Math.Clamp(ev.Page, 1, GifConstants.MaxPage);
 
-        if (session.Status == SessionStatus.Disconnected
-            || _rateLimit.CountAction(session, SearchRateLimitKey) != RateLimitStatus.Allowed)
+        if (session.Status == SessionStatus.Disconnected)
             return;
+
+        if (_rateLimit.CountAction(session, SearchRateLimitKey) != RateLimitStatus.Allowed)
+        {
+            // Reply as a search response so the picker leaves its "searching" state.
+            Reply(session, new GifSearchResponseEvent(query, page, false, new List<GifSearchEntry>(), "gifs-error-rate-limited"));
+            return;
+        }
 
         if (!TryBeginWork(session, "gifs-error-busy"))
             return;
@@ -303,6 +311,14 @@ public sealed partial class GifSystem : EntitySystem
             return;
         }
 
+        // Admin chat timeout / GIF mute (timeout, gifmute commands).
+        if (_timeouts.TryGetActive(ChatTimeoutManager.Kind.Gif, session.UserId, out var mute)
+            || _timeouts.TryGetActive(ChatTimeoutManager.Kind.Chat, session.UserId, out mute))
+        {
+            RaiseNetworkEvent(new GifErrorEvent("gifs-error-timed-out", ChatTimeoutManager.RemainingMinutes(mute)), session.Channel);
+            return;
+        }
+
         if (!IsRoleAllowed(session))
         {
             SendError(session, "gifs-error-not-allowed");
@@ -310,14 +326,17 @@ public sealed partial class GifSystem : EntitySystem
         }
 
         if (_rateLimit.CountAction(session, SendRateLimitKey) != RateLimitStatus.Allowed)
+        {
+            SendError(session, "gifs-error-rate-limited");
             return;
+        }
 
         var id = ev.Id;
         var channel = ev.Channel;
 
-        if (TryGetSheet(id, out var cachedSheet) && _infoCache.TryGetValue(id, out var cachedInfo))
+        if (TryGetSheet(id, out _) && _infoCache.TryGetValue(id, out var cachedInfo))
         {
-            PostToChat(session, cachedInfo, cachedSheet, channel);
+            PostToChat(session, cachedInfo, channel);
             return;
         }
 
@@ -335,7 +354,7 @@ public sealed partial class GifSystem : EntitySystem
 
             CacheInfo(result.Info);
             StoreSheet(id, result.Sheet);
-            PostToChat(session, result.Info, result.Sheet, channel);
+            PostToChat(session, result.Info, channel);
         });
     }
 
@@ -358,17 +377,14 @@ public sealed partial class GifSystem : EntitySystem
         }
     }
 
-    /// <summary>
-    /// Posts the GIF line through the regular OOC/LOOC path. Main thread only. The frame size rides along in the
-    /// markup so the client can lay the line out at its final size before the sheet has arrived.
-    /// </summary>
-    private void PostToChat(ICommonSession session, GifInfo info, GifEncoder.Sheet sheet, ChatSelectChannel channel)
+    /// <summary>Posts the GIF line through the regular OOC/LOOC path. Main thread only.</summary>
+    private void PostToChat(ICommonSession session, GifInfo info, ChatSelectChannel channel)
     {
         if (session.Status != SessionStatus.InGame)
             return;
 
         var title = DisplayTitle(info);
-        var markup = $" [gif id=\"{info.Id}\" title=\"{FormattedMessage.EscapeStringParameter(title)}\" w=\"{sheet.FrameWidth}\" h=\"{sheet.FrameHeight}\"]";
+        var markup = $" [gif id=\"{info.Id}\" title=\"{FormattedMessage.EscapeStringParameter(title)}\"]";
         var message = Loc.GetString("gifs-chat-message", ("title", title));
 
         bool sent;
@@ -488,13 +504,14 @@ public sealed partial class GifSystem : EntitySystem
         // Read config on the main thread before the first await.
         var baseUrl = _cfg.GetCVar(CCVars.GifsApiUrl).TrimEnd('/');
         var maxDownload = Math.Max(64 * 1024, _cfg.GetCVar(CCVars.GifsMaxDownloadBytes));
-        var maxWidth = _cfg.GetCVar(CCVars.GifsMaxWidth);
+        var maxWidth = _cfg.GetCVar(CCVars.GifsFrameWidth);
+        var maxHeight = _cfg.GetCVar(CCVars.GifsFrameHeight);
         var maxFrames = _cfg.GetCVar(CCVars.GifsMaxFrames);
         var maxSheetBytes = Math.Max(32 * 1024, _cfg.GetCVar(CCVars.GifsMaxSheetBytes));
 
         try
         {
-            var result = await FetchAndEncodeCoreAsync(id, info, baseUrl, maxDownload, maxWidth, maxFrames, maxSheetBytes);
+            var result = await FetchAndEncodeCoreAsync(id, info, baseUrl, maxDownload, maxWidth, maxHeight, maxFrames, maxSheetBytes);
             _mainThread.Enqueue(() => onDone(result));
         }
         catch (Exception e)
@@ -508,7 +525,7 @@ public sealed partial class GifSystem : EntitySystem
         }
     }
 
-    private async Task<FetchResult> FetchAndEncodeCoreAsync(string id, GifInfo? info, string baseUrl, int maxDownload, int maxWidth, int maxFrames, int maxSheetBytes)
+    private async Task<FetchResult> FetchAndEncodeCoreAsync(string id, GifInfo? info, string baseUrl, int maxDownload, int maxWidth, int maxHeight, int maxFrames, int maxSheetBytes)
     {
         if (info == null)
         {
@@ -529,7 +546,7 @@ public sealed partial class GifSystem : EntitySystem
         var sheet = await Task.Run(() =>
         {
             using var image = GifEncoder.DecodeBounded(data);
-            return image == null ? null : GifEncoder.BuildSheet(image, maxWidth, maxFrames, maxSheetBytes);
+            return image == null ? null : GifEncoder.BuildSheet(image, maxWidth, maxHeight, maxFrames, maxSheetBytes);
         });
 
         return sheet == null

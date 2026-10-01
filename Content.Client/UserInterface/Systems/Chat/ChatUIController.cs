@@ -19,6 +19,7 @@ using Content.Shared.Chat;
 using Content.Shared.Codewords;
 using Content.Shared.Damage.ForceSay;
 using Content.Shared.Decals;
+using Content.Shared.Gifs;
 using Content.Shared.Input;
 using Content.Shared.Radio;
 using Robust.Client.GameObjects;
@@ -864,6 +865,10 @@ public sealed partial class ChatUIController : UIController
         if (!speechBubble || msg.SenderEntity == default)
             return;
 
+        // iss14: GIF lines only ever live in the chat panel; never put their plain text over someone's head.
+        if (GifConstants.ContainsGifTag(msg.WrappedMessage))
+            return;
+
         switch (msg.Channel)
         {
             case ChatChannel.Local:
@@ -916,6 +921,16 @@ public sealed partial class ChatUIController : UIController
     public ChatSelectChannel GetPreferredChannel()
     {
         return MapLocalIfGhost(PreferredChannel);
+    }
+
+    /// <summary>
+    /// iss14: adds a client-only notice line (server-channel styling) to the chat history, e.g. a GIF error.
+    /// </summary>
+    public void AddLocalNotice(string text, Color? color = null)
+    {
+        var wrapped = Loc.GetString("chat-manager-server-wrap-message", ("message", FormattedMessage.EscapeText(text)));
+        var msg = new ChatMessage(ChatChannel.Server, text, wrapped, NetEntity.Invalid, null, colorOverride: color);
+        ProcessChatMessage(msg, speechBubble: false);
     }
 
     /// <summary>

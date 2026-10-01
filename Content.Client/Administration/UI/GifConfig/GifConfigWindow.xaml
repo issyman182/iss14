@@ -1,0 +1,63 @@
+<!-- iss14: GIFs in chat via GifSnap -->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      Title="{Loc gif-config-title}"
+                      Resizable="True"
+                      MinSize="440 420"
+                      SetSize="480 520">
+    <PanelContainer StyleClasses="BackgroundDark">
+        <ScrollContainer HScrollEnabled="False" VerticalExpand="True" HorizontalExpand="True">
+            <BoxContainer Orientation="Vertical" Margin="8" HorizontalExpand="True">
+
+                <Label Text="{Loc gif-config-general}" StyleClasses="LabelHeading" />
+                <CheckBox Name="EnabledCheck" Text="{Loc gif-config-enabled}" />
+                <BoxContainer Orientation="Horizontal" Margin="0 4 0 0">
+                    <Label Text="{Loc gif-config-channels}" MinWidth="170" />
+                    <CheckBox Name="OocCheck" Text="OOC" Margin="0 0 12 0" />
+                    <CheckBox Name="LoocCheck" Text="LOOC" />
+                </BoxContainer>
+                <BoxContainer Orientation="Horizontal" Margin="0 4 0 0">
+                    <Label Text="{Loc gif-config-required-hours}" MinWidth="170" />
+                    <LineEdit Name="RequiredHoursEdit" MinWidth="100" />
+                    <Label Name="RoleHintLabel" Margin="8 0 0 0" StyleClasses="LabelSubText" />
+                </BoxContainer>
+
+                <Label Text="{Loc gif-config-cooldowns}" StyleClasses="LabelHeading" Margin="0 10 0 0" />
+                <BoxContainer Orientation="Horizontal" Margin="0 4 0 0">
+                    <Label Text="{Loc gif-config-send-cooldown}" MinWidth="170" />
+                    <LineEdit Name="SendCountEdit" MinWidth="60" />
+                    <Label Text="{Loc gif-config-per}" Margin="6 0" />
+                    <LineEdit Name="SendPeriodEdit" MinWidth="60" />
+                    <Label Text="{Loc gif-config-seconds}" Margin="6 0 0 0" />
+                </BoxContainer>
+                <BoxContainer Orientation="Horizontal" Margin="0 4 0 0">
+                    <Label Text="{Loc gif-config-search-cooldown}" MinWidth="170" />
+                    <LineEdit Name="SearchCountEdit" MinWidth="60" />
+                    <Label Text="{Loc gif-config-per}" Margin="6 0" />
+                    <LineEdit Name="SearchPeriodEdit" MinWidth="60" />
+                    <Label Text="{Loc gif-config-seconds}" Margin="6 0 0 0" />
+                </BoxContainer>
+
+                <Label Text="{Loc gif-config-encoding}" StyleClasses="LabelHeading" Margin="0 10 0 0" />
+                <BoxContainer Orientation="Horizontal" Margin="0 4 0 0">
+                    <Label Text="{Loc gif-config-frame-size}" MinWidth="170" />
+                    <LineEdit Name="FrameWidthEdit" MinWidth="60" />
+                    <Label Text="x" Margin="6 0" />
+                    <LineEdit Name="FrameHeightEdit" MinWidth="60" />
+                    <Label Text="{Loc gif-config-pixels}" Margin="6 0 0 0" />
+                </BoxContainer>
+                <BoxContainer Orientation="Horizontal" Margin="0 4 0 0">
+                    <Label Text="{Loc gif-config-max-frames}" MinWidth="170" />
+                    <LineEdit Name="MaxFramesEdit" MinWidth="100" />
+                </BoxContainer>
+                <BoxContainer Orientation="Horizontal" Margin="0 4 0 0">
+                    <Label Text="{Loc gif-config-max-sheet-bytes}" MinWidth="170" />
+                    <LineEdit Name="MaxSheetBytesEdit" MinWidth="100" />
+                </BoxContainer>
+
+                <Label Name="StatusLabel" Margin="0 8 0 0" />
+                <Label Text="{Loc gif-config-hint}" StyleClasses="LabelSubText" Margin="0 8 0 0" />
+            </BoxContainer>
+        </ScrollContainer>
+    </PanelContainer>
+</controls:FancyWindow>

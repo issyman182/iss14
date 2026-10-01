@@ -2,6 +2,13 @@ Name: Changelog
 Order: 0
 Entries:
 - author: issyman182
+  version: iss14:1.9.0
+  time: '2026-10-01'
+  changes:
+  - message: 'GIFs in chat: a new GIF button next to the chat box opens a picker (search or trending, powered by GifSnap) and posts the GIF to OOC or LOOC. GIFs animate inline in the chat panel at a fixed size; sending needs 2 hours of playtime by default and is rate limited.'
+    type: Add
+  id: 18
+- author: issyman182
   version: iss14:1.8.3
   time: '2026-08-28'
   changes:

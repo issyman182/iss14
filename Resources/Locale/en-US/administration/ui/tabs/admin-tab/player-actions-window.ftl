@@ -12,6 +12,7 @@ admin-player-actions-window-voting-config = Voting Config
 admin-player-actions-window-combat-stats = Combat Stats
 admin-player-actions-window-new-life-config = New Life Config
 admin-player-actions-window-tts-config = TTS Config
+admin-player-actions-window-gif-config = GIF Config
 admin-player-actions-window-player-records = Player Records
 admin-player-actions-window-migrations = User Migrations
 admin-player-actions-window-server-perf = Server Performance

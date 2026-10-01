@@ -240,10 +240,10 @@ public sealed partial class GifPickerWindow : DefaultWindow
         Close();
     }
 
-    private void OnError(string locKey)
+    private void OnError(string error)
     {
         _waiting = false;
-        StatusLabel.Text = Loc.GetString(locKey);
+        StatusLabel.Text = error;
     }
 
     private void ClearResults()

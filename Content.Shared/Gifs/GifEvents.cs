@@ -18,6 +18,47 @@ public static class GifConstants
     /// <summary>Longest GIF title that is carried around (also ends up in chat markup).</summary>
     public const int MaxTitleLength = 80;
 
+    /// <summary>Start of the inline GIF markup tag the server appends to a chat line.</summary>
+    public const string TagMarker = "[gif ";
+
+    /// <summary>True if a wrapped chat line carries an inline GIF tag.</summary>
+    public static bool ContainsGifTag(string? wrappedMessage)
+        => wrappedMessage != null && wrappedMessage.Contains(TagMarker, StringComparison.Ordinal);
+
+    /// <summary>
+    /// Removes every inline GIF tag (and the space before it) from a wrapped chat line, leaving the plain text.
+    /// A <c>]</c> inside the (escaped) title is written as <c>\]</c>, so the first unescaped <c>]</c> ends the tag.
+    /// </summary>
+    public static string StripGifTags(string wrappedMessage)
+    {
+        var text = wrappedMessage;
+        int start;
+        while ((start = text.IndexOf(TagMarker, StringComparison.Ordinal)) >= 0)
+        {
+            var end = start + TagMarker.Length;
+            while (end < text.Length)
+            {
+                if (text[end] == '\\')
+                {
+                    end += 2;
+                    continue;
+                }
+
+                if (text[end] == ']')
+                    break;
+
+                end++;
+            }
+
+            // Malformed (no closing bracket): drop the rest of the line.
+            var cut = end >= text.Length ? text.Length : end + 1;
+            var before = text[..start].TrimEnd();
+            text = before + text[cut..];
+        }
+
+        return text;
+    }
+
     /// <summary>Longest GIF id accepted.</summary>
     public const int MaxIdLength = 80;
 
@@ -122,9 +163,13 @@ public sealed class GifDataEvent(string id, byte[] sheetPng, int frameWidth, int
     public int[] FrameDelaysMs = frameDelaysMs;
 }
 
-/// <summary>Server → client: something went wrong. <see cref="Message"/> is a localization key the client resolves.</summary>
+/// <summary>
+/// Server → client: something went wrong. <see cref="Message"/> is a localization key the client resolves;
+/// <see cref="Minutes"/> is passed as the <c>minutes</c> argument (used by the timed-out error).
+/// </summary>
 [Serializable, NetSerializable]
-public sealed class GifErrorEvent(string message) : EntityEventArgs
+public sealed class GifErrorEvent(string message, int minutes = 0) : EntityEventArgs
 {
     public string Message = message;
+    public int Minutes = minutes;
 }

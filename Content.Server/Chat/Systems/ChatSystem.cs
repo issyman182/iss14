@@ -163,6 +163,10 @@ public sealed partial class ChatSystem : SharedChatSystem
         if (player != null && _chatManager.HandleRateLimit(player) != RateLimitStatus.Allowed)
             return;
 
+        // iss14: admin chat timeout.
+        if (player != null && _chatManager.IsChatTimedOut(player))
+            return;
+
         // Sus
         if (player?.AttachedEntity is { Valid: true } entity && source != entity)
         {
@@ -278,6 +282,10 @@ public sealed partial class ChatSystem : SharedChatSystem
             return false;
 
         if (player != null && _chatManager.HandleRateLimit(player) != RateLimitStatus.Allowed)
+            return false;
+
+        // iss14: admin chat timeout.
+        if (player != null && _chatManager.IsChatTimedOut(player))
             return false;
 
         // It doesn't make any sense for a non-player to send in-game OOC messages, whereas non-players may be sending

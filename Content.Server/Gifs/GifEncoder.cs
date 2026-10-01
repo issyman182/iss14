@@ -74,17 +74,23 @@ public static class GifEncoder
     /// <summary>
     /// Builds a sprite sheet from a decoded (possibly animated) image. Frames are subsampled evenly down to
     /// <paramref name="maxFrames"/> (skipped frames' delays are folded into the kept frame so timing is preserved),
-    /// downscaled to <paramref name="maxWidth"/> (never upscaled) and packed into a roughly square grid. If the PNG
+    /// downscaled to fit inside <paramref name="maxWidth"/> x <paramref name="maxHeight"/> (never upscaled) and packed
+    /// into a roughly square grid. If the PNG
     /// exceeds <paramref name="maxSheetBytes"/> the width and frame count are reduced until it fits or the floors
     /// (<see cref="MinWidth"/>, <see cref="MinFrames"/>) are hit, in which case null is returned.
     /// </summary>
-    public static Sheet? BuildSheet(Image<Rgba32> image, int maxWidth, int maxFrames, int maxSheetBytes)
+    public static Sheet? BuildSheet(Image<Rgba32> image, int maxWidth, int maxHeight, int maxFrames, int maxSheetBytes)
     {
         maxWidth = Math.Max(MinWidth, maxWidth);
+        maxHeight = Math.Max(MinWidth, maxHeight);
         maxFrames = Math.Max(MinFrames, maxFrames);
 
         var sourceDelays = ReadDelays(image);
-        var width = Math.Min(maxWidth, image.Width);
+
+        // Fit inside the box: express the height limit as an equivalent width limit so the retry loop only has to
+        // shrink one dimension.
+        var fitWidth = Math.Min(maxWidth, (int) MathF.Floor(maxHeight * image.Width / (float) image.Height));
+        var width = Math.Clamp(Math.Min(fitWidth, image.Width), 1, int.MaxValue);
         var frames = Math.Min(maxFrames, image.Frames.Count);
 
         // Shrink by 0.75x width, then by 0.75x frames, alternating, until the sheet fits the budget.
@@ -95,13 +101,13 @@ public static class GifEncoder
             if (sheet.Png.Length <= maxSheetBytes)
                 return sheet;
 
-            var canShrinkWidth = width > MinWidth;
+            var canShrinkWidth = width > Math.Min(MinWidth, fitWidth);
             var canShrinkFrames = frames > MinFrames;
             if (!canShrinkWidth && !canShrinkFrames)
                 return null;
 
             if ((shrinkWidthNext && canShrinkWidth) || !canShrinkFrames)
-                width = Math.Max(MinWidth, (int) (width * 0.75f));
+                width = Math.Max(Math.Min(MinWidth, fitWidth), (int) (width * 0.75f));
             else
                 frames = Math.Max(MinFrames, (int) (frames * 0.75f));
 

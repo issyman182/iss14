@@ -55,5 +55,11 @@ namespace Content.Server.Chat.Managers
         /// <param name="player">The player sending a chat message.</param>
         /// <returns>False if the player has violated rate limits and should be blocked from sending further messages.</returns>
         RateLimitStatus HandleRateLimit(ICommonSession player);
+
+        /// <summary>
+        /// iss14: true if the player is under an admin chat timeout (see <c>timeout</c> command). When so, the
+        /// player is told how long is left; callers must drop the message.
+        /// </summary>
+        bool IsChatTimedOut(ICommonSession player);
     }
 }

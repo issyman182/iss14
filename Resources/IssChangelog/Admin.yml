@@ -3,6 +3,15 @@ Order: 3
 AdminOnly: true
 Entries:
 - author: issyman182
+  version: iss14:1.9.0
+  time: '2026-10-01'
+  changes:
+  - message: New gifconfig panel (also in the admin menu) — toggle GIF chat, set send/search cooldowns, frame box size, frame and size caps, allowed channels and the required playtime (edits the hidden GifSender role requirement; it also shows up in the role requirement editor).
+    type: Add
+  - message: 'New chat moderation commands: timeout/untimeout/timeouts block a player from all chat for N minutes, gifmute/gifunmute/gifmutes block only GIFs. Both are in-memory, survive reconnects and expire automatically.'
+    type: Add
+  id: 13
+- author: issyman182
   version: iss14:1.8.2
   time: '2026-07-25'
   changes:

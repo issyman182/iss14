@@ -1,3 +1,4 @@
+using Content.Server.Administration.Managers;
 using Content.Shared.CCVar;
 using Content.Shared.Database;
 using Content.Shared.Players.RateLimiting;
@@ -34,5 +35,18 @@ internal sealed partial class ChatManager
     public RateLimitStatus HandleRateLimit(ICommonSession player)
     {
         return _rateLimitManager.CountAction(player, RateLimitKey);
+    }
+
+    // iss14: admin chat timeouts (timeout/untimeout commands) are checked right next to the rate limit at every
+    // player chat entry point.
+    public bool IsChatTimedOut(ICommonSession player)
+    {
+        if (!_timeouts.TryGetActive(ChatTimeoutManager.Kind.Chat, player.UserId, out var entry))
+            return false;
+
+        DispatchServerMessage(player, Loc.GetString("chat-timeout-notice",
+            ("minutes", ChatTimeoutManager.RemainingMinutes(entry)),
+            ("reason", entry.Reason)), suppressLog: true);
+        return true;
     }
 }

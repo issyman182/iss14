@@ -6,6 +6,7 @@ using Content.Shared.Gifs;
 using JetBrains.Annotations;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.RichText;
+using Robust.Shared.Configuration;
 using Robust.Shared.Timing;
 using Robust.Shared.Utility;
 
@@ -20,6 +21,7 @@ public sealed partial class GifTag : IMarkupTagHandler
 {
     [Dependency] private IEntityManager _entMan = default!;
     [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private IConfigurationManager _cfg = default!;
 
     public string Name => "gif";
 
@@ -40,18 +42,11 @@ public sealed partial class GifTag : IMarkupTagHandler
         if (title.Length > GifConstants.MaxTitleLength)
             title = title[..GifConstants.MaxTitleLength];
 
-        // Optional frame size (pixels) so the line is laid out at its final size before the sheet arrives.
-        var width = 0;
-        var height = 0;
-        if (node.Attributes.TryGetValue("w", out var wParam) && wParam.TryGetLong(out var w))
-            width = (int) Math.Clamp(w.Value, 0, 4096);
-        if (node.Attributes.TryGetValue("h", out var hParam) && hParam.TryGetLong(out var h))
-            height = (int) Math.Clamp(h.Value, 0, 4096);
-
+        // Any w/h attributes (older markup) are accepted but ignored: the control is always the fixed box.
         if (!_entMan.TrySystem<GifClientSystem>(out var gifs))
             return false;
 
-        control = new GifControl(id, title, width, height, gifs, _timing);
+        control = new GifControl(id, title, gifs, _timing, _cfg);
         return true;
     }
 }
