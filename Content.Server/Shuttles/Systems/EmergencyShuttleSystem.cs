@@ -496,15 +496,15 @@ public sealed partial class EmergencyShuttleSystem : SharedEmergencyShuttleSyste
             if (xform.GridUid is not { } gridUid || !HasComp<EscapePodComponent>(gridUid))
                 continue;
 
+            // Only open pods that are actually docked to something; opening the airlock of a
+            // pod that has already undocked would vent it into space.
+            if (docking.DockedWith is not { } stationDock)
+                continue;
+
             TryOpenEscapePodAirlock(uid, door);
 
-            if (docking.DockedWith is not { } stationDock ||
-                !TryComp<DoorComponent>(stationDock, out var stationDoor))
-            {
-                continue;
-            }
-
-            TryOpenEscapePodAirlock(stationDock, stationDoor);
+            if (TryComp<DoorComponent>(stationDock, out var stationDoor))
+                TryOpenEscapePodAirlock(stationDock, stationDoor);
         }
     }
 
