@@ -204,6 +204,12 @@
   - type: ActionGrant
     actions:
     - ActionViewLaws
+    - ActionMothershipCoreShunt # iss14
+  - type: StationAIShuntable # iss14: the core can pilot unoccupied xenoborgs
+    requireCameraView: false
+    whitelist:
+      components:
+      - Xenoborg
   - type: SiliconLawProvider
     laws: MothershipCoreLawset # custom laws here
     subverted: true

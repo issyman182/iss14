@@ -75,6 +75,9 @@
   - type: ShowJobIcons
   - type: ShowCrewIcons
   - type: StationAIShuntable # Starlight
+    blacklist: # iss14: xenoborgs belong to the mothership core
+      components:
+      - Xenoborg
   - type: DamagedSiliconAccent
     startPowerCorruptionAtCharIdx: 4
     maxPowerCorruptionAtCharIdx: 20

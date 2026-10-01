@@ -1,5 +1,6 @@
 using Content.Server.GameTicking.Rules;
 using Content.Server.Silicons.Borgs;
+using Content.Shared._Starlight.Silicons.Borgs;
 using Content.Shared.Antag;
 using Content.Shared.Destructible;
 using Content.Shared.GameTicking.Rules.Components;
@@ -79,6 +80,9 @@ public sealed partial class XenoborgSystem : EntitySystem
 
     private void OnXenoborgMindAdded(EntityUid ent, XenoborgComponent comp, MindAddedMessage args)
     {
+        if (IsShuntTransfer(ent))
+            return; // iss14: the mothership core shunting in/out keeps its own role, no briefing spam.
+
         _roles.MindAddRole(args.Mind, comp.MindRole, silent: true);
 
         if (!TryComp<ActorComponent>(ent, out var actorComp))
@@ -93,8 +97,21 @@ public sealed partial class XenoborgSystem : EntitySystem
 
     private void OnXenoborgMindRemoved(EntityUid ent, XenoborgComponent comp, MindRemovedMessage args)
     {
+        if (IsShuntTransfer(ent))
+            return; // iss14: see OnXenoborgMindAdded
+
         // We don't need to update the mind if the mind is being fully detached!
         if (args.TransferEntity != null)
             _roles.MindRemoveRole(args.Mind.Owner, comp.MindRole);
+    }
+
+    /// <summary>
+    /// iss14: True while a mind moves because of an AI shunt: either this body is a shunt target
+    /// with a shunter inside, or this body is the shunter (mothership core) currently inhabiting another.
+    /// </summary>
+    private bool IsShuntTransfer(EntityUid ent)
+    {
+        return TryComp<StationAIShuntComponent>(ent, out var shunt) && shunt.Return != null
+               || TryComp<StationAIShuntableComponent>(ent, out var shuntable) && shuntable.Inhabited != null;
     }
 }

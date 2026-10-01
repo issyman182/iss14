@@ -451,6 +451,8 @@
     - NamesXenoborg
   - type: NameIdentifier
     group: Xenoborg
+  - type: StationAIShunt # iss14: once a player has been in this xenoborg, the core can't take it
+    lockOnPlayer: true
   - type: Sprite
     sprite: Mobs/Silicon/chassis.rsi
   - type: MobThresholds

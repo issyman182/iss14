@@ -14,6 +14,7 @@ using Content.Shared.Silicons.Laws;
 using Content.Shared.Silicons.Laws.Components;
 using Content.Shared.Silicons.StationAi;
 using Content.Shared.Verbs;
+using Content.Shared.Whitelist;
 using Robust.Shared.Containers;
 using Robust.Shared.Network;
 using Robust.Shared.Utility;
@@ -32,6 +33,7 @@ public sealed partial class StationAIShuntSystem : EntitySystem
     [Dependency] private INetManager _net = default!;
     [Dependency] private StationAiVisionSystem _vision = default!;
     [Dependency] private SharedContainerSystem _containers = default!;
+    [Dependency] private EntityWhitelistSystem _whitelist = default!;
 
     public override void Initialize()
     {
@@ -41,6 +43,7 @@ public sealed partial class StationAIShuntSystem : EntitySystem
 
         SubscribeLocalEvent<StationAIShuntComponent, AIUnShuntActionEvent>(OnAttemptUnshunt);
         SubscribeLocalEvent<StationAIShuntComponent, GetVerbsEvent<AlternativeVerb>>(GetAltVerbs);
+        SubscribeLocalEvent<StationAIShuntComponent, MindAddedMessage>(OnShuntTargetMindAdded);
 
         SubscribeLocalEvent<StationAIShuntThroughComponent, GetVerbsEvent<AlternativeVerb>>(GetAltVerbs);
         SubscribeLocalEvent<StationAIShuntThroughComponent, FindShuntTargetEvent>(OnFindShuntTarget);
@@ -52,7 +55,7 @@ public sealed partial class StationAIShuntSystem : EntitySystem
         if (ev.Handled)
             return;
         var target = ev.Target;
-        if (_vision.IsOutsideCameraView(target))
+        if (shuntable.RequireCameraView && _vision.IsOutsideCameraView(target))
             return;
 
         // If target has ShuntThrough component, search for a valid target in containers
@@ -69,9 +72,12 @@ public sealed partial class StationAIShuntSystem : EntitySystem
 
         if (!TryComp<StationAIShuntComponent>(target, out var shunt))
             return;
+        if (!CanShuntInto(shuntable, target))
+            return; // iss14: e.g. station AI -> xenoborg, or mothership core -> station borg
         if (!_mindSystem.TryGetMind(uid, out var mindId, out var _))
             return;
-        if (!TryComp<MobStateComponent>(uid, out var state) || state.CurrentState != MobState.Alive)
+        // iss14: shunters without a mob state (the mothership core is a structure) are always "alive".
+        if (TryComp<MobStateComponent>(uid, out var state) && state.CurrentState != MobState.Alive)
             return;
 
         // iss14: never enter a body that is already possessed by a player - e.g. a cyborg
@@ -109,9 +115,10 @@ public sealed partial class StationAIShuntSystem : EntitySystem
             return; //target is allready inhabited.
         }
         shunt.Return = uid;
+        // iss14: set before the transfer so mind added/removed handlers can tell this is a shunt.
+        shuntable.Inhabited = target;
         _mindSystem.TransferTo(mindId, target);
         shunt.ReturnAction = _actionSystem.AddAction(target, shuntable.UnshuntAction.Id);
-        shuntable.Inhabited = target;
 
         // iss14 edit: laws are server-authoritative here; capture via GetSiliconLawsEvent
         // instead of reading the provider's (possibly still unmaterialized) cached lawset.
@@ -215,10 +222,38 @@ public sealed partial class StationAIShuntSystem : EntitySystem
         if (TryComp<MindContainerComponent>(target, out var mindContainer) && mindContainer.HasMind)
             return true;
 
-        return TryComp<BorgChassisComponent>(target, out var chassis)
-               && chassis.BrainContainer.ContainedEntity is { } brain
-               && TryComp<MindContainerComponent>(brain, out var brainMindContainer)
-               && brainMindContainer.HasMind;
+        // A body a player has used stays closed even after they ghost or leave the server.
+        if (TryComp<StationAIShuntComponent>(target, out var shunt) && shunt.PlayerClaimed)
+            return true;
+
+        if (!TryComp<BorgChassisComponent>(target, out var chassis)
+            || chassis.BrainContainer.ContainedEntity is not { } brain)
+            return false;
+
+        return TryComp<MindContainerComponent>(brain, out var brainMindContainer) && brainMindContainer.HasMind
+               || TryComp<StationAIShuntComponent>(brain, out var brainShunt) && brainShunt.PlayerClaimed;
+    }
+
+    /// <summary>
+    /// iss14: Whether this shunter is allowed to enter this kind of body at all.
+    /// </summary>
+    private bool CanShuntInto(StationAIShuntableComponent shuntable, EntityUid target)
+    {
+        return _whitelist.IsWhitelistPassOrNull(shuntable.Whitelist, target)
+               && !_whitelist.IsWhitelistPass(shuntable.Blacklist, target);
+    }
+
+    /// <summary>
+    /// iss14: Remember that a real player has occupied a lock-on-player body.
+    /// Shunted AIs set <see cref="StationAIShuntComponent.Return"/> before transferring, so they are excluded.
+    /// </summary>
+    private void OnShuntTargetMindAdded(EntityUid uid, StationAIShuntComponent comp, MindAddedMessage args)
+    {
+        if (!_net.IsServer || !comp.LockOnPlayer || comp.PlayerClaimed || comp.Return != null)
+            return;
+
+        comp.PlayerClaimed = true;
+        Dirty(uid, comp);
     }
 
     /// <summary>
@@ -261,7 +296,7 @@ public sealed partial class StationAIShuntSystem : EntitySystem
             return;
         }
 
-        if (!HasComp<StationAIShuntableComponent>(ev.User))
+        if (!TryComp<StationAIShuntableComponent>(ev.User, out var userShuntable))
             return; //only shuntable can get the into verb
 
         // Handle direct shunt targets
@@ -272,6 +307,9 @@ public sealed partial class StationAIShuntSystem : EntitySystem
 
             if (IsOccupied(uid))
                 return; // iss14: a player is already in this body, don't offer the verb.
+
+            if (!CanShuntInto(userShuntable, uid))
+                return; // iss14: not a body this shunter may enter.
         }
         // Handle shunt-through targets
         else if (comp is StationAIShuntThroughComponent)
@@ -285,6 +323,9 @@ public sealed partial class StationAIShuntSystem : EntitySystem
 
             if (IsOccupied(findEv.Target.Value))
                 return; // iss14: a player is already in this body, don't offer the verb.
+
+            if (!CanShuntInto(userShuntable, findEv.Target.Value))
+                return; // iss14: not a body this shunter may enter.
         }
         else
         {

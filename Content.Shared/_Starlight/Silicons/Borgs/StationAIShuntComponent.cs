@@ -32,4 +32,18 @@ public sealed partial class StationAIShuntComponent : Component
     [ViewVariables]
     [DataField, AutoNetworkedField]
     public SiliconLawset? OldLawset = null;
+
+    /// <summary>
+    /// iss14: If true, this body is permanently closed to shunting once a player (not a shunted AI)
+    /// has occupied it, even if that player later ghosts or leaves the server.
+    /// </summary>
+    [DataField]
+    public bool LockOnPlayer = false;
+
+    /// <summary>
+    /// iss14: Set once a player has occupied this body while <see cref="LockOnPlayer"/> is enabled.
+    /// </summary>
+    [ViewVariables]
+    [DataField, AutoNetworkedField]
+    public bool PlayerClaimed = false;
 }

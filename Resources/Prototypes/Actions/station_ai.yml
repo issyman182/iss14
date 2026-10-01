@@ -41,6 +41,17 @@
       - StationAIShunt
     event: !type:AIShuntActionEvent
 
+# iss14: mothership core version, works on anything the core can see instead of AI cameras.
+- type: entity
+  parent: ActionAIShunt
+  id: ActionMothershipCoreShunt
+  name: Shunt
+  description: Take direct control of an unoccupied xenoborg. Use UnShunt to return to the core.
+  components:
+  - type: TargetAction
+    checkCanAccess: false
+    range: 0
+
 - type: entity
   parent: BaseMentalAction
   id: ActionAIUnShunt
