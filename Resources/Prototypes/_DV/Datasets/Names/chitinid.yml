@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Ported from Goob-Station (originally DeltaV): Chitinid species.
+
+- type: localizedDataset
+  id: NamesChitinidFirstMale
+  values:
+    prefix: names-chitinid-male-dataset-
+    count: 33
+
+- type: localizedDataset
+  id: NamesChitinidFirstFemale
+  values:
+    prefix: names-chitinid-female-dataset-
+    count: 31

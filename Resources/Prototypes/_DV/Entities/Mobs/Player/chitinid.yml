@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Ported from Goob-Station (originally DeltaV): Chitinid species.
+
+- type: entity
+  save: false
+  name: Urist McAnt
+  parent: BaseMobChitinid
+  id: MobChitinid

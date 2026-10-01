@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Ported from Goob-Station (originally DeltaV): Chitinid species.
+
+# iss14: converted to this fork's solution/metabolism formats. Goob's chitinid liver only differed by
+# metabolising alcohol at 0.1x, which the metabolism-stages system can't express, so the body plan
+# uses OrganAnimalLiver instead.
+- type: entity
+  id: OrganChitinidStomach
+  parent: OrganAnimalStomach
+  name: stomach
+  description: "Gross. This is hard to stomach."
+  components:
+  - type: SolutionManager
+    solutions:
+    - SolutionStomach # 50u, Goob's chitinid stomach size
+    - SolutionOrganFood

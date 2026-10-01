@@ -1,0 +1,139 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Ported from Goob-Station (originally DeltaV): Chitinid species.
+
+- type: entity
+  save: false
+  name: Urist McAnt
+  parent: BaseMobSpeciesOrganic
+  id: BaseMobChitinid
+  abstract: true
+  components:
+  - type: HumanoidAppearance
+    species: Chitinid
+    hideLayersOnEquip:
+    - HeadTop
+  - type: Satiation # iss14: replaces Goob's Hunger/Thirst; needs to eat more to survive
+    satiations:
+      Hunger:
+        prototype: ChitinidSatiationHunger
+      Thirst:
+        prototype: NormalSatiationThirst
+  - type: UnpoweredFlashlight
+  - type: PointLight
+    enabled: false
+    radius: 3
+    softness: 5
+    color: "#2CFA1F"
+    autoRot: true
+  - type: Icon
+    sprite: _DV/Mobs/Species/Chitinid/parts.rsi
+    state: full
+  - type: Body # Shitmed: part-based body
+    prototype: Chitinid
+    requiredLegs: 2
+  - type: Damageable
+    damageContainer: Biological
+    damageModifierSet: Chitinid
+  - type: Speech
+    speechVerb: Chitinid
+    allowedEmotes: ['Chitter', 'Click', 'Hiss']
+  - type: MeleeWeapon
+    animation: WeaponArcBite
+    soundHit:
+      path: /Audio/Effects/bite.ogg
+    damage:
+      types:
+        Piercing: 5
+  - type: TypingIndicator
+    proto: chitinid
+  - type: Butcherable
+    butcheringType: Spike
+    spawned:
+    - id: FoodMeat
+      amount: 5
+  - type: Bloodstream
+    bloodReagent: InsectBlood
+  - type: Vocal
+  - type: CreamPied
+    sprite:
+      sprite: Effects/creampie.rsi
+      state: creampie_moth
+  - type: Temperature
+    temperature: 310.15
+    specificHeat: 46
+  - type: TemperatureDamage # Ants hate the cold
+    heatDamageThreshold: 320
+    coldDamageThreshold: 230
+    coldDamage:
+      types:
+        Cold: 1.25 # per second, scales with temperature & other constants
+    heatDamage:
+      types:
+        Heat: 1.0 # per second, scales with temperature & other constants
+  - type: TemperatureSpeed
+    thresholds:
+      289: 0.6
+      275: 0.4
+      250: 0.3
+  - type: Sprite # sprite again because we want different layer ordering (iss14: same order as moths)
+    noRot: true
+    drawdepth: Mobs
+    layers:
+      - map: [ "enum.HumanoidVisualLayers.Groin" ]
+      - map: [ "enum.HumanoidVisualLayers.Chest" ]
+      - map: [ "enum.HumanoidVisualLayers.Head" ]
+      - map: [ "enum.HumanoidVisualLayers.Snout" ]
+      - map: [ "enum.HumanoidVisualLayers.Eyes" ]
+      - map: [ "enum.HumanoidVisualLayers.RArm" ]
+      - map: [ "enum.HumanoidVisualLayers.LArm" ]
+      - map: [ "enum.HumanoidVisualLayers.RLeg" ]
+      - map: [ "enum.HumanoidVisualLayers.LLeg" ]
+      - map: [ "enum.HumanoidVisualLayers.Underwear" ]
+      - map: [ "enum.HumanoidVisualLayers.Undershirt" ]
+      - map: [ "jumpsuit" ]
+      - map: [ "enum.HumanoidVisualLayers.LHand" ]
+      - map: [ "enum.HumanoidVisualLayers.RHand" ]
+      - map: [ "enum.HumanoidVisualLayers.LFoot" ]
+      - map: [ "enum.HumanoidVisualLayers.RFoot" ]
+      - map: [ "enum.HumanoidVisualLayers.Handcuffs" ]
+        color: "#ffffff"
+        sprite: Objects/Misc/handcuffs.rsi
+        state: body-overlay-2
+        visible: false
+      - map: [ "gloves" ]
+      - map: [ "shoes" ]
+      - map: [ "ears" ]
+      - map: [ "eyes" ]
+      - map: [ "id" ]
+      - map: [ "outerClothing" ]
+      - map: [ "belt" ]
+      - map: [ "enum.HumanoidVisualLayers.Tail" ] # wings
+      - map: [ "back" ]
+      - map: [ "neck" ]
+      - map: [ "enum.HumanoidVisualLayers.Face" ]
+      - map: [ "enum.HumanoidVisualLayers.FacialHair" ]
+      - map: [ "enum.HumanoidVisualLayers.HeadSide" ]
+      - map: [ "maskalt" ]
+      - map: [ "enum.HumanoidVisualLayers.Hair" ]
+      - map: [ "mask" ]
+      - map: [ "enum.HumanoidVisualLayers.HeadTop" ]
+      - map: [ "head" ]
+      - map: [ "pocket1" ]
+      - map: [ "pocket2" ]
+  - type: Chitinid
+  - type: BlockInjection # iss14: syringes can't pierce the shell, hyposprays still work
+  - type: Inventory
+    speciesId: moth
+  - type: ItemCougher
+    item: Chitzite
+    action: ActionChitzite
+    coughPopup: chitzite-cough
+  # iss14: dropped Goob-only components: Carriable, LanguageKnowledge, CosmicMarkVisuals.
+
+- type: entity
+  parent: BaseSpeciesDummy
+  id: MobChitinidDummy
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: HumanoidAppearance
+    species: Chitinid

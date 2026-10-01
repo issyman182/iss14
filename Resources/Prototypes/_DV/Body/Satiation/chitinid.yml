@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Ported from Goob-Station (originally DeltaV): Chitinid species.
+
+# iss14: Goob used Hunger.baseDecayRate; this fork uses Satiation prototypes.
+# Chitinids get hungry 33% faster than normal (per the species guidebook).
+- type: satiation
+  id: ChitinidSatiationHunger
+  parent: NormalSatiationHunger
+  baseChangeRate: -0.02222222222

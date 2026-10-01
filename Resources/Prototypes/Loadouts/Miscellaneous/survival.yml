@@ -20,6 +20,7 @@
     - Reptilian
     - Tajaran # Carpmosia: Tajaran port
     - Vulpkanin
+    - Chitinid # DeltaV, via Goob-Station
 
 - type: loadoutEffectGroup
   id: EffectSpeciesVox

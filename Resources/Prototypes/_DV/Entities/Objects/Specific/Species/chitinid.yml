@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Ported from Goob-Station (originally DeltaV): Chitinid species.
+
+- type: entity
+  parent: BaseItem
+  id: Chitzite
+  name: chitzite
+  description: A small radioactive stone formed in the chest cavity of a radioactive chitinid, gross.... but kinda pretty?
+  components:
+  - type: Sprite
+    sprite: _DV/Objects/Specific/Species/chitinid.rsi
+    layers:
+      - state: chitzite
+      - state: chitzite_glow
+  - type: RadiationSource
+    intensity: 0.5
+  - type: Extractable
+    grindableSolutionName: chitzite
+  - type: SolutionManager # iss14: new solution system
+    solutions:
+    - SolutionChitzite
+  - type: MeleeWeapon
+    damage:
+      types:
+        Blunt: 3
+        Radiation: 3
+  - type: Tag
+    tags:
+    - Recyclable
+    - Trash
+
+- type: entity
+  parent: Solution
+  id: SolutionChitzite
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Solution
+    id: chitzite
+    solution:
+      maxVol: 5
+      reagents:
+      - ReagentId: Uranium
+        Quantity: 2.5
+      - ReagentId: Radium
+        Quantity: 2.5

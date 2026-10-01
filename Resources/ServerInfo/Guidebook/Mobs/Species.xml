@@ -17,6 +17,7 @@
   </Box>
   <Box>
     <GuideEntityEmbed Entity="MobVulpkanin" Caption="Vulpkanin"/>
+    <GuideEntityEmbed Entity="MobChitinid" Caption="Chitinid"/>
   </Box>
 
 </Document>

@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Ported from Goob-Station (originally DeltaV): Chitinid species.
+
+- type: typingIndicator
+  id: chitinid
+  spritePath: /Textures/_DV/Effects/speech.rsi
+  typingState: chitinid0
+  idleState: chitinid0
+  offset: -0.2, 0.1 # 0625

@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Ported from Goob-Station (originally DeltaV): Chitinid species.
+
+- type: entity
+  parent: BaseAction
+  id: ActionChitzite
+  name: Cough Up Chitzite
+  description: Purge the excess radiation build-up from your body, and gain a cool danger rock.
+  components:
+  - type: Action
+    enabled: false
+    useDelay: 120
+  - type: Sprite # iss14: action icons live on a Sprite component
+    sprite: _DV/Objects/Specific/Species/chitinid.rsi
+    layers:
+    - state: chitzite
+  - type: InstantAction
+    event: !type:CoughItemActionEvent

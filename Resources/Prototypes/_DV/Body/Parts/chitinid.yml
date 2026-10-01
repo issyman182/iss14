@@ -1,0 +1,150 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Ported from Goob-Station (originally DeltaV): Chitinid species.
+# iss14: generated from Body/Parts/moth.yml so it matches this fork's part-based body format.
+
+- type: entity
+  id: PartChitinidBase
+  parent: [BaseItem, BasePart]
+  name: "chitinid body part"
+  abstract: true
+  components:
+  - type: WoundableVisuals
+    damageOverlayGroups:
+      Brute:
+        sprite: _Shitmed/Mobs/Effects/brute_damage.rsi
+        color: "#507846"
+      Burn:
+        sprite: _Shitmed/Mobs/Effects/burn_damage.rsi
+  - type: Icon # Shitmed Change
+    sprite: _DV/Mobs/Species/Chitinid/parts.rsi
+  - type: BodyPart # Shitmed Change
+    species: Chitinid
+  - type: Extractable
+    juiceSolution:
+      reagents:
+      - ReagentId: Fat
+        Quantity: 3
+      - ReagentId: Blood
+        Quantity: 10
+  - type: Damageable # Shitmed
+    damageModifierSet: Chitinid
+
+- type: entity
+  id: ChestChitinid
+  name: "chitinid chest"
+  parent: [PartChitinidBase, BaseChest]
+  components:
+  - type: Sprite
+    sprite: _DV/Mobs/Species/Chitinid/parts.rsi
+    state: "chest_m"
+  - type: Extractable
+    juiceSolution:
+      reagents:
+      - ReagentId: Fat
+        Quantity: 10
+      - ReagentId: Blood
+        Quantity: 20
+
+- type: entity
+  id: GroinChitinid
+  name: "chitinid groin"
+  parent: [PartChitinidBase, BaseGroin]
+  components:
+  - type: Sprite
+    sprite: _DV/Mobs/Species/Chitinid/parts.rsi
+    state: "groin_m"
+  - type: Extractable
+    juiceSolution:
+      reagents:
+      - ReagentId: Fat
+        Quantity: 10
+      - ReagentId: Blood
+        Quantity: 20
+
+- type: entity
+  id: HeadChitinid
+  name: "chitinid head"
+  parent: [PartChitinidBase, BaseHead]
+  components:
+  - type: Sprite
+    sprite: _DV/Mobs/Species/Chitinid/parts.rsi
+    state: "head_m"
+  - type: Extractable
+    juiceSolution:
+      reagents:
+      - ReagentId: Fat
+        Quantity: 5
+      - ReagentId: Blood
+        Quantity: 10
+
+- type: entity
+  id: LeftArmChitinid
+  name: "left chitinid arm"
+  parent: [PartChitinidBase, BaseLeftArm]
+  components:
+  - type: Sprite
+    sprite: _DV/Mobs/Species/Chitinid/parts.rsi
+    state: "l_arm"
+
+- type: entity
+  id: RightArmChitinid
+  name: "right chitinid arm"
+  parent: [PartChitinidBase, BaseRightArm]
+  components:
+  - type: Sprite
+    sprite: _DV/Mobs/Species/Chitinid/parts.rsi
+    state: "r_arm"
+
+- type: entity
+  id: LeftHandChitinid
+  name: "left chitinid hand"
+  parent: [PartChitinidBase, BaseLeftHand]
+  components:
+  - type: Sprite
+    sprite: _DV/Mobs/Species/Chitinid/parts.rsi
+    state: "l_hand"
+
+- type: entity
+  id: RightHandChitinid
+  name: "right chitinid hand"
+  parent: [PartChitinidBase, BaseRightHand]
+  components:
+  - type: Sprite
+    sprite: _DV/Mobs/Species/Chitinid/parts.rsi
+    state: "r_hand"
+
+- type: entity
+  id: LeftLegChitinid
+  name: "left chitinid leg"
+  parent: [PartChitinidBase, BaseLeftLeg]
+  components:
+  - type: Sprite
+    sprite: _DV/Mobs/Species/Chitinid/parts.rsi
+    state: "l_leg"
+
+- type: entity
+  id: RightLegChitinid
+  name: "right chitinid leg"
+  parent: [PartChitinidBase, BaseRightLeg]
+  components:
+  - type: Sprite
+    sprite: _DV/Mobs/Species/Chitinid/parts.rsi
+    state: "r_leg"
+
+- type: entity
+  id: LeftFootChitinid
+  name: "left chitinid foot"
+  parent: [PartChitinidBase, BaseLeftFoot]
+  components:
+  - type: Sprite
+    sprite: _DV/Mobs/Species/Chitinid/parts.rsi
+    state: "l_foot"
+
+- type: entity
+  id: RightFootChitinid
+  name: "right chitinid foot"
+  parent: [PartChitinidBase, BaseRightFoot]
+  components:
+  - type: Sprite
+    sprite: _DV/Mobs/Species/Chitinid/parts.rsi
+    state: "r_foot"
