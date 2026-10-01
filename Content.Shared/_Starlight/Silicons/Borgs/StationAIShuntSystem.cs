@@ -79,7 +79,10 @@ public sealed partial class StationAIShuntSystem : EntitySystem
         if (IsOccupied(target))
         {
             if (_net.IsServer) //only send on server cause client is confused somehow?
-                _popup.PopupEntity(Loc.GetString("shunt-target-occupied"), target, uid, PopupType.Large);
+            {
+                var msg = IsAiInhabited(target, shunt) ? "shunt-target-occupied" : "shunt-target-occupied-player";
+                _popup.PopupEntity(Loc.GetString(msg), target, uid, PopupType.Large);
+            }
             return;
         }
 
@@ -216,6 +219,20 @@ public sealed partial class StationAIShuntSystem : EntitySystem
                && chassis.BrainContainer.ContainedEntity is { } brain
                && TryComp<MindContainerComponent>(brain, out var brainMindContainer)
                && brainMindContainer.HasMind;
+    }
+
+    /// <summary>
+    /// iss14: True if the occupant of the target is a shunted Station AI rather than a player
+    /// (used only to pick the right popup message).
+    /// </summary>
+    private bool IsAiInhabited(EntityUid target, StationAIShuntComponent shunt)
+    {
+        if (shunt.Return != null)
+            return true;
+
+        return TryComp<BorgChassisComponent>(target, out var chassis)
+               && TryComp<StationAIShuntComponent>(chassis.BrainContainer.ContainedEntity, out var brainShunt)
+               && brainShunt.Return != null;
     }
 
     #region Verbs
