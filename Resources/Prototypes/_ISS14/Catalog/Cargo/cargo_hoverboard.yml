@@ -2,7 +2,7 @@
 - type: cargoProduct
   id: Hoverboard
   icon:
-    sprite: Clothing/Shoes/Misc/hoverboard.rsi
+    sprite: _ISS14/Clothing/Shoes/Misc/hoverboard.rsi
     state: icon
   product: CrateHoverboard
   cost: 1500

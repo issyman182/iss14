@@ -6,7 +6,7 @@
   description: A hovering board you ride. Buckle on, then drive — W/S go forward/back, A/D steer.
   components:
   - type: Sprite
-    sprite: Clothing/Shoes/Misc/hoverboard.rsi
+    sprite: _ISS14/Clothing/Shoes/Misc/hoverboard.rsi
     state: icon
     # noRot so the board doesn't visually tilt while steering; the engine still picks the N/E/S/W frame from facing.
     noRot: true

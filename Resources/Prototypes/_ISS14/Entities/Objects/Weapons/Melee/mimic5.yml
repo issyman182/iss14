@@ -7,11 +7,11 @@
   description: A matte-black Cybersun telescoping baton with an embedded holo-lattice. Marketing claims it "looks like whatever the customer needs it to look like". Marketing says nothing about it hitting any harder.
   components:
   - type: Sprite
-    sprite: Objects/Weapons/Melee/mimic5.rsi
+    sprite: _ISS14/Objects/Weapons/Melee/mimic5.rsi
     state: icon
   - type: Item
     size: Small
-    sprite: Objects/Weapons/Melee/mimic5.rsi
+    sprite: _ISS14/Objects/Weapons/Melee/mimic5.rsi
   - type: MeleeWeapon
     wideAnimationRotation: -135
     damage:

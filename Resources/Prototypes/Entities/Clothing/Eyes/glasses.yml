@@ -312,9 +312,9 @@
   description: Green-tinted upgraded sunglasses that provide flash immunity and show ID card status.
   components:
   - type: Sprite
-    sprite: Clothing/Eyes/Glasses/centcommglasses.rsi
+    sprite: _ISS14/Clothing/Eyes/Glasses/centcommglasses.rsi
   - type: Clothing
-    sprite: Clothing/Eyes/Glasses/centcommglasses.rsi
+    sprite: _ISS14/Clothing/Eyes/Glasses/centcommglasses.rsi
   - type: FlashImmunity
   - type: EyeProtection
     protectionTime: 5

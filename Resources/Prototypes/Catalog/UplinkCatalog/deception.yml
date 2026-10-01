@@ -191,7 +191,7 @@
   name: store-listing-mimic5-name
   description: store-listing-mimic5-desc
   productEntity: WeaponChameleonMimic
-  icon: { sprite: /Textures/Objects/Weapons/Melee/mimic5.rsi, state: icon }
+  icon: { sprite: /Textures/_ISS14/Objects/Weapons/Melee/mimic5.rsi, state: icon }
   discountCategory: usualDiscounts
   discountDownTo:
     Telecrystal: 1
