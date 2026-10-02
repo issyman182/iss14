@@ -115,6 +115,16 @@ public abstract partial class SharedVendingMachineSystem : EntitySystem
 
     protected virtual void UpdateUI(Entity<VendingMachineComponent?> entity) { }
 
+    /// <summary>iss14: Economy — called after the inventory was (re)filled from the pack prototype.</summary>
+    protected virtual void OnInventoryRestocked(Entity<VendingMachineComponent> entity) { }
+
+    /// <summary>
+    /// iss14: Economy — server hook to charge the user for a vend. Return false to deny (the override is expected
+    /// to tell the user why). Default: everything is free.
+    /// </summary>
+    protected virtual bool TryPayForVend(EntityUid uid, EntityUid user, InventoryType type, string itemId, VendingMachineComponent component)
+        => true;
+
     public void RestockInventoryFromPrototype(EntityUid uid,
         VendingMachineComponent? component = null, float restockQuality = 1f)
     {
@@ -129,6 +139,8 @@ public abstract partial class SharedVendingMachineSystem : EntitySystem
         AddInventoryFromPrototype(uid, packPrototype.StartingInventory, InventoryType.Regular, component, restockQuality);
         AddInventoryFromPrototype(uid, packPrototype.EmaggedInventory, InventoryType.Emagged, component, restockQuality);
         AddInventoryFromPrototype(uid, packPrototype.ContrabandInventory, InventoryType.Contraband, component, restockQuality);
+
+        OnInventoryRestocked((uid, component)); // iss14: Economy
         Dirty(uid, component);
     }
 

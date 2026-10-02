@@ -1,0 +1,17 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "Recolour of the Goobstation claw machine for the iss14 chip exchanger. Original taken from goonstation at commit https://github.com/goonstation/goonstation/commit/4059e4be90832b02b1228b1bee3db342094e4f1e, recoloured by issyman182 (iss14)",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "exchanger"
+        },
+        {
+            "name": "panel"
+        }
+    ]
+}

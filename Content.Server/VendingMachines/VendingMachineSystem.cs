@@ -1,7 +1,13 @@
 using System.Linq;
 using System.Numerics;
+using Content.Server.Cargo.Components;
 using Content.Server.Cargo.Systems;
+using Content.Server.Economy;
 using Content.Server.VendingMachines.Components;
+using Content.Shared.Access.Systems;
+using Content.Shared.CCVar;
+using Content.Shared.Economy;
+using Content.Shared.Emag.Components;
 using Content.Server.Vocalization.Systems;
 using Content.Shared.Cargo;
 using Content.Shared.Damage.Systems;
@@ -10,6 +16,7 @@ using Content.Shared.Throwing;
 using Content.Shared.VendingMachines;
 using Content.Shared.VendingMachines.Components;
 using Content.Shared.Wall;
+using Robust.Shared.Configuration;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 
@@ -20,6 +27,10 @@ public sealed partial class VendingMachineSystem : SharedVendingMachineSystem
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private PricingSystem _pricing = default!;
     [Dependency] private ThrowingSystem _throwingSystem = default!;
+    [Dependency] private IBankManager _bank = default!; // iss14: Economy
+    [Dependency] private IConfigurationManager _cfg = default!; // iss14: Economy
+    [Dependency] private IComponentFactory _factory = default!; // iss14: Economy
+    [Dependency] private SharedIdCardSystem _idCard = default!; // iss14: Economy
 
     private const float WallVendEjectDistanceFromWall = 1f;
 
@@ -89,6 +100,77 @@ public sealed partial class VendingMachineSystem : SharedVendingMachineSystem
             eject.NextEmpEject += (5 * eject.EjectDelay);
         }
     }
+
+    #region iss14: Economy — paid vending
+
+    /// <summary>Credits a vend of <paramref name="itemId"/> costs right now, 0 when free.</summary>
+    public int GetVendPrice(EntProtoId itemId)
+    {
+        if (!ProtoMan.TryIndex(itemId, out var proto)
+            || !proto.TryComp<StaticPriceComponent>(out var price, _factory))
+        {
+            return 0;
+        }
+
+        return EconomyPricing.VendPrice(price.Price, _cfg.GetCVar(CCVars.EconomyVendingPriceMultiplier));
+    }
+
+    /// <summary>Fills <see cref="VendingMachineInventoryEntry.Price"/> for every entry so clients can display it.</summary>
+    protected override void OnInventoryRestocked(Entity<VendingMachineComponent> entity)
+    {
+        var changed = false;
+        foreach (var inventory in new[] { entity.Comp.Inventory, entity.Comp.EmaggedInventory, entity.Comp.ContrabandInventory })
+        {
+            foreach (var entry in inventory.Values)
+            {
+                var price = GetVendPrice(entry.ID);
+                if (entry.Price == price)
+                    continue;
+
+                entry.Price = price;
+                changed = true;
+            }
+        }
+
+        if (changed)
+            Dirty(entity);
+    }
+
+    protected override bool TryPayForVend(EntityUid uid, EntityUid user, InventoryType type, string itemId, VendingMachineComponent component)
+    {
+        if (!_cfg.GetCVar(CCVars.EconomyVendingPrices))
+            return true;
+
+        // Emagged vendors give everything away.
+        if (HasComp<EmaggedComponent>(uid))
+            return true;
+
+        var price = GetVendPrice(itemId);
+        if (price <= 0)
+            return true;
+
+        if (!_idCard.TryFindIdCard(user, out var idCard)
+            || !TryComp<BankCardComponent>(idCard, out var bankCard)
+            || bankCard.OwnerUserId is not { } owner)
+        {
+            Popup.PopupEntity(Loc.GetString("vending-machine-economy-no-card", ("price", price)), uid, user);
+            Deny((uid, component), user);
+            return false;
+        }
+
+        if (!_bank.IsLoaded(owner)
+            || !_bank.TryDebit(owner, price, $"vending: {itemId} at {ToPrettyString(uid)} by {ToPrettyString(user)}", out _))
+        {
+            Popup.PopupEntity(Loc.GetString("vending-machine-economy-insufficient", ("price", price)), uid, user);
+            Deny((uid, component), user);
+            return false;
+        }
+
+        Popup.PopupEntity(Loc.GetString("vending-machine-economy-charged", ("price", price)), uid, user);
+        return true;
+    }
+
+    #endregion
 
     [SubscribeLocalEvent]
     private void OnVendingPrice(Entity<VendingMachineComponent> entity, ref PriceCalculationEvent args)

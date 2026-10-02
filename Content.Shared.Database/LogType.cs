@@ -493,4 +493,9 @@ public enum LogType
     /// Silicon law changes.
     /// </summary>
     SiliconLaw = 106,
+
+    /// <summary>
+    /// iss14: Economy — bank balance changes (salary, ATM, vending, admin edits).
+    /// </summary>
+    Economy = 107,
 }

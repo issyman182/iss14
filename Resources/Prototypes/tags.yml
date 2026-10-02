@@ -1153,6 +1153,9 @@
   id: PlushieSharkPink # Storage whitelist: MopBucket. ItemMapper: MopBucket
 
 - type: Tag
+  id: PokerChips # iss14: Economy
+
+- type: Tag
   id: Potato # ConstructionGraph: PowerCellPotato
 
 - type: Tag

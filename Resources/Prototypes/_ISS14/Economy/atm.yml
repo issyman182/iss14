@@ -1,0 +1,123 @@
+# iss14: Economy — bank terminal
+- type: entity
+  parent: [ BaseMachinePowered, BaseMachineDestructible ]
+  id: ATM
+  name: ATM
+  description: A NanoTrasen bank terminal. Insert your ID card to check your balance, withdraw spesos or deposit cash.
+  components:
+  - type: Sprite
+    sprite: _ISS14/Structures/Machines/atm.rsi
+    snapCardinals: true
+    layers:
+    - state: off
+    - state: normal-unshaded
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: panel
+      map: ["enum.WiresVisualLayers.MaintenancePanel"]
+      visible: false
+  - type: GenericVisualizer
+    visuals:
+      enum.PowerDeviceVisuals.Powered:
+        enum.PowerDeviceVisualLayers.Powered:
+          True: { visible: true }
+          False: { visible: false }
+      enum.WiresVisualLayers.MaintenancePanel:
+        enum.WiresVisualLayers.MaintenancePanel:
+          True: { visible: true }
+          False: { visible: false }
+  - type: Appearance
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.25,-0.45,0.25,0.45"
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
+        density: 200
+  - type: Damageable
+    damageModifierSet: GlassReinforcedMod
+  - type: Repairable
+    doAfterDelay: 8
+  - type: StationAiWhitelist
+  - type: AmbientOnPowered
+  - type: AmbientSound
+    volume: -9
+    range: 3
+    enabled: false
+    sound:
+      path: /Audio/Ambience/Objects/vending_machine_hum.ogg
+  - type: ApcPowerReceiver
+    powerLoad: 150
+  - type: LitOnPowered
+  - type: PointLight
+    enabled: false
+    castShadows: false
+    radius: 1.5
+    color: "#5fe0b0"
+  - type: Electrified
+    enabled: false
+    usesApcPower: true
+  - type: WiresPanel
+  - type: WiresVisuals
+  - type: StaticPrice
+    price: 400
+  - type: Atm
+  - type: ItemSlots
+    slots:
+      atm-id:
+        name: atm-slot-id
+        ejectSound: /Audio/Machines/id_swipe.ogg
+        insertSound: /Audio/Weapons/Guns/MagIn/batrifle_magin.ogg
+        ejectOnBreak: true
+        swap: false
+        whitelist:
+          components:
+          - IdCard
+      atm-cash:
+        name: atm-slot-cash
+        ejectOnBreak: true
+        swap: false
+        whitelist:
+          components:
+          - Cash
+  - type: ContainerContainer
+    containers:
+      atm-id: !type:ContainerSlot
+      atm-cash: !type:ContainerSlot
+  - type: ActivatableUI
+    key: enum.AtmUiKey.Key
+  - type: ActivatableUIRequiresPower
+  - type: UserInterface
+    interfaces:
+      enum.AtmUiKey.Key:
+        type: AtmBoundUserInterface
+
+- type: entity
+  parent: BaseFlatpack
+  id: ATMFlatpack
+  name: ATM flatpack
+  description: A flatpack used for constructing an ATM.
+  components:
+  - type: Flatpack
+    entity: ATM
+  - type: Sprite
+    layers:
+    - state: base
+    - state: overlay
+      color: "#5fe0b0"
+      map: ["enum.FlatpackVisualLayers.Overlay"]
+    - state: icon-default
+
+- type: entity
+  id: CrateATM
+  parent: CrateGenericSteel
+  name: ATM crate
+  description: A crate with an ATM flatpack inside. Capitalism, now self-service.
+  components:
+  - type: StorageFill
+    contents:
+    - id: ATMFlatpack

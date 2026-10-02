@@ -6,6 +6,7 @@ using Content.Server.Afk;
 using Content.Server.Chat.Managers;
 using Content.Server.Connection;
 using Content.Server.Database;
+using Content.Server.Economy;
 using Content.Server.Discord;
 using Content.Server.Discord.DiscordLink;
 using Content.Server.Discord.WebhookMessages;
@@ -69,6 +70,7 @@ internal static class ServerContentIoC
         deps.Register<AutoRestartManager>(); // iss14: scheduled auto-restart admin config
         deps.Register<RoundEndAdManager>(); // iss14: round-end advertisement admin config
         deps.Register<UserMigrationManager>();
+        deps.Register<IBankManager, BankManager>(); // iss14: Economy
         deps.Register<UserDbDataManager>();
         deps.Register<ServerInfoManager>();
         deps.Register<DiscordWebhook>();

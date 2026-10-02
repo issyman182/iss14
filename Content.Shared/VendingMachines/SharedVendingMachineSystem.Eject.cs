@@ -204,6 +204,16 @@ public abstract partial class SharedVendingMachineSystem
         if (!TryComp<VendingMachineEjectComponent>(uid, out var ejectComponent))
             return;
 
+        // iss14: Economy — paid vending. Only charge when the vend is otherwise going to succeed
+        // (TryEjectVendorItem handles the "invalid"/"out of stock" denials itself, for free).
+        if (!ejectComponent.Ejecting
+            && !component.Broken
+            && GetEntry(uid, itemId, type, component) is { Amount: > 0 }
+            && !TryPayForVend(uid, sender, type, itemId, component))
+        {
+            return;
+        }
+
         TryEjectVendorItem(uid, type, itemId, ShouldThrowVendItem((uid, ejectComponent)), sender, component, ejectComponent);
     }
 }

@@ -3,6 +3,15 @@ Order: 3
 AdminOnly: true
 Entries:
 - author: issyman182
+  version: iss14:1.11.0
+  time: '2026-10-02'
+  changes:
+  - message: 'New moneyconfig panel (also in the admin menu) for the economy: max balance, salary on/off, default rate and multiplier, ATM fingerprint check, per-round withdrawal limit and fee, vending prices on/off and multiplier, chip rate.'
+    type: Add
+  - message: 'New bank commands: bank <player> shows a balance, bankset <player> <amount> sets it, bankadd <player> <delta> [reason] adjusts it, banktop [n] lists the richest accounts. All work for offline players. Every balance change is written to the admin logs (type Economy) with its reason.'
+    type: Add
+  id: 14
+- author: issyman182
   version: iss14:1.9.0
   time: '2026-10-01'
   changes:

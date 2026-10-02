@@ -15,7 +15,16 @@ public sealed partial class VendingMachineInventoryEntry(InventoryType type, Ent
     [DataField]
     public uint Amount = amount;
 
-    public VendingMachineInventoryEntry(VendingMachineInventoryEntry entry) : this(entry.Type, entry.ID, entry.Amount) { }
+    /// <summary>
+    /// iss14: Economy — credits charged per vend when <c>economy.vending_prices</c> is on. Filled by the server
+    /// from the item's static price; 0 means free.
+    /// </summary>
+    public int Price;
+
+    public VendingMachineInventoryEntry(VendingMachineInventoryEntry entry) : this(entry.Type, entry.ID, entry.Amount)
+    {
+        Price = entry.Price;
+    }
 }
 
 [Serializable, NetSerializable]

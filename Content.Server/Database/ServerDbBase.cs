@@ -674,6 +674,95 @@ namespace Content.Server.Database
 
         #endregion
 
+        #region Economy (iss14)
+
+        public async Task<long> GetBankBalanceAsync(NetUserId userId, CancellationToken cancel)
+        {
+            await using var db = await GetDb(cancel);
+
+            var account = await db.DbContext.BankAccount
+                .AsNoTracking()
+                .SingleOrDefaultAsync(b => b.UserId == userId.UserId, cancel);
+
+            return account?.Balance ?? 0;
+        }
+
+        public async Task SetBankBalanceAsync(NetUserId userId, long balance)
+        {
+            await using var db = await GetDb();
+
+            var account = await GetOrCreateBankAccount(db, userId);
+            account.Balance = Math.Max(0, balance);
+
+            await db.DbContext.SaveChangesAsync();
+        }
+
+        public async Task<long?> AdjustBankBalanceAsync(NetUserId userId, long delta, bool allowNegative, long maxBalance, bool salary)
+        {
+            await using var db = await GetDb();
+
+            // The row is loaded and saved inside one transaction; concurrent writers for the same user are
+            // additionally serialized by BankManager's per-user queue, so no lost updates.
+            await using var tx = await db.DbContext.Database.BeginTransactionAsync();
+
+            var account = await GetOrCreateBankAccount(db, userId);
+            var next = account.Balance + delta;
+
+            if (next < 0 && !allowNegative)
+                return null;
+
+            if (maxBalance > 0 && next > maxBalance)
+                next = maxBalance;
+
+            if (delta > 0)
+                account.LifetimeEarned += next - account.Balance;
+
+            if (salary)
+                account.LastSalaryPayout = DateTime.UtcNow;
+
+            account.Balance = next;
+
+            await db.DbContext.SaveChangesAsync();
+            await tx.CommitAsync();
+
+            return next;
+        }
+
+        public async Task<List<BankTopEntry>> GetTopBankAccountsAsync(int count, CancellationToken cancel)
+        {
+            await using var db = await GetDb(cancel);
+
+            var rows = await db.DbContext.BankAccount
+                .AsNoTracking()
+                .OrderByDescending(b => b.Balance)
+                .Take(count)
+                .ToListAsync(cancel);
+
+            var ids = rows.Select(r => r.UserId).ToList();
+            var names = await db.DbContext.Player
+                .AsNoTracking()
+                .Where(p => ids.Contains(p.UserId))
+                .Select(p => new { p.UserId, p.LastSeenUserName })
+                .ToDictionaryAsync(p => p.UserId, p => p.LastSeenUserName, cancel);
+
+            return rows
+                .Select(r => new BankTopEntry(new NetUserId(r.UserId), names.GetValueOrDefault(r.UserId), r.Balance, r.LifetimeEarned))
+                .ToList();
+        }
+
+        private static async Task<BankAccount> GetOrCreateBankAccount(DbGuard db, NetUserId userId)
+        {
+            var account = await db.DbContext.BankAccount.SingleOrDefaultAsync(b => b.UserId == userId.UserId);
+            if (account != null)
+                return account;
+
+            account = new BankAccount { UserId = userId.UserId };
+            db.DbContext.BankAccount.Add(account);
+            return account;
+        }
+
+        #endregion
+
         #region User Migration
 
         public async Task<List<MigrationLog>> GetMigrationLogsAsync(int limit, CancellationToken cancel)

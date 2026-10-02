@@ -52,6 +52,7 @@ namespace Content.Server.Database
         public DbSet<CustomVoteLog> CustomVoteLog { get; set; } = null!;
         public DbSet<CustomVoteLogOption> CustomVoteLogOption { get; set; } = null!;
         public DbSet<MigrationLog> MigrationLog { get; set; } = null!;
+        public DbSet<BankAccount> BankAccount { get; set; } = null!; // iss14: Economy
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -306,6 +307,10 @@ namespace Content.Server.Database
 
             modelBuilder.Entity<MigrationLog>()
                 .HasIndex(m => m.Time);
+
+            // iss14: Economy
+            modelBuilder.Entity<BankAccount>()
+                .HasIndex(b => b.Balance);
 
             ModelBan.OnModelCreating(modelBuilder);
             ModelCustomVoteLog.OnModelCreating(modelBuilder);
@@ -575,6 +580,25 @@ namespace Content.Server.Database
         public List<Ban> AdminServerBansCreated { get; set; } = null!;
         public List<Ban> AdminServerBansLastEdited { get; set; } = null!;
         public List<RoleWhitelist> JobWhitelists { get; set; } = null!;
+    }
+
+    /// <summary>
+    /// iss14: Economy — one persistent bank account per player (user id), shared across all their characters.
+    /// </summary>
+    [Table("bank_account")]
+    public sealed class BankAccount
+    {
+        [Required, Key]
+        public Guid UserId { get; set; }
+
+        /// <summary>Current balance in credits.</summary>
+        public long Balance { get; set; }
+
+        /// <summary>Total credits ever credited to the account (salary, deposits, admin adds).</summary>
+        public long LifetimeEarned { get; set; }
+
+        /// <summary>When the last salary was paid out, for display/diagnostics.</summary>
+        public DateTime? LastSalaryPayout { get; set; }
     }
 
     [Table("whitelist")]

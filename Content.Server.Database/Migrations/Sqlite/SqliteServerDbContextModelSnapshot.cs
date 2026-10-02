@@ -733,6 +733,33 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("ban_template", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.BankAccount", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("user_id");
+
+                    b.Property<long>("Balance")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("balance");
+
+                    b.Property<DateTime?>("LastSalaryPayout")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("last_salary_payout");
+
+                    b.Property<long>("LifetimeEarned")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("lifetime_earned");
+
+                    b.HasKey("UserId")
+                        .HasName("PK_bank_account");
+
+                    b.HasIndex("Balance");
+
+                    b.ToTable("bank_account", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.Blacklist", b =>
                 {
                     b.Property<Guid>("UserId")

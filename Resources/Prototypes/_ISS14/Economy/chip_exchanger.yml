@@ -1,0 +1,83 @@
+# iss14: Economy — poker chip exchange
+- type: entity
+  parent: [ BaseMachinePowered, BaseMachineDestructible ]
+  id: ChipExchanger
+  name: chip exchanger
+  description: Trades spesos for poker chips and back. The house always gets its cut. Eventually.
+  components:
+  - type: Sprite
+    sprite: _ISS14/Structures/Machines/chip_exchanger.rsi
+    snapCardinals: true
+    layers:
+    - state: exchanger
+    - state: panel
+      map: ["enum.WiresVisualLayers.MaintenancePanel"]
+      visible: false
+  - type: GenericVisualizer
+    visuals:
+      enum.WiresVisualLayers.MaintenancePanel:
+        enum.WiresVisualLayers.MaintenancePanel:
+          True: { visible: true }
+          False: { visible: false }
+  - type: Appearance
+  - type: Damageable
+    damageModifierSet: GlassReinforcedMod
+  - type: Repairable
+    doAfterDelay: 8
+  - type: StationAiWhitelist
+  - type: ApcPowerReceiver
+    powerLoad: 100
+  - type: Electrified
+    enabled: false
+    usesApcPower: true
+  - type: WiresPanel
+  - type: WiresVisuals
+  - type: StaticPrice
+    price: 250
+  - type: ChipExchanger
+  - type: ItemSlots
+    slots:
+      exchanger-cash:
+        name: chip-exchanger-slot-cash
+        ejectOnBreak: true
+        swap: false
+        whitelist:
+          components:
+          - Cash
+      exchanger-chips:
+        name: chip-exchanger-slot-chips
+        ejectOnBreak: true
+        swap: false
+        whitelist:
+          tags:
+          - PokerChips
+  - type: ContainerContainer
+    containers:
+      exchanger-cash: !type:ContainerSlot
+      exchanger-chips: !type:ContainerSlot
+
+- type: entity
+  parent: BaseFlatpack
+  id: ChipExchangerFlatpack
+  name: chip exchanger flatpack
+  description: A flatpack used for constructing a chip exchanger.
+  components:
+  - type: Flatpack
+    entity: ChipExchanger
+  - type: Sprite
+    layers:
+    - state: base
+    - state: overlay
+      color: "#d9a623"
+      map: ["enum.FlatpackVisualLayers.Overlay"]
+    - state: icon-default
+
+- type: entity
+  id: CrateChipExchanger
+  parent: CrateGenericSteel
+  name: chip exchanger crate
+  description: A crate with a chip exchanger flatpack inside. Turn your spesos into gambling tokens.
+  components:
+  - type: StorageFill
+    contents:
+    - id: ChipExchangerFlatpack

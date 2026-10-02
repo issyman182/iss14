@@ -177,3 +177,25 @@
   cost: 500
   category: cargoproduct-category-name-service
   group: market
+
+# iss14: Economy
+- type: cargoProduct
+  id: ATMCargo
+  icon:
+    sprite: _ISS14/Structures/Machines/atm.rsi
+    state: off
+  product: CrateATM
+  cost: 1500
+  category: cargoproduct-category-name-service
+  group: market
+
+# iss14: Economy
+- type: cargoProduct
+  id: ChipExchangerCargo
+  icon:
+    sprite: _ISS14/Structures/Machines/chip_exchanger.rsi
+    state: exchanger
+  product: CrateChipExchanger
+  cost: 1000
+  category: cargoproduct-category-name-service
+  group: market

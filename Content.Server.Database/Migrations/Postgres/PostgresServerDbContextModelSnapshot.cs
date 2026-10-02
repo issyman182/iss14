@@ -779,6 +779,33 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.ToTable("ban_template", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.BankAccount", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<long>("Balance")
+                        .HasColumnType("bigint")
+                        .HasColumnName("balance");
+
+                    b.Property<DateTime?>("LastSalaryPayout")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_salary_payout");
+
+                    b.Property<long>("LifetimeEarned")
+                        .HasColumnType("bigint")
+                        .HasColumnName("lifetime_earned");
+
+                    b.HasKey("UserId")
+                        .HasName("PK_bank_account");
+
+                    b.HasIndex("Balance");
+
+                    b.ToTable("bank_account", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.Blacklist", b =>
                 {
                     b.Property<Guid>("UserId")

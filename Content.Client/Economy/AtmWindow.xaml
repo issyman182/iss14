@@ -1,0 +1,38 @@
+<!-- iss14: Economy -->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      Title="{Loc atm-window-title}"
+                      MinSize="340 300"
+                      SetSize="360 320">
+    <BoxContainer Orientation="Vertical" Margin="8" HorizontalExpand="True" VerticalExpand="True">
+        <PanelContainer StyleClasses="BackgroundDark" Margin="0 0 0 8">
+            <BoxContainer Orientation="Vertical" Margin="8">
+                <BoxContainer Orientation="Horizontal">
+                    <Label Text="{Loc atm-window-account}" MinWidth="110" StyleClasses="LabelSubText" />
+                    <Label Name="OwnerLabel" Text="-" />
+                </BoxContainer>
+                <BoxContainer Orientation="Horizontal">
+                    <Label Text="{Loc atm-window-balance}" MinWidth="110" StyleClasses="LabelSubText" />
+                    <Label Name="BalanceLabel" Text="-" StyleClasses="LabelHeading" />
+                </BoxContainer>
+                <BoxContainer Orientation="Horizontal">
+                    <Label Text="{Loc atm-window-cash-slot}" MinWidth="110" StyleClasses="LabelSubText" />
+                    <Label Name="CashLabel" Text="-" />
+                </BoxContainer>
+            </BoxContainer>
+        </PanelContainer>
+
+        <BoxContainer Orientation="Horizontal" Margin="0 0 0 4">
+            <LineEdit Name="AmountEdit" PlaceHolder="{Loc atm-window-amount-placeholder}" HorizontalExpand="True" />
+            <Button Name="WithdrawButton" Text="{Loc atm-window-withdraw}" Margin="6 0 0 0" />
+        </BoxContainer>
+        <BoxContainer Orientation="Horizontal" Margin="0 0 0 4">
+            <Button Name="DepositButton" Text="{Loc atm-window-deposit}" HorizontalExpand="True" />
+            <Button Name="VerifyButton" Text="{Loc atm-window-verify}" HorizontalExpand="True" Margin="6 0 0 0" />
+        </BoxContainer>
+
+        <Label Name="LimitLabel" StyleClasses="LabelSubText" />
+        <Label Name="VerifyLabel" />
+        <Label Name="MessageLabel" Margin="0 6 0 0" />
+    </BoxContainer>
+</controls:FancyWindow>

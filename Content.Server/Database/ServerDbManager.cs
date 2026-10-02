@@ -172,6 +172,24 @@ namespace Content.Server.Database
             CancellationToken cancel = default);
         #endregion
 
+        #region Economy (iss14)
+        /// <summary>Current balance of the player's bank account; 0 if they have none yet.</summary>
+        Task<long> GetBankBalanceAsync(NetUserId userId, CancellationToken cancel = default);
+
+        /// <summary>Overwrites the balance (creating the account if needed). Negative values are clamped to 0.</summary>
+        Task SetBankBalanceAsync(NetUserId userId, long balance);
+
+        /// <summary>
+        /// Atomically adds <paramref name="delta"/> to the balance. Fails (returns null) when the result would be
+        /// negative and <paramref name="allowNegative"/> is false, or exceed <paramref name="maxBalance"/>
+        /// (the balance is then capped instead). Returns the new balance.
+        /// </summary>
+        Task<long?> AdjustBankBalanceAsync(NetUserId userId, long delta, bool allowNegative, long maxBalance, bool salary = false);
+
+        /// <summary>The <paramref name="count"/> richest accounts with the players' last seen names.</summary>
+        Task<List<BankTopEntry>> GetTopBankAccountsAsync(int count, CancellationToken cancel = default);
+        #endregion
+
         #region User Migration
         /// <summary>Most recent migration log entries (auto, pending and manual), newest first.</summary>
         Task<List<MigrationLog>> GetMigrationLogsAsync(int limit, CancellationToken cancel = default);
@@ -674,6 +692,31 @@ namespace Content.Server.Database
         {
             DbReadOpsMetric.Inc();
             return RunDbCommand(() => _db.GetPlayerRecordsInfoAsync(filter, limit, offset, cancel));
+        }
+
+        // iss14: Economy
+        public Task<long> GetBankBalanceAsync(NetUserId userId, CancellationToken cancel = default)
+        {
+            DbReadOpsMetric.Inc();
+            return RunDbCommand(() => _db.GetBankBalanceAsync(userId, cancel));
+        }
+
+        public Task SetBankBalanceAsync(NetUserId userId, long balance)
+        {
+            DbWriteOpsMetric.Inc();
+            return RunDbCommand(() => _db.SetBankBalanceAsync(userId, balance));
+        }
+
+        public Task<long?> AdjustBankBalanceAsync(NetUserId userId, long delta, bool allowNegative, long maxBalance, bool salary = false)
+        {
+            DbWriteOpsMetric.Inc();
+            return RunDbCommand(() => _db.AdjustBankBalanceAsync(userId, delta, allowNegative, maxBalance, salary));
+        }
+
+        public Task<List<BankTopEntry>> GetTopBankAccountsAsync(int count, CancellationToken cancel = default)
+        {
+            DbReadOpsMetric.Inc();
+            return RunDbCommand(() => _db.GetTopBankAccountsAsync(count, cancel));
         }
 
         public Task<List<MigrationLog>> GetMigrationLogsAsync(int limit, CancellationToken cancel = default)
@@ -1351,6 +1394,9 @@ namespace Content.Server.Database
     }
 
     public sealed record PlayTimeUpdate(NetUserId User, string Tracker, TimeSpan Time);
+
+    /// <summary>iss14: Economy — one row of the bank leaderboard.</summary>
+    public sealed record BankTopEntry(NetUserId UserId, string? UserName, long Balance, long LifetimeEarned);
 
     internal sealed class SyncAsyncEnumerable<T> : IAsyncEnumerable<T>
     {

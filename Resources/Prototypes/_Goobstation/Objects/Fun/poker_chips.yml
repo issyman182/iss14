@@ -12,6 +12,9 @@
   name: poker chips
   description: Play money for adults
   components:
+  - type: Tag # iss14: Economy — chip exchanger slot whitelist
+    tags:
+    - PokerChips
   - type: Stack
     stackType: PokerChips
     count: 1

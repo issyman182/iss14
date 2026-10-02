@@ -2,6 +2,19 @@ Name: Changelog
 Order: 0
 Entries:
 - author: issyman182
+  version: iss14:1.11.0
+  time: '2026-10-02'
+  changes:
+  - message: 'Money! Every player now has one persistent bank account that survives rounds and is shared by all their characters. You earn a salary for the time you spend alive in your job each round (paid on round end or when you leave; "balance" in the console shows your account), and your ID card is bound to your account on spawn.'
+    type: Add
+  - message: 'New ATM machine (cargo service catalogue, flatpack also in the HoP locker): insert an ID card to see the balance, withdraw spesos or deposit a stack of cash. Whoever holds the card can use the account, so guard it - the "Verify holder" button checks whether the user''s fingerprint matches the card''s owner.'
+    type: Add
+  - message: 'New chip exchanger machine (cargo service catalogue): trades spesos for poker chips and back.'
+    type: Add
+  - message: 'Vending machines can optionally charge your bank account (off by default; the price shows in the menu when on). Emagged vendors are free.'
+    type: Add
+  id: 21
+- author: issyman182
   version: iss14:1.10.0
   time: '2026-10-01'
   changes:

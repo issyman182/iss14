@@ -1,6 +1,7 @@
 using Content.Shared.Administration;
 using Content.Shared.CCVar;
 using Content.Shared.Database;
+using Content.Server.GameTicking.Events;
 using Content.Shared.GameTicking;
 using Content.Shared.GameWindow;
 using Content.Shared.Players;
@@ -131,6 +132,9 @@ namespace Content.Server.GameTicking
                     {
                         _pvsOverride.RemoveSessionOverride(mindId.Value, session);
                     }
+
+                    // iss14: Economy — let systems settle up (salary) while the session's DB-backed data is still loaded.
+                    RaiseLocalEvent(new PlayerDisconnectingEvent(session));
 
                     _userDb.ClientDisconnected(session);
 
