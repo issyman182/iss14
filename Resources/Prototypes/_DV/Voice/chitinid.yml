@@ -10,7 +10,7 @@
   - chat-speech-verb-chitinid-3
   - chat-speech-verb-chitinid-4
 
-# iss14: Goob's Gulp/Surprised/Belch entries dropped, those emotes don't exist here.
+# iss14: Goob's Surprised entry dropped: its sound has no license/source information.
 - type: emoteSounds
   id: UnisexChitinid
   voiceSelectorName: humanoid-profile-editor-voice-neutral
@@ -49,3 +49,7 @@
       collection: MaleSigh
     Whistle:
       collection: Whistles
+    Gulp: # Goob
+      path: /Audio/_Goobstation/Voice/gulpexotic.ogg
+    Belch: # Frontier
+      collection: Belch

@@ -1,0 +1,31 @@
+# Ported from Frontier via Goob-Station. iss14: silicons excluded via the SiliconEmotes tag like the other emotes here.
+
+- type: emote
+  id: Belch
+  name: chat-emote-name-belch
+  category: Vocal
+  available: true
+  icon: _NF/Interface/Emotes/belch.png
+  whitelist:
+    components:
+    - Vocal
+  blacklist:
+    tags:
+    - SiliconEmotes
+  chatMessages: ["chat-emote-msg-belch"]
+  chatTriggers:
+  - belch
+  - belch.
+  - belch!
+  - burp
+  - burp.
+  - burp!
+  - belchs
+  - belchs.
+  - belchs!
+  - burps
+  - burps.
+  - burps!
+  - belches
+  - belches.
+  - belches!
