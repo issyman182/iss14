@@ -82,6 +82,9 @@
                         <Button Name="AHelpButton" Access="Public" Text="{Loc 'ui-lobby-ahelp-button'}"
                                 StyleClasses="ButtonBig" />
                         <vote:VoteCallMenuButton Name="CallVoteButton" StyleClasses="ButtonBig" />
+                        <!-- iss14: Economy -->
+                        <Button Name="StoreButton" Access="Public" StyleClasses="ButtonBig"
+                                Text="{Loc 'ui-lobby-store-button'}" />
                         <Button Name="OptionsButton" Access="Public" StyleClasses="ButtonBig"
                                 Text="{Loc 'ui-lobby-options-button'}" />
                         <Button Name="LeaveButton" Access="Public" StyleClasses="ButtonBig"

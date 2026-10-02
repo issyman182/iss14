@@ -8,4 +8,9 @@ chip-exchanger-no-cash = Put spesos into the cash slot first.
 chip-exchanger-no-chips = Put poker chips into the chip slot first.
 chip-exchanger-too-little-cash = One chip costs { $rate } credits.
 chip-exchanger-bought = Exchanged { $credits } credits for { $chips } chips.
-chip-exchanger-sold = Exchanged { $chips } chips for { $credits } credits.
+chip-exchanger-sold = Exchanged { $chips } chips for { $credits } credits{ $fee ->
+    [0] .
+   *[other] { " " }(house fee { $fee }).
+}
+chip-exchanger-too-few-chips = Too few chips to cash out after the house fee.
+chip-exchanger-limit-reached = You have reached the cash-out limit of { $limit } credits for this shift.

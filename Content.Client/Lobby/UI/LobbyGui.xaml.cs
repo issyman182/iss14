@@ -23,9 +23,26 @@ namespace Content.Client.Lobby.UI
 
             LeaveButton.OnPressed += _ => _consoleHost.ExecuteCommand("disconnect");
             OptionsButton.OnPressed += _ => UserInterfaceManager.GetUIController<OptionsUIController>().ToggleWindow();
+            StoreButton.OnPressed += _ => ToggleStore(); // iss14: Economy
 
             CollapseButton.OnPressed += _ => TogglePanel(false);
             ExpandButton.OnPressed += _ => TogglePanel(true);
+        }
+
+        // iss14: Economy
+        private Economy.Store.StoreWindow? _storeWindow;
+
+        private void ToggleStore()
+        {
+            if (_storeWindow is { IsOpen: true })
+            {
+                _storeWindow.Close();
+                return;
+            }
+
+            _storeWindow = new Economy.Store.StoreWindow();
+            _storeWindow.OnClose += () => _storeWindow = null;
+            _storeWindow.OpenCentered();
         }
 
         public void SwitchState(LobbyGuiState state)

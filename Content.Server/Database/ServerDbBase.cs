@@ -750,6 +750,119 @@ namespace Content.Server.Database
                 .ToList();
         }
 
+        public async Task AddBankTransactionAsync(BankTransaction transaction)
+        {
+            await using var db = await GetDb();
+            db.DbContext.BankTransaction.Add(transaction);
+            await db.DbContext.SaveChangesAsync();
+        }
+
+        public async Task<List<BankTransaction>> GetBankTransactionsAsync(string partyId, int count, CancellationToken cancel)
+        {
+            await using var db = await GetDb(cancel);
+            return await db.DbContext.BankTransaction
+                .AsNoTracking()
+                .Where(t => t.FromId == partyId || t.ToId == partyId)
+                .OrderByDescending(t => t.Id)
+                .Take(count)
+                .ToListAsync(cancel);
+        }
+
+        public async Task<Dictionary<string, int>> GetSalaryOverridesAsync(CancellationToken cancel)
+        {
+            await using var db = await GetDb(cancel);
+            return await db.DbContext.SalaryOverride
+                .AsNoTracking()
+                .ToDictionaryAsync(o => o.Job, o => o.Amount, cancel);
+        }
+
+        public async Task SetSalaryOverrideAsync(string job, int? amount)
+        {
+            await using var db = await GetDb();
+            var row = await db.DbContext.SalaryOverride.SingleOrDefaultAsync(o => o.Job == job);
+
+            if (amount == null)
+            {
+                if (row != null)
+                    db.DbContext.SalaryOverride.Remove(row);
+            }
+            else if (row == null)
+            {
+                db.DbContext.SalaryOverride.Add(new SalaryOverride { Job = job, Amount = amount.Value });
+            }
+            else
+            {
+                row.Amount = amount.Value;
+            }
+
+            await db.DbContext.SaveChangesAsync();
+        }
+
+        public async Task<HashSet<string>> GetPlayerUnlocksAsync(NetUserId userId, CancellationToken cancel)
+        {
+            await using var db = await GetDb(cancel);
+            var ids = await db.DbContext.PlayerUnlock
+                .AsNoTracking()
+                .Where(u => u.UserId == userId.UserId)
+                .Select(u => u.UnlockId)
+                .ToListAsync(cancel);
+            return ids.ToHashSet();
+        }
+
+        public async Task<bool> AddPlayerUnlockAsync(NetUserId userId, string unlockId, long price)
+        {
+            await using var db = await GetDb();
+            if (await db.DbContext.PlayerUnlock.AnyAsync(u => u.UserId == userId.UserId && u.UnlockId == unlockId))
+                return false;
+
+            db.DbContext.PlayerUnlock.Add(new PlayerUnlock
+            {
+                UserId = userId.UserId,
+                UnlockId = unlockId,
+                Time = DateTime.UtcNow,
+                Price = price,
+            });
+            await db.DbContext.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> RemovePlayerUnlockAsync(NetUserId userId, string unlockId)
+        {
+            await using var db = await GetDb();
+            var rows = await db.DbContext.PlayerUnlock
+                .Where(u => u.UserId == userId.UserId && u.UnlockId == unlockId)
+                .ToListAsync();
+            if (rows.Count == 0)
+                return false;
+
+            db.DbContext.PlayerUnlock.RemoveRange(rows);
+            await db.DbContext.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<string?> GetPlayerTitleAsync(NetUserId userId, CancellationToken cancel)
+        {
+            await using var db = await GetDb(cancel);
+            var row = await db.DbContext.PlayerTitle
+                .AsNoTracking()
+                .SingleOrDefaultAsync(t => t.UserId == userId.UserId, cancel);
+            return string.IsNullOrEmpty(row?.TitleId) ? null : row.TitleId;
+        }
+
+        public async Task SetPlayerTitleAsync(NetUserId userId, string? titleId)
+        {
+            await using var db = await GetDb();
+            var row = await db.DbContext.PlayerTitle.SingleOrDefaultAsync(t => t.UserId == userId.UserId);
+            if (row == null)
+            {
+                row = new PlayerTitle { UserId = userId.UserId };
+                db.DbContext.PlayerTitle.Add(row);
+            }
+
+            row.TitleId = titleId;
+            await db.DbContext.SaveChangesAsync();
+        }
+
         private static async Task<BankAccount> GetOrCreateBankAccount(DbGuard db, NetUserId userId)
         {
             var account = await db.DbContext.BankAccount.SingleOrDefaultAsync(b => b.UserId == userId.UserId);

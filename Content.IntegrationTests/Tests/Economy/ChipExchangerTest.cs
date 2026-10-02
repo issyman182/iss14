@@ -23,6 +23,8 @@ public sealed class ChipExchangerTest : InteractionTest
     public async Task BothDirections()
     {
         await OverrideCVar(Side.Server, CCVars.EconomyChipRate, 2);
+        await OverrideCVar(Side.Server, CCVars.EconomyChipExchangeFeePercent, 0f);
+        await OverrideCVar(Side.Server, CCVars.EconomyChipPayoutLimitPerRound, 0);
 
         await SpawnTarget("ChipExchanger");
         var machine = STarget!.Value;

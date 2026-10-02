@@ -11,6 +11,7 @@
     - id: ClothingHeadsetAltCargo
     - id: DoorRemoteCargo
     - id: AstroNavCartridge
+    - id: TaskBoardCargoFlatpack # iss14: Economy
     - id: ClothingHandsKnuckleDustersQM
     - id: SlotMachineHighRollerFlatPack # Goob - gambling
     - id: PlushieLizardJobQuartermaster
@@ -136,6 +137,8 @@
     - id: WeaponDisabler
     - id: ClothingEyesHudCommand
     - id: ATMFlatpack # iss14: Economy
+    - id: TaskBoardFlatpack # iss14: Economy
+    - id: CashRegister # iss14: Economy
     - id: PlushieLizardJobHeadofpersonnel
       prob: 0.02
 
@@ -155,6 +158,7 @@
   table: !type:AllSelector
     children:
     - id: AccessConfigurator
+    - id: TaskBoardEngineeringFlatpack # iss14: Economy
     - id: BoxEncryptionKeyEngineering
     - id: CigarCase
       prob: 0.15
@@ -218,6 +222,7 @@
     - id: HandheldCrewMonitor
     - id: Hypospray
     - id: MedTekCartridge
+    - id: TaskBoardMedicalFlatpack # iss14: Economy
     # Standard command gear
     - id: RubberStampCMO
     - id: ClothingHeadsetAltMedical
@@ -270,6 +275,7 @@
   table: !type:AllSelector
     children:
     - id: Intellicard
+    - id: TaskBoardScienceFlatpack # iss14: Economy
     - id: BoxEncryptionKeyScience
     - id: BoxRDCircuitboards
     - id: ClothingBeltUtilityFilled
@@ -337,6 +343,8 @@
     - id: BoxHoSCircuitboards
     - id: WeaponDisabler
     - id: WantedListCartridge
+    - id: FineTerminalFlatpack # iss14: Economy
+    - id: TaskBoardSecurityFlatpack # iss14: Economy
     - id: DrinkHosFlask
     - id: PlushieLizardJobHeadofsecurity
       prob: 0.02

@@ -2,6 +2,31 @@ Name: Changelog
 Order: 0
 Entries:
 - author: issyman182
+  version: iss14:1.12.0
+  time: '2026-10-02'
+  changes:
+  - message: 'Salary rework: everyone with a job is paid once per round, at round end - even if you logged out before. Your pay is the time-weighted average of the base salaries of the jobs you held, scaled by how much of the round you were present (20% if you barely showed up, 100% at three quarters of the round, 150% for the whole round). Time while dead still counts; observing and cryo do not.'
+    type: Tweak
+  - message: 'Department money: the station''s accounts (Logistics, Engineering, Medical, Science, Security, Service) are now the economy''s department budgets. Heads of staff (and the Captain) can spend their department account; all money movement is logged.'
+    type: Add
+  - message: 'Cash register (bar/kitchen lockers, HoP locker, cargo): staff with service access see what lies on the counter, set prices (defaults from the item''s appraised value, resettable) and write a bill. Customers swipe their ID card or hand over spesos (change is returned). Sales go to the Service account; the cashier keeps a 20% commission.'
+    type: Add
+  - message: 'Cargo: every order can now be paid privately from your own bank account ("Pay privately", 1.5x price, no console access needed - Logistics still delivers). Logistics can edit a per-shift blocklist of products that may not be bought privately (default: armory, security and emergency goods) or switch it off.'
+    type: Add
+  - message: 'Fines: Security issues fines against criminal records at the new legal terminal (HoS locker flatpack, cargo). Pay yours by inserting your ID; once nothing is open a Wanted status clears automatically. Unpaid fines are deducted from your salary at round end. Fines fund the Security account.'
+    type: Add
+  - message: 'Attorneys: the legal closet holds representation agreements. Signed by client and attorney (alt-click actions; signatures are bound to the real player) and filed at a legal terminal with the attorney''s ID, the attorney can settle the client''s fines from the client''s account and earns a 10% fee.'
+    type: Add
+  - message: 'Heists: antagonists who escape alive on the evacuation shuttle are paid for the cash and valuables (worth 100+) they carry; the station''s accounts lose the same value. Thieves get a bonus per completed theft.'
+    type: Add
+  - message: 'Store: a new Store button in the lobby sells titles (and, in future, loadout items) for your persistent balance. A worn title shows on your ID card, when examined and in front of your name in local chat.'
+    type: Add
+  - message: 'Department task boards (head lockers hold a flatpack for each department; cargo sells a crate with all of them): the board generates tasks for its department - deliveries you hand in at the board (burgers, trash, steel sheets, brute packs...) and jobs a head confirms (clean the bar, repair the hull...). Heads can post their own contracts paid from the department account; CentComm tasks pay from outside.'
+    type: Add
+  - message: 'Chip exchanger: cashing out chips now costs a 5% house fee and is limited to 20000 credits per shift.'
+    type: Tweak
+  id: 22
+- author: issyman182
   version: iss14:1.11.0
   time: '2026-10-02'
   changes:

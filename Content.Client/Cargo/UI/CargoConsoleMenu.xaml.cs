@@ -19,6 +19,7 @@ namespace Content.Client.Cargo.UI
     public sealed partial class CargoConsoleMenu : FancyWindow
     {
         [Dependency] private IGameTiming _timing = default!;
+        [Dependency] private Robust.Shared.Configuration.IConfigurationManager _cfg = default!; // iss14: Economy
 
         private readonly IEntityManager _entityManager;
         private readonly IPrototypeManager _protoManager;
@@ -33,6 +34,8 @@ namespace Content.Client.Cargo.UI
         public event Action<CargoProductRow?>? OnItemSelected;
         public event Action<CargoOrderData?>? OnOrderApproved;
         public event Action<CargoOrderData?>? OnOrderCanceled;
+        public event Action<CargoOrderData?>? OnOrderPaidPrivately; // iss14: Economy
+        public event Action? OnPrivatePolicy; // iss14: Economy
 
         public event Action<ProtoId<CargoAccountPrototype>?, int>? OnAccountAction;
 
@@ -97,6 +100,8 @@ namespace Content.Client.Cargo.UI
             {
                 OnToggleUnboundedLimit?.Invoke(a);
             };
+
+            PrivatePolicyButton.OnPressed += _ => OnPrivatePolicy?.Invoke(); // iss14: Economy
         }
 
         private void OnCategoryItemSelected(OptionButton.ItemSelectedEventArgs args)
@@ -267,6 +272,19 @@ namespace Content.Client.Cargo.UI
                 // TODO: Disable based on access.
                 row.SetApproveVisible(orderConsole.Mode != CargoOrderConsoleMode.SendToPrimary);
                 row.Approve.OnPressed += (args) => { OnOrderApproved?.Invoke(order); };
+
+                // iss14: Economy — private payment (cvar replicated to the client)
+                var privateAllowed = _cfg.GetCVar(Content.Shared.CCVar.CCVars.EconomyCargoPrivateOrders)
+                                     && orderConsole.Mode == CargoOrderConsoleMode.DirectOrder;
+                row.PayPrivate.Visible = privateAllowed;
+                if (privateAllowed)
+                {
+                    var markup = _cfg.GetCVar(Content.Shared.CCVar.CCVars.EconomyCargoPrivateMarkup);
+                    var privateCost = (int) Math.Ceiling(productProto.Cost * order.OrderQuantity * markup);
+                    row.PayPrivate.ToolTip = Loc.GetString("cargo-console-menu-order-row-button-private-tooltip", ("cost", privateCost));
+                    row.PayPrivate.OnPressed += (args) => { OnOrderPaidPrivately?.Invoke(order); };
+                }
+
                 Requests.AddChild(row);
             }
         }

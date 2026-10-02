@@ -41,6 +41,12 @@ public interface IBankManager
     /// <summary>Waits for all pending database writes (tests, shutdown).</summary>
     Task FlushAsync();
 
+    /// <summary>
+    /// Runs a database write on the economy's single write queue. All economy writes (balances, transaction log,
+    /// unlocks, salary overrides) go through here so they never run concurrently — SQLite can't take that.
+    /// </summary>
+    void EnqueueWrite(Func<Task> write);
+
     /// <summary>Raised on the entity event bus as <see cref="BankBalanceChangedEvent"/> too; this is for managers.</summary>
     event Action<BankBalanceChangedEvent>? BalanceChanged;
 }

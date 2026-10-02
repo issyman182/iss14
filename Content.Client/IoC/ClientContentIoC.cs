@@ -58,6 +58,8 @@ namespace Content.Client.IoC
             collection.Register<GhostKickManager>();
             collection.Register<ExtendedDisconnectInformationManager>();
             collection.Register<JobRequirementsManager>();
+            collection.Register<Economy.Store.ClientStoreManager>(); // iss14: Economy
+            collection.Register<Content.Shared.Economy.Store.ISharedStoreManager, Economy.Store.ClientStoreManager>(); // iss14: Economy
             collection.Register<DocumentParsingManager>();
             collection.Register<ContentReplayPlaybackManager>();
             collection.Register<ISharedPlaytimeManager, JobRequirementsManager>();

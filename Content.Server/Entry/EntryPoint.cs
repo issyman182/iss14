@@ -71,6 +71,7 @@ namespace Content.Server.Entry
         [Dependency] private JobWhitelistManager _job = default!;
         [Dependency] private MultiServerKickManager _multiServerKick = default!;
         [Dependency] private PlayTimeTrackingManager _playTimeTracking = default!;
+        [Dependency] private Content.Server.Economy.Store.StoreManager _store = default!; // iss14: Economy
         [Dependency] private RoleRequirementOverrideManager _roleReqOverride = default!;
         [Dependency] private VoteConfigManager _voteConfig = default!;
         [Dependency] private NewLifeManager _newLife = default!;
@@ -135,6 +136,7 @@ namespace Content.Server.Entry
             _voteManager.Initialize();
             _updateManager.Initialize();
             _playTimeTracking.Initialize();
+            _store.Initialize(); // iss14: Economy
             _roleReqOverride.Initialize();
             _voteConfig.Initialize();
             _newLife.Initialize();

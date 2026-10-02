@@ -187,6 +187,11 @@
               <BoxContainer HorizontalAlignment="Center">
                   <Button Name="AccountActionButton" Text="{ Loc 'cargo-console-menu-account-action-button'}" MinHeight="45" MinWidth="120"/>
               </BoxContainer>
+              <Control MinHeight="15"/>
+              <!-- iss14: Economy -->
+              <BoxContainer HorizontalAlignment="Center">
+                  <Button Name="PrivatePolicyButton" Text="{ Loc 'cargo-console-menu-private-policy-button'}" MinHeight="45" MinWidth="120"/>
+              </BoxContainer>
               <Control VerticalExpand="True"/>
               <BoxContainer VerticalAlignment="Bottom" HorizontalAlignment="Center">
                   <Button Name="AccountLimitToggleButton" Text="{ Loc 'cargo-console-menu-toggle-account-lock-button'}" MinHeight="45" MinWidth="120"/>

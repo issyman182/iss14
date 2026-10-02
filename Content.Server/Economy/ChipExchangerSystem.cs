@@ -10,7 +10,10 @@ using Content.Shared.Power.EntitySystems;
 using Content.Shared.Stacks;
 using Content.Shared.Verbs;
 using Robust.Shared.Audio.Systems;
+using Content.Shared.GameTicking;
+using Robust.Server.Player;
 using Robust.Shared.Configuration;
+using Robust.Shared.Network;
 using Robust.Shared.Utility;
 
 namespace Content.Server.Economy;
@@ -18,7 +21,8 @@ namespace Content.Server.Economy;
 /// <summary>
 /// Poker chip exchange: spesos in the cash slot become chips in the chip slot (and back) at
 /// <c>economy.chip_rate</c> credits per chip. Nothing is created from thin air: cash is destroyed when chips are
-/// minted and chips are destroyed when cash is paid out.
+/// minted and chips are destroyed when cash is paid out. Cashing out costs <c>economy.chip_exchange_fee_percent</c>
+/// (the house keeps it) and is capped per player and round by <c>economy.chip_payout_limit_per_round</c>.
 /// </summary>
 public sealed partial class ChipExchangerSystem : EntitySystem
 {
@@ -29,10 +33,17 @@ public sealed partial class ChipExchangerSystem : EntitySystem
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedPowerReceiverSystem _power = default!;
     [Dependency] private StackSystem _stack = default!;
+    [Dependency] private EconomySystem _economy = default!;
+    [Dependency] private IPlayerManager _players = default!;
+
+    /// <summary>Credits already cashed out per player this round.</summary>
+    private readonly Dictionary<NetUserId, long> _paidOut = new();
 
     public override void Initialize()
     {
         base.Initialize();
+
+        SubscribeLocalEvent<RoundRestartCleanupEvent>(_ => _paidOut.Clear());
 
         SubscribeLocalEvent<ChipExchangerComponent, GetVerbsEvent<ActivationVerb>>(OnGetVerbs);
         SubscribeLocalEvent<ChipExchangerComponent, ActivateInWorldEvent>(OnActivate);
@@ -124,17 +135,46 @@ public sealed partial class ChipExchangerSystem : EntitySystem
         if (GetStack(ent, ChipExchangerComponent.ChipSlotId) is not { } chips)
             return Fail(ent, user, "chip-exchanger-no-chips");
 
+        var rate = Rate;
         var count = chips.Comp.Count;
-        var credits = count * Rate;
 
-        QueueDel(chips);
+        // Per-round cash-out cap: only as many chips as still fit under the limit.
+        var limit = _cfg.GetCVar(CCVars.EconomyChipPayoutLimitPerRound);
+        NetUserId? userId = _players.TryGetSessionByEntity(user, out var session) ? session.UserId : null;
+        if (limit > 0 && userId != null)
+        {
+            var remaining = limit - _paidOut.GetValueOrDefault(userId.Value);
+            var allowed = (int) Math.Max(0, remaining / rate);
+            if (allowed <= 0)
+                return Fail(ent, user, "chip-exchanger-limit-reached", ("limit", limit));
+
+            count = Math.Min(count, allowed);
+        }
+
+        var gross = (long) count * rate;
+        var feePercent = Math.Clamp(_cfg.GetCVar(CCVars.EconomyChipExchangeFeePercent), 0f, 100f);
+        var fee = (int) Math.Ceiling(gross * feePercent / 100.0);
+        var credits = (int) gross - fee;
+        if (credits <= 0)
+            return Fail(ent, user, "chip-exchanger-too-few-chips");
+
+        if (count >= chips.Comp.Count)
+            QueueDel(chips);
+        else
+            _stack.SetCount(chips.AsNullable(), chips.Comp.Count - count);
+
+        if (userId != null)
+            _paidOut[userId.Value] = _paidOut.GetValueOrDefault(userId.Value) + gross;
 
         var cash = Spawn(ent.Comp.CashPrototype, Transform(ent).Coordinates);
         _stack.SetCount((cash, null), credits);
         Deliver(ent, user, cash, ChipExchangerComponent.CashSlotId);
 
+        if (fee > 0)
+            _economy.Record(EconomyParty.External, EconomyParty.External, fee, $"chip exchange fee from {ToPrettyString(user)} at {ToPrettyString(ent)}");
+
         _audio.PlayPvs(ent.Comp.ExchangeSound, ent);
-        _popup.PopupEntity(Loc.GetString("chip-exchanger-sold", ("chips", count), ("credits", credits)), ent, user);
+        _popup.PopupEntity(Loc.GetString("chip-exchanger-sold", ("chips", count), ("credits", credits), ("fee", fee)), ent, user);
         return true;
     }
 

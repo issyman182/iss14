@@ -27,7 +27,7 @@ public sealed partial class VendingMachineSystem : SharedVendingMachineSystem
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private PricingSystem _pricing = default!;
     [Dependency] private ThrowingSystem _throwingSystem = default!;
-    [Dependency] private IBankManager _bank = default!; // iss14: Economy
+    [Dependency] private EconomySystem _economy = default!; // iss14: Economy
     [Dependency] private IConfigurationManager _cfg = default!; // iss14: Economy
     [Dependency] private IComponentFactory _factory = default!; // iss14: Economy
     [Dependency] private SharedIdCardSystem _idCard = default!; // iss14: Economy
@@ -158,8 +158,7 @@ public sealed partial class VendingMachineSystem : SharedVendingMachineSystem
             return false;
         }
 
-        if (!_bank.IsLoaded(owner)
-            || !_bank.TryDebit(owner, price, $"vending: {itemId} at {ToPrettyString(uid)} by {ToPrettyString(user)}", out _))
+        if (!_economy.TryCharge(EconomyParty.Player(owner), price, $"vending: {itemId} at {ToPrettyString(uid)} by {ToPrettyString(user)}", out _))
         {
             Popup.PopupEntity(Loc.GetString("vending-machine-economy-insufficient", ("price", price)), uid, user);
             Deny((uid, component), user);

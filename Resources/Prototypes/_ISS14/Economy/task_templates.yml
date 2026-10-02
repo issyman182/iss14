@@ -1,0 +1,289 @@
+# iss14: Economy — tasks the department boards generate.
+# Manual tasks are confirmed by a department head; Delivery tasks complete when the items are handed in at the board.
+# Payer Department takes the reward from the department account, CentComm pays from outside.
+
+## Service ##
+- type: departmentTaskTemplate
+  id: ServiceCleanHall
+  department: Service
+  title: task-service-clean-hall-title
+  description: task-service-clean-hall-desc
+  rewardMin: 80
+  rewardMax: 160
+
+- type: departmentTaskTemplate
+  id: ServiceCleanBar
+  department: Service
+  title: task-service-clean-bar-title
+  description: task-service-clean-bar-desc
+  rewardMin: 60
+  rewardMax: 120
+
+- type: departmentTaskTemplate
+  id: ServiceTrash
+  department: Service
+  title: task-service-trash-title
+  description: task-service-trash-desc
+  kind: Delivery
+  deliverTag: Trash
+  deliverMin: 10
+  deliverMax: 25
+  rewardMin: 100
+  rewardMax: 200
+
+- type: departmentTaskTemplate
+  id: ServiceBurgers
+  department: Service
+  title: task-service-burgers-title
+  description: task-service-burgers-desc
+  kind: Delivery
+  deliverTag: Burger
+  deliverMin: 3
+  deliverMax: 6
+  rewardMin: 120
+  rewardMax: 240
+
+- type: departmentTaskTemplate
+  id: ServiceDonuts
+  department: Service
+  title: task-service-donuts-title
+  description: task-service-donuts-desc
+  kind: Delivery
+  deliverTag: Donut
+  deliverMin: 6
+  deliverMax: 12
+  rewardMin: 100
+  rewardMax: 180
+
+- type: departmentTaskTemplate
+  id: ServicePizza
+  department: Service
+  title: task-service-pizza-title
+  description: task-service-pizza-desc
+  kind: Delivery
+  deliverTag: Pizza
+  deliverMin: 2
+  deliverMax: 4
+  rewardMin: 150
+  rewardMax: 300
+
+- type: departmentTaskTemplate
+  id: ServiceFruit
+  department: Service
+  title: task-service-fruit-title
+  description: task-service-fruit-desc
+  kind: Delivery
+  deliverTag: Fruit
+  deliverMin: 8
+  deliverMax: 16
+  rewardMin: 100
+  rewardMax: 200
+
+- type: departmentTaskTemplate
+  id: ServiceFlowers
+  department: Service
+  title: task-service-flowers-title
+  description: task-service-flowers-desc
+  kind: Delivery
+  deliverTag: Flower
+  deliverMin: 3
+  deliverMax: 6
+  rewardMin: 80
+  rewardMax: 160
+
+- type: departmentTaskTemplate
+  id: ServiceCentCommBanquet
+  department: Service
+  title: task-service-banquet-title
+  description: task-service-banquet-desc
+  payer: CentComm
+  rewardMin: 300
+  rewardMax: 600
+  weight: 0.4
+
+## Cargo ##
+- type: departmentTaskTemplate
+  id: CargoSteel
+  department: Cargo
+  title: task-cargo-steel-title
+  description: task-cargo-steel-desc
+  kind: Delivery
+  deliverPrototype: SheetSteel
+  deliverMin: 30
+  deliverMax: 90
+  rewardMin: 120
+  rewardMax: 300
+
+- type: departmentTaskTemplate
+  id: CargoGlass
+  department: Cargo
+  title: task-cargo-glass-title
+  description: task-cargo-glass-desc
+  kind: Delivery
+  deliverPrototype: SheetGlass
+  deliverMin: 30
+  deliverMax: 60
+  rewardMin: 100
+  rewardMax: 220
+
+- type: departmentTaskTemplate
+  id: CargoSalvage
+  department: Cargo
+  title: task-cargo-salvage-title
+  description: task-cargo-salvage-desc
+  rewardMin: 200
+  rewardMax: 400
+
+- type: departmentTaskTemplate
+  id: CargoDeliverCrate
+  department: Cargo
+  title: task-cargo-deliver-title
+  description: task-cargo-deliver-desc
+  rewardMin: 80
+  rewardMax: 160
+
+- type: departmentTaskTemplate
+  id: CargoCentCommPlasma
+  department: Cargo
+  title: task-cargo-plasma-title
+  description: task-cargo-plasma-desc
+  kind: Delivery
+  payer: CentComm
+  deliverPrototype: SheetPlasma
+  deliverMin: 10
+  deliverMax: 30
+  rewardMin: 400
+  rewardMax: 800
+  weight: 0.4
+
+## Engineering ##
+- type: departmentTaskTemplate
+  id: EngineeringRepair
+  department: Engineering
+  title: task-engineering-repair-title
+  description: task-engineering-repair-desc
+  rewardMin: 100
+  rewardMax: 200
+
+- type: departmentTaskTemplate
+  id: EngineeringLights
+  department: Engineering
+  title: task-engineering-lights-title
+  description: task-engineering-lights-desc
+  rewardMin: 60
+  rewardMax: 120
+
+- type: departmentTaskTemplate
+  id: EngineeringSolars
+  department: Engineering
+  title: task-engineering-solars-title
+  description: task-engineering-solars-desc
+  rewardMin: 200
+  rewardMax: 350
+
+- type: departmentTaskTemplate
+  id: EngineeringAtmos
+  department: Engineering
+  title: task-engineering-atmos-title
+  description: task-engineering-atmos-desc
+  rewardMin: 120
+  rewardMax: 240
+
+## Medical ##
+- type: departmentTaskTemplate
+  id: MedicalBrutepacks
+  department: Medical
+  title: task-medical-brutepacks-title
+  description: task-medical-brutepacks-desc
+  kind: Delivery
+  deliverPrototype: Brutepack
+  deliverMin: 4
+  deliverMax: 8
+  rewardMin: 100
+  rewardMax: 200
+
+- type: departmentTaskTemplate
+  id: MedicalOintment
+  department: Medical
+  title: task-medical-ointment-title
+  description: task-medical-ointment-desc
+  kind: Delivery
+  deliverPrototype: Ointment
+  deliverMin: 4
+  deliverMax: 8
+  rewardMin: 100
+  rewardMax: 200
+
+- type: departmentTaskTemplate
+  id: MedicalCheckup
+  department: Medical
+  title: task-medical-checkup-title
+  description: task-medical-checkup-desc
+  rewardMin: 80
+  rewardMax: 160
+
+- type: departmentTaskTemplate
+  id: MedicalRestock
+  department: Medical
+  title: task-medical-restock-title
+  description: task-medical-restock-desc
+  rewardMin: 60
+  rewardMax: 140
+
+## Science ##
+- type: departmentTaskTemplate
+  id: ScienceDisk
+  department: Science
+  title: task-science-disk-title
+  description: task-science-disk-desc
+  kind: Delivery
+  deliverPrototype: ResearchDisk
+  deliverMin: 1
+  deliverMax: 2
+  rewardMin: 150
+  rewardMax: 300
+
+- type: departmentTaskTemplate
+  id: ScienceAnomaly
+  department: Science
+  title: task-science-anomaly-title
+  description: task-science-anomaly-desc
+  rewardMin: 150
+  rewardMax: 300
+
+- type: departmentTaskTemplate
+  id: ScienceBorg
+  department: Science
+  title: task-science-borg-title
+  description: task-science-borg-desc
+  rewardMin: 200
+  rewardMax: 400
+
+## Security ##
+- type: departmentTaskTemplate
+  id: SecurityPatrol
+  department: Security
+  title: task-security-patrol-title
+  description: task-security-patrol-desc
+  rewardMin: 80
+  rewardMax: 160
+
+- type: departmentTaskTemplate
+  id: SecurityContraband
+  department: Security
+  title: task-security-contraband-title
+  description: task-security-contraband-desc
+  rewardMin: 150
+  rewardMax: 300
+
+- type: departmentTaskTemplate
+  id: SecurityDonuts
+  department: Security
+  title: task-security-donuts-title
+  description: task-security-donuts-desc
+  kind: Delivery
+  deliverTag: Donut
+  deliverMin: 4
+  deliverMax: 8
+  rewardMin: 60
+  rewardMax: 120

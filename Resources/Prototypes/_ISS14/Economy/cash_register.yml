@@ -1,0 +1,118 @@
+# iss14: Economy — counter cash register (see CashRegisterComponent).
+- type: entity
+  parent: BaseItem
+  id: CashRegister
+  name: cash register
+  description: A NanoTrasen point-of-sale terminal. Staff write a bill, customers swipe their ID or hand over spesos.
+  components:
+  - type: Sprite
+    sprite: _ISS14/Objects/Devices/cash_register.rsi
+    layers:
+    - state: icon
+    - state: bill
+      map: ["enum.CashRegisterVisualLayers.Screen"]
+      visible: false
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.CashRegisterVisuals.HasBill:
+        enum.CashRegisterVisualLayers.Screen:
+          True: { visible: true }
+          False: { visible: false }
+  - type: Item
+    size: Ginormous
+  - type: MultiHandedItem
+  - type: CashRegister
+  - type: StaticPrice
+    price: 150
+  - type: AccessReader
+    access: [["Service"], ["Bar"], ["Kitchen"], ["Hydroponics"], ["HeadOfPersonnel"], ["Captain"]]
+  - type: ActivatableUI
+    key: enum.CashRegisterUiKey.Key
+  - type: ActivatableUIRequiresAccess
+    popupMessage: cash-register-access-denied
+  - type: UserInterface
+    interfaces:
+      enum.CashRegisterUiKey.Key:
+        type: CashRegisterBoundUserInterface
+  - type: Damageable
+    damageContainer: Inorganic
+    damageModifierSet: Metallic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 80
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          SheetSteel1:
+            min: 1
+            max: 2
+
+- type: entity
+  parent: CashRegister
+  id: CashRegisterSecurity
+  name: security cash register
+  description: A NanoTrasen point-of-sale terminal, bookkept for Security. For fines, bribes and donuts.
+  components:
+  - type: CashRegister
+    account: Security
+  - type: AccessReader
+    access: [["Security"], ["HeadOfSecurity"], ["Captain"]]
+
+- type: entity
+  parent: CashRegister
+  id: CashRegisterCargo
+  name: cargo cash register
+  description: A NanoTrasen point-of-sale terminal, bookkept for Logistics.
+  components:
+  - type: CashRegister
+    account: Cargo
+  - type: AccessReader
+    access: [["Cargo"], ["Quartermaster"], ["Captain"]]
+
+- type: entity
+  parent: CashRegister
+  id: CashRegisterMedical
+  name: medical cash register
+  description: A NanoTrasen point-of-sale terminal, bookkept for Medical.
+  components:
+  - type: CashRegister
+    account: Medical
+  - type: AccessReader
+    access: [["Medical"], ["ChiefMedicalOfficer"], ["Captain"]]
+
+- type: entity
+  parent: CashRegister
+  id: CashRegisterScience
+  name: science cash register
+  description: A NanoTrasen point-of-sale terminal, bookkept for Epistemics.
+  components:
+  - type: CashRegister
+    account: Science
+  - type: AccessReader
+    access: [["Research"], ["ResearchDirector"], ["Captain"]]
+
+- type: entity
+  parent: CashRegister
+  id: CashRegisterEngineering
+  name: engineering cash register
+  description: A NanoTrasen point-of-sale terminal, bookkept for Engineering.
+  components:
+  - type: CashRegister
+    account: Engineering
+  - type: AccessReader
+    access: [["Engineering"], ["ChiefEngineer"], ["Captain"]]
+
+- type: entity
+  id: CrateCashRegister
+  parent: CrateGenericSteel
+  name: cash register crate
+  description: A crate with a cash register inside. Ring it up.
+  components:
+  - type: StorageFill
+    contents:
+    - id: CashRegister

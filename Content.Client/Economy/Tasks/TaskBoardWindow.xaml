@@ -1,0 +1,29 @@
+<!-- iss14: Economy -->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      Title="{Loc task-board-window-title}"
+                      Resizable="True"
+                      MinSize="520 420"
+                      SetSize="600 600">
+    <BoxContainer Orientation="Vertical" Margin="8" HorizontalExpand="True" VerticalExpand="True">
+        <Label Name="HeaderLabel" StyleClasses="LabelHeading" />
+        <Label Text="{Loc task-board-hint}" StyleClasses="LabelSubText" />
+        <ScrollContainer HScrollEnabled="False" VerticalExpand="True" HorizontalExpand="True" Margin="0 6 0 6">
+            <BoxContainer Name="TasksBox" Orientation="Vertical" HorizontalExpand="True" />
+        </ScrollContainer>
+        <PanelContainer Name="CreatePanel" StyleClasses="BackgroundDark">
+            <BoxContainer Orientation="Vertical" Margin="6">
+                <Label Text="{Loc task-board-create-heading}" StyleClasses="LabelKeyText" />
+                <BoxContainer Orientation="Horizontal" Margin="0 4 0 0">
+                    <LineEdit Name="TitleEdit" PlaceHolder="{Loc task-board-create-title}" HorizontalExpand="True" />
+                    <LineEdit Name="RewardEdit" PlaceHolder="{Loc task-board-create-reward}" MinWidth="90" Margin="4 0 0 0" />
+                </BoxContainer>
+                <BoxContainer Orientation="Horizontal" Margin="0 4 0 0">
+                    <LineEdit Name="DescriptionEdit" PlaceHolder="{Loc task-board-create-description}" HorizontalExpand="True" />
+                    <Button Name="CreateButton" Text="{Loc task-board-create}" Margin="4 0 0 0" />
+                </BoxContainer>
+            </BoxContainer>
+        </PanelContainer>
+        <Label Name="MessageLabel" Margin="0 6 0 0" />
+    </BoxContainer>
+</controls:FancyWindow>

@@ -71,6 +71,8 @@ internal static class ServerContentIoC
         deps.Register<RoundEndAdManager>(); // iss14: round-end advertisement admin config
         deps.Register<UserMigrationManager>();
         deps.Register<IBankManager, BankManager>(); // iss14: Economy
+        deps.Register<Content.Server.Economy.Store.StoreManager>(); // iss14: Economy
+        deps.Register<Content.Shared.Economy.Store.ISharedStoreManager, Content.Server.Economy.Store.StoreManager>(); // iss14: Economy
         deps.Register<UserDbDataManager>();
         deps.Register<ServerInfoManager>();
         deps.Register<DiscordWebhook>();

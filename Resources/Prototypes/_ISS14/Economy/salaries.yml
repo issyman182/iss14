@@ -1,65 +1,66 @@
-# iss14: Economy — credits per hour of tracked job playtime. Unlisted jobs use economy.salary_default_per_hour.
+# iss14: Economy — base salary per round (full presence = factor 1.0, see economy.salary_* cvars).
+# Admins can override single jobs in the Money Config panel. Unlisted jobs use economy.salary_default.
 - type: salaryTable
   id: Default
   jobs:
     # Command
-    Captain: 150
-    HeadOfPersonnel: 130
-    HeadOfSecurity: 145
-    ChiefEngineer: 140
-    ChiefMedicalOfficer: 140
-    ResearchDirector: 140
-    Quartermaster: 135
+    Captain: 300
+    HeadOfPersonnel: 260
+    HeadOfSecurity: 290
+    ChiefEngineer: 280
+    ChiefMedicalOfficer: 280
+    ResearchDirector: 280
+    Quartermaster: 270
     # Security
-    Warden: 110
-    Detective: 90
-    SecurityOfficer: 85
-    SecurityCadet: 30
-    Lawyer: 70
+    Warden: 220
+    Detective: 180
+    SecurityOfficer: 170
+    SecurityCadet: 60
+    Lawyer: 140
     # Engineering
-    AtmosphericTechnician: 80
-    StationEngineer: 75
-    TechnicalAssistant: 25
+    AtmosphericTechnician: 160
+    StationEngineer: 150
+    TechnicalAssistant: 50
     # Medical
-    Chemist: 80
-    MedicalDoctor: 80
-    Paramedic: 75
-    Psychologist: 60
-    MedicalIntern: 25
+    Chemist: 160
+    MedicalDoctor: 160
+    Paramedic: 150
+    Psychologist: 120
+    MedicalIntern: 50
     # Science
-    Scientist: 80
-    ResearchAssistant: 25
+    Scientist: 160
+    ResearchAssistant: 50
     # Supply
-    SalvageSpecialist: 75
-    CargoTechnician: 60
+    SalvageSpecialist: 150
+    CargoTechnician: 120
     # Service
-    Bartender: 60
-    Chef: 60
-    Botanist: 55
-    Janitor: 55
-    Chaplain: 50
-    Librarian: 50
-    Reporter: 50
-    Musician: 45
-    Clown: 45
-    Mime: 45
-    ServiceWorker: 30
-    TramDriver: 50
+    Bartender: 120
+    Chef: 120
+    Botanist: 110
+    Janitor: 110
+    Chaplain: 100
+    Librarian: 100
+    Reporter: 100
+    Musician: 90
+    Clown: 90
+    Mime: 90
+    ServiceWorker: 60
+    TramDriver: 100
     # Silicon
-    StationAi: 100
-    Borg: 50
+    StationAi: 200
+    Borg: 100
     # Civilian
-    Passenger: 10
-    Visitor: 10
+    Passenger: 20
+    Visitor: 20
     # Central Command / response teams (normally not round-start station jobs)
-    CentralCommandOfficial: 150
-    CBURN: 120
-    DeathSquad: 120
-    ERTLeader: 120
-    ERTChaplain: 110
-    ERTEngineer: 110
-    ERTJanitor: 110
-    ERTMedical: 110
-    ERTSecurity: 110
+    CentralCommandOfficial: 300
+    CBURN: 240
+    DeathSquad: 240
+    ERTLeader: 240
+    ERTChaplain: 220
+    ERTEngineer: 220
+    ERTJanitor: 220
+    ERTMedical: 220
+    ERTSecurity: 220
     # Hidden gate role for GIF sending, never paid
     GifSender: 0

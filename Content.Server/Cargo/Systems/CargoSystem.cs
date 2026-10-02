@@ -64,6 +64,7 @@ public sealed partial class CargoSystem : SharedCargoSystem
         InitializeShuttle();
         InitializeBounty();
         InitializeFunds();
+        InitializeEconomy(); // iss14: Economy
     }
 
     public override void Update(float frameTime)

@@ -1,243 +1,349 @@
 // iss14: Economy
 using System.Linq;
+using System.Threading.Tasks;
+using Content.Server.Afk;
 using Content.Server.Chat.Managers;
-using Content.Server.GameTicking.Events;
-using Content.Server.Players.PlayTimeTracking;
+using Content.Server.Database;
+using Content.Server.GameTicking;
+using Content.Shared.Bed.Cryostorage;
 using Content.Shared.CCVar;
 using Content.Shared.Economy;
 using Content.Shared.GameTicking;
-using Content.Shared.Players.PlayTimeTracking;
+using Content.Shared.Ghost.Components;
+using Content.Shared.Mind;
+using Content.Shared.Mobs.Systems;
 using Content.Shared.Roles;
+using Content.Shared.Roles.Jobs;
 using Robust.Server.Player;
 using Robust.Shared.Configuration;
 using Robust.Shared.Enums;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Timing;
 
 namespace Content.Server.Economy;
 
 /// <summary>
-/// Pays players for the time they spent in a job this round. Playtime comes from the existing job trackers
-/// (<see cref="PlayTimeTrackingManager"/>; they only accrue while the player is alive and not AFK). A baseline of
-/// every tracker is taken when the session enters the game; the payout is the growth since that baseline minus
-/// what was already paid, so a reconnect or the round end can never pay the same minutes twice.
+/// Pays every crew member once per round, at round end — including players who have disconnected by then.
+///
+/// Time is tracked here (not via the playtime trackers): every <see cref="TickInterval"/> each in-game session
+/// whose mind holds a job accrues that interval for that job while they are in their body (alive or dead) or
+/// a ghost whose body died; observers, cryo-stored characters and AFK players accrue nothing.
+///
+/// Payout = Σ(base(job) × time(job)) / presentTime × factor(presentTime / roundDuration) × multiplier, i.e. the
+/// time-weighted average base of all jobs held this round (switching jobs can't be exploited) scaled by
+/// presence: <c>economy.salary_min_factor</c> when barely present, 1.0 at <c>economy.salary_full_time_fraction</c>
+/// of the round, <c>economy.salary_max_factor</c> for the whole round. Base salaries come from the DB override
+/// table, else <see cref="SalaryTablePrototype"/>, else <c>economy.salary_default</c>.
 /// </summary>
 public sealed partial class SalarySystem : EntitySystem
 {
+    [Dependency] private EconomySystem _economy = default!;
     [Dependency] private IBankManager _bank = default!;
     [Dependency] private IChatManager _chat = default!;
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private IPlayerManager _players = default!;
-    [Dependency] private PlayTimeTrackingManager _tracking = default!;
+    [Dependency] private IAfkManager _afk = default!;
+    [Dependency] private IServerDbManager _db = default!;
+    [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private ServerGameTicker _ticker = default!;
+    [Dependency] private SharedMindSystem _mind = default!;
+    [Dependency] private SharedJobSystem _jobs = default!;
+    [Dependency] private MobStateSystem _mobState = default!;
 
     public const string DefaultTable = "Default";
+    public static readonly TimeSpan TickInterval = TimeSpan.FromSeconds(10);
 
-    private readonly Dictionary<NetUserId, SessionPay> _sessions = new();
+    private TimeSpan _nextTick;
+
+    /// <summary>Per player, per job: time accrued this round. Kept after disconnect until the round ends.</summary>
+    private readonly Dictionary<NetUserId, RoundPay> _round = new();
+
+    /// <summary>Admin overrides of per-round base salaries (DB-backed).</summary>
+    private readonly Dictionary<string, int> _overrides = new();
+
+    private bool _paidThisRound;
 
     public override void Initialize()
     {
         base.Initialize();
 
-        _players.PlayerStatusChanged += OnPlayerStatusChanged;
-
-        SubscribeLocalEvent<PlayerAttachedEvent>(OnPlayerAttached);
-        SubscribeLocalEvent<PlayerDisconnectingEvent>(OnPlayerDisconnecting);
+        SubscribeLocalEvent<RoundEndTextAppendEvent>(OnRoundEndText);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart);
+
+        _ = LoadOverridesAsync();
     }
 
-    public override void Shutdown()
+    private async Task LoadOverridesAsync()
     {
-        base.Shutdown();
-        _players.PlayerStatusChanged -= OnPlayerStatusChanged;
-        _sessions.Clear();
+        try
+        {
+            var rows = await _db.GetSalaryOverridesAsync();
+            _overrides.Clear();
+            foreach (var (job, amount) in rows)
+            {
+                _overrides[job] = amount;
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Failed to load salary overrides: {e}");
+        }
     }
 
-    private void OnPlayerStatusChanged(object? sender, SessionStatusEventArgs e)
+    #region Time tracking
+
+    public override void Update(float frameTime)
     {
-        // Disconnects are settled (and the entry removed) in OnPlayerDisconnecting, which the game ticker raises
-        // before the session's playtime/bank data is unloaded, regardless of event handler ordering.
-        if (e.NewStatus == SessionStatus.InGame)
-            EnsureBaseline(e.Session);
+        base.Update(frameTime);
+
+        if (_timing.CurTime < _nextTick)
+            return;
+
+        _nextTick = _timing.CurTime + TickInterval;
+
+        if (_ticker.RunLevel != GameRunLevel.InRound || !_cfg.GetCVar(CCVars.EconomySalaryEnabled))
+            return;
+
+        foreach (var session in _players.Sessions)
+        {
+            if (session.Status != SessionStatus.InGame)
+                continue;
+
+            if (TryGetPaidJob(session, out var job) && job is { } paidJob)
+                Accrue(session.UserId, paidJob, TickInterval);
+        }
     }
 
-    private void OnPlayerAttached(PlayerAttachedEvent ev)
+    /// <summary>The job a session is currently earning for, if any (see class docs for the rules).</summary>
+    public bool TryGetPaidJob(ICommonSession session, out ProtoId<JobPrototype>? job)
     {
-        EnsureBaseline(ev.Player);
+        job = null;
+
+        if (_afk.IsAfk(session))
+            return false;
+
+        if (!_mind.TryGetMind(session.UserId, out var mindId, out var mind))
+            return false;
+
+        if (!_jobs.MindTryGetJobId(mindId, out job) || job == null)
+            return false;
+
+        var current = mind.CurrentEntity;
+        if (current == null)
+            return false;
+
+        if (HasComp<GhostComponent>(current))
+        {
+            // Dead and ghosted still counts ("killed on duty"); a living abandoned body or cryo doesn't.
+            if (!TryGetEntity(mind.OriginalOwnedEntity, out var body))
+                return false;
+
+            return _mobState.IsDead(body.Value) && !HasComp<CryostorageContainedComponent>(body);
+        }
+
+        return !HasComp<CryostorageContainedComponent>(current);
     }
 
-    private void OnPlayerDisconnecting(PlayerDisconnectingEvent ev)
+    /// <summary>Adds job time for a player (also used by tests).</summary>
+    public void Accrue(NetUserId userId, ProtoId<JobPrototype> job, TimeSpan time)
     {
-        PayOut(ev.Session);
-        _sessions.Remove(ev.Session.UserId);
+        if (time <= TimeSpan.Zero)
+            return;
+
+        if (!_round.TryGetValue(userId, out var pay))
+            _round[userId] = pay = new RoundPay();
+
+        pay.JobTime[job] = pay.JobTime.GetValueOrDefault(job) + time;
+    }
+
+    /// <summary>Accrued job time for a player this round (tests, admin commands).</summary>
+    public IReadOnlyDictionary<ProtoId<JobPrototype>, TimeSpan> GetAccrued(NetUserId userId)
+        => _round.TryGetValue(userId, out var pay) ? pay.JobTime : new Dictionary<ProtoId<JobPrototype>, TimeSpan>();
+
+    #endregion
+
+    #region Base salaries
+
+    /// <summary>Per-round base salary for a job: admin override, salary table, default CVar.</summary>
+    public int GetBaseSalary(ProtoId<JobPrototype> job)
+    {
+        if (_overrides.TryGetValue(job.Id, out var overridden))
+            return overridden;
+
+        return GetPrototypeSalary(job);
+    }
+
+    /// <summary>The salary table's value for a job (ignoring overrides), or the default CVar.</summary>
+    public int GetPrototypeSalary(ProtoId<JobPrototype> job)
+    {
+        if (ProtoMan.TryIndex<SalaryTablePrototype>(DefaultTable, out var table) && table.Jobs.TryGetValue(job, out var rate))
+            return rate;
+
+        return _cfg.GetCVar(CCVars.EconomySalaryDefault);
+    }
+
+    public bool HasOverride(ProtoId<JobPrototype> job) => _overrides.ContainsKey(job.Id);
+
+    /// <summary>Sets (or with null, clears) the admin override for a job and persists it.</summary>
+    public void SetOverride(ProtoId<JobPrototype> job, int? amount)
+    {
+        if (amount == null)
+            _overrides.Remove(job.Id);
+        else
+            _overrides[job.Id] = Math.Max(0, amount.Value);
+
+        var value = amount == null ? (int?) null : Math.Max(0, amount.Value);
+        _bank.EnqueueWrite(() => _db.SetSalaryOverrideAsync(job.Id, value));
+    }
+
+    #endregion
+
+    #region Payout math
+
+    /// <summary>
+    /// Presence factor: <paramref name="minFactor"/> at 0, 1.0 at <paramref name="fullFraction"/>,
+    /// <paramref name="maxFactor"/> at 1.0 (linear in between, clamped).
+    /// </summary>
+    public static float PresenceFactor(double presentFraction, float minFactor, float fullFraction, float maxFactor)
+    {
+        presentFraction = Math.Clamp(presentFraction, 0, 1);
+        fullFraction = Math.Clamp(fullFraction, 0.01f, 1f);
+        minFactor = Math.Max(0, minFactor);
+        maxFactor = Math.Max(1f, maxFactor);
+
+        if (presentFraction >= fullFraction)
+        {
+            if (fullFraction >= 1f)
+                return maxFactor;
+
+            var t = (presentFraction - fullFraction) / (1 - fullFraction);
+            return (float) (1 + (maxFactor - 1) * t);
+        }
+
+        return (float) (minFactor + (1 - minFactor) * (presentFraction / fullFraction));
+    }
+
+    /// <summary>
+    /// Gross payout for the given job times: time-weighted average base × presence factor × multiplier.
+    /// </summary>
+    public long ComputePayout(IReadOnlyDictionary<ProtoId<JobPrototype>, TimeSpan> jobTime, TimeSpan roundDuration, out float factor, out double weightedBase)
+    {
+        factor = 0;
+        weightedBase = 0;
+
+        var present = TimeSpan.Zero;
+        foreach (var time in jobTime.Values)
+        {
+            present += time;
+        }
+
+        if (present <= TimeSpan.Zero)
+            return 0;
+
+        foreach (var (job, time) in jobTime)
+        {
+            weightedBase += GetBaseSalary(job) * (time / present);
+        }
+
+        var fraction = roundDuration > TimeSpan.Zero ? present / roundDuration : 1.0;
+        factor = PresenceFactor(fraction,
+            _cfg.GetCVar(CCVars.EconomySalaryMinFactor),
+            _cfg.GetCVar(CCVars.EconomySalaryFullTimeFraction),
+            _cfg.GetCVar(CCVars.EconomySalaryMaxFactor));
+
+        var multiplier = Math.Max(0, _cfg.GetCVar(CCVars.EconomySalaryMultiplier));
+        return (long) Math.Floor(weightedBase * factor * multiplier);
+    }
+
+    #endregion
+
+    #region Round end
+
+    private void OnRoundEndText(ref RoundEndTextAppendEvent ev)
+    {
+        var (count, total) = PayAll();
+        if (count > 0)
+            ev.AddLine(Loc.GetString("salary-round-end-summary", ("count", count), ("total", total)));
+    }
+
+    /// <summary>Pays everyone who accrued time this round. Idempotent per round.</summary>
+    public (int Count, long Total) PayAll()
+    {
+        if (_paidThisRound || !_cfg.GetCVar(CCVars.EconomySalaryEnabled))
+            return (0, 0);
+
+        _paidThisRound = true;
+
+        var roundDuration = _ticker.RoundDuration();
+        var count = 0;
+        var total = 0L;
+
+        foreach (var (userId, pay) in _round)
+        {
+            var gross = ComputePayout(pay.JobTime, roundDuration, out var factor, out _);
+            if (gross <= 0)
+                continue;
+
+            // Let other systems (fines) take their cut.
+            var deduction = new SalaryDeductionEvent(userId, gross);
+            RaiseLocalEvent(ref deduction);
+            var net = Math.Max(0, gross - deduction.Total);
+
+            var jobs = string.Join(", ", pay.JobTime.Select(kv => $"{kv.Key.Id} {kv.Value.TotalMinutes:0}min"));
+            if (net > 0)
+            {
+                _economy.Pay(EconomyParty.Player(userId), net, $"salary ({jobs}; factor {factor:0.00})");
+                count++;
+                total += net;
+            }
+
+            if (_players.TryGetSessionById(userId, out var session) && session.Status != SessionStatus.Disconnected)
+            {
+                var jobNames = string.Join(", ", pay.JobTime.Keys.Select(j => ProtoMan.TryIndex(j, out var proto) ? proto.LocalizedName : j.Id));
+                _chat.DispatchServerMessage(session, Loc.GetString("salary-notice",
+                    ("credits", net),
+                    ("jobs", jobNames),
+                    ("factor", factor.ToString("0.00"))));
+
+                foreach (var line in deduction.Lines)
+                {
+                    _chat.DispatchServerMessage(session, line);
+                }
+            }
+        }
+
+        return (count, total);
     }
 
     private void OnRoundRestart(RoundRestartCleanupEvent ev)
     {
-        foreach (var session in _players.Sessions)
-        {
-            PayOut(session);
-            // Fresh round: whatever accrued so far is settled, start counting from here again.
-            ResetBaseline(session);
-        }
+        ResetRound();
     }
 
-    /// <summary>Takes the tracker snapshot for a session once, as soon as its playtime data is loaded.</summary>
-    private void EnsureBaseline(ICommonSession session)
+    /// <summary>Forgets all accrued time and the paid flag (round restart, tests).</summary>
+    public void ResetRound()
     {
-        if (_sessions.ContainsKey(session.UserId))
-            return;
-
-        if (!_tracking.TryGetTrackerTimes(session, out var times))
-            return;
-
-        _tracking.FlushTracker(session);
-        _sessions[session.UserId] = new SessionPay(new Dictionary<string, TimeSpan>(times));
+        _round.Clear();
+        _paidThisRound = false;
     }
 
-    private void ResetBaseline(ICommonSession session)
+    #endregion
+
+    private sealed class RoundPay
     {
-        _sessions.Remove(session.UserId);
-        EnsureBaseline(session);
-    }
-
-    /// <summary>Hourly rate for a job: the salary table, else the default CVar.</summary>
-    public int GetHourlyRate(ProtoId<JobPrototype> job)
-    {
-        if (ProtoMan.TryIndex<SalaryTablePrototype>(DefaultTable, out var table)
-            && table.Jobs.TryGetValue(job, out var rate))
-        {
-            return rate;
-        }
-
-        return _cfg.GetCVar(CCVars.EconomySalaryDefaultPerHour);
-    }
-
-    /// <summary>
-    /// Maps every job playtime tracker to the best-paid job using it and that job's localized name.
-    /// Only job trackers count — never <c>Overall</c>/<c>Admin</c>.
-    /// </summary>
-    private Dictionary<string, (ProtoId<JobPrototype> Job, int Rate, string Name)> BuildTrackerRates()
-    {
-        var result = new Dictionary<string, (ProtoId<JobPrototype>, int, string)>();
-        foreach (var job in ProtoMan.EnumeratePrototypes<JobPrototype>())
-        {
-            if (string.IsNullOrEmpty(job.PlayTimeTracker.Id))
-                continue;
-
-            var rate = GetHourlyRate(job.ID);
-            if (result.TryGetValue(job.PlayTimeTracker.Id, out var existing) && existing.Item2 >= rate)
-                continue;
-
-            result[job.PlayTimeTracker.Id] = (job.ID, rate, job.LocalizedName);
-        }
-
-        return result;
-    }
-
-    /// <summary>
-    /// Pure payout computation: for each job tracker, the unpaid minutes since the baseline and the credits owed.
-    /// </summary>
-    public List<SalaryLine> ComputeLines(
-        IReadOnlyDictionary<string, TimeSpan> baseline,
-        IReadOnlyDictionary<string, TimeSpan> current,
-        IReadOnlyDictionary<string, TimeSpan> alreadyPaid)
-    {
-        var lines = new List<SalaryLine>();
-        var rates = BuildTrackerRates();
-        var multiplier = _cfg.GetCVar(CCVars.EconomySalaryMultiplier);
-
-        foreach (var (tracker, now) in current)
-        {
-            if (tracker == PlayTimeTrackingShared.TrackerOverall || tracker == PlayTimeTrackingShared.TrackerAdmin)
-                continue;
-
-            if (!rates.TryGetValue(tracker, out var rate))
-                continue;
-
-            var earned = now - baseline.GetValueOrDefault(tracker) - alreadyPaid.GetValueOrDefault(tracker);
-            if (earned <= TimeSpan.Zero)
-                continue;
-
-            var credits = EconomyPricing.Salary(earned.TotalMinutes, rate.Rate, multiplier);
-            lines.Add(new SalaryLine(tracker, rate.Job, rate.Name, earned, credits));
-        }
-
-        return lines;
-    }
-
-    /// <summary>Pays everything the session has earned since its last payout. Safe to call repeatedly.</summary>
-    public long PayOut(ICommonSession session)
-    {
-        if (!_cfg.GetCVar(CCVars.EconomySalaryEnabled))
-            return 0;
-
-        // A session without a baseline (playtime loaded late) starts counting now; nothing is owed yet.
-        EnsureBaseline(session);
-
-        if (!_sessions.TryGetValue(session.UserId, out var pay))
-            return 0;
-
-        if (!_tracking.TryGetTrackerTimes(session, out var current))
-            return 0;
-
-        _tracking.FlushTracker(session);
-
-        var lines = ComputeLines(pay.Baseline, current, pay.Paid);
-        var total = 0L;
-        var notices = new List<string>();
-
-        foreach (var line in lines)
-        {
-            // Always mark the minutes as settled, even when they rounded down to 0 credits; the fraction is lost
-            // rather than carried, which keeps reconnect/round-end bookkeeping trivial.
-            pay.Paid[line.Tracker] = pay.Paid.GetValueOrDefault(line.Tracker) + line.Time;
-
-            if (line.Credits <= 0)
-                continue;
-
-            total += line.Credits;
-            notices.Add(Loc.GetString("salary-notice",
-                ("credits", line.Credits),
-                ("minutes", (int) Math.Floor(line.Time.TotalMinutes)),
-                ("job", line.JobName)));
-        }
-
-        if (total <= 0)
-            return 0;
-
-        var reason = $"salary ({string.Join(", ", lines.Where(l => l.Credits > 0).Select(l => $"{l.Job} {l.Time.TotalMinutes:0}min"))})";
-
-        if (_bank.IsLoaded(session.UserId))
-        {
-            _bank.Credit(session.UserId, total, reason, out _, salary: true);
-        }
-        else
-        {
-            // Cache already unloaded (late disconnect path): write straight to the database.
-            _ = _bank.AdjustBalanceAsync(session.UserId, total, reason);
-        }
-
-        if (session.Status != SessionStatus.Disconnected)
-        {
-            foreach (var notice in notices)
-            {
-                _chat.DispatchServerMessage(session, notice);
-            }
-        }
-
-        return total;
-    }
-
-    /// <summary>Testing hook: whether a baseline exists for the session.</summary>
-    public bool HasBaseline(ICommonSession session) => _sessions.ContainsKey(session.UserId);
-
-    private sealed class SessionPay(Dictionary<string, TimeSpan> baseline)
-    {
-        public readonly Dictionary<string, TimeSpan> Baseline = baseline;
-        public readonly Dictionary<string, TimeSpan> Paid = new();
+        public readonly Dictionary<ProtoId<JobPrototype>, TimeSpan> JobTime = new();
     }
 }
 
-/// <summary>One job's share of a salary payout.</summary>
-public readonly record struct SalaryLine(string Tracker, ProtoId<JobPrototype> Job, string JobName, TimeSpan Time, long Credits);
+/// <summary>
+/// Raised before a salary is paid so other systems can deduct from it (unpaid fines). Handlers add to
+/// <see cref="Total"/> (never more than <see cref="Gross"/> in sum) and may add a chat line for the player.
+/// </summary>
+[ByRefEvent]
+public record struct SalaryDeductionEvent(NetUserId UserId, long Gross)
+{
+    public long Total;
+    public readonly List<string> Lines = new();
+}

@@ -16,6 +16,7 @@ public sealed class MoneyConfigEui : BaseEui
         _window = new MoneyConfigWindow();
 
         _window.OnSet += (field, value) => SendMessage(new MoneyConfigSetMessage(field, value));
+        _window.OnSetSalary += (job, value) => SendMessage(new MoneyConfigSetSalaryMessage(job, value));
         _window.OnClose += () => SendMessage(new CloseEuiMessage());
     }
 

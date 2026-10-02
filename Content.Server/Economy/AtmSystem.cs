@@ -27,6 +27,7 @@ public sealed partial class AtmSystem : EntitySystem
 {
     [Dependency] private IAdminLogManager _adminLog = default!;
     [Dependency] private IBankManager _bank = default!;
+    [Dependency] private EconomySystem _economy = default!;
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private BankCardSystem _cards = default!;
     [Dependency] private ItemSlotsSystem _slots = default!;
@@ -238,6 +239,7 @@ public sealed partial class AtmSystem : EntitySystem
             if (!_bank.TryDebit(owner, total, reason, out _))
                 return Fail(ent, user, "atm-insufficient-funds");
 
+            _economy.Record(EconomyParty.Player(owner), EconomyParty.External, total, reason);
             CompleteWithdraw(ent, user, card, amount, fee);
             return true;
         }
@@ -253,6 +255,9 @@ public sealed partial class AtmSystem : EntitySystem
             var result = await _bank.AdjustBalanceAsync(owner, -(amount + fee), reason);
             if (Deleted(ent))
                 return;
+
+            if (result != null)
+                _economy.Record(EconomyParty.Player(owner), EconomyParty.External, amount + fee, reason);
 
             if (result == null)
             {
@@ -320,6 +325,7 @@ public sealed partial class AtmSystem : EntitySystem
             if (!_bank.Credit(owner, amount, reason, out _))
                 return Fail(ent, user, "atm-error");
 
+            _economy.Record(EconomyParty.External, EconomyParty.Player(owner), amount, reason);
             CompleteDeposit(ent, user, card, cash, amount);
             return true;
         }
@@ -341,6 +347,9 @@ public sealed partial class AtmSystem : EntitySystem
             var result = await _bank.AdjustBalanceAsync(owner, amount, reason);
             if (Deleted(ent))
                 return;
+
+            if (result != null)
+                _economy.Record(EconomyParty.External, EconomyParty.Player(owner), amount, reason);
 
             if (result != null)
                 _offlineBalances[ent] = result.Value;

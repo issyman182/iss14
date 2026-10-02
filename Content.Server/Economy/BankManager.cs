@@ -30,10 +30,10 @@ public sealed partial class BankManager : IBankManager, IPostInjectInit
     private readonly Dictionary<NetUserId, long> _balances = new();
 
     /// <summary>
-    /// Per-user write queue: the tail task of each user's chain. Writes for one user run strictly in order, so a
-    /// fast credit+debit can never race in the database. Writes for different users run concurrently.
+    /// The one economy write queue: every database write is chained onto it, so writes run strictly in order and
+    /// never concurrently (a fast credit+debit can't race, and SQLite only allows one writer anyway).
     /// </summary>
-    private readonly Dictionary<NetUserId, Task> _writeChains = new();
+    private Task _writeChain = Task.CompletedTask;
 
     public event Action<BankBalanceChangedEvent>? BalanceChanged;
 
@@ -111,7 +111,7 @@ public sealed partial class BankManager : IBankManager, IPostInjectInit
         _balances[userId] = newBalance;
 
         var delta = newBalance - oldBalance;
-        Enqueue(userId, async () =>
+        EnqueueWrite(async () =>
         {
             // The cache already has the authoritative value; delta-adjust the row so an admin edit made directly
             // in the database between two writes is not clobbered by a stale absolute value.
@@ -137,10 +137,9 @@ public sealed partial class BankManager : IBankManager, IPostInjectInit
         _entMan.EventBus.RaiseEvent(EventSource.Local, ev);
     }
 
-    private void Enqueue(NetUserId userId, Func<Task> write)
+    public void EnqueueWrite(Func<Task> write)
     {
-        var previous = _writeChains.GetValueOrDefault(userId) ?? Task.CompletedTask;
-        var next = previous.ContinueWith(async _ =>
+        _writeChain = _writeChain.ContinueWith(async _ =>
             {
                 try
                 {
@@ -148,18 +147,13 @@ public sealed partial class BankManager : IBankManager, IPostInjectInit
                 }
                 catch (Exception e)
                 {
-                    _sawmill.Error($"Bank write for {userId} failed: {e}");
+                    _sawmill.Error($"Economy database write failed: {e}");
                 }
             },
             TaskScheduler.Default).Unwrap();
-
-        _writeChains[userId] = next;
     }
 
-    public async Task FlushAsync()
-    {
-        await Task.WhenAll(_writeChains.Values.ToArray());
-    }
+    public Task FlushAsync() => _writeChain;
 
     #region Offline / direct database access
 
@@ -215,8 +209,7 @@ public sealed partial class BankManager : IBankManager, IPostInjectInit
         return result;
     }
 
-    private Task FlushUser(NetUserId userId)
-        => _writeChains.GetValueOrDefault(userId) ?? Task.CompletedTask;
+    private Task FlushUser(NetUserId userId) => _writeChain;
 
     #endregion
 }

@@ -70,6 +70,14 @@
                         StyleClasses="OpenRight"
                         HorizontalExpand="True"/>
 
+                <!-- iss14: Economy — pay from the buyer's own account -->
+                <Button Name="PayPrivate"
+                        Access="Public"
+                        Text="{Loc 'cargo-console-menu-order-row-button-private'}"
+                        StyleClasses="OpenBoth"
+                        HorizontalExpand="True"
+                        Visible="False" />
+
                 <Button Name="Cancel"
                         Access="Public"
                         Text="{Loc 'cargo-console-menu-order-row-button-cancel'}"

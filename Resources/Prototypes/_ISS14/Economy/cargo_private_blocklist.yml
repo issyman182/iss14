@@ -1,0 +1,9 @@
+# iss14: Economy — products crew may not order with their own money by default.
+# Cargo can change the list (or switch it off) per round at the cargo order console.
+- type: cargoPrivateBlocklist
+  id: Default
+  categories:
+  - cargoproduct-category-name-armory
+  - cargoproduct-category-name-security
+  - cargoproduct-category-name-emergency
+  products: []

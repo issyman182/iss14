@@ -1,0 +1,141 @@
+# iss14: Economy — legal terminal (fines, mandates). Built from the ATM prototype.
+- type: entity
+  parent: [ BaseMachinePowered, BaseMachineDestructible ]
+  id: FineTerminal
+  name: legal terminal
+  description: A NanoTrasen legal terminal. Security issues fines here; insert your ID card to pay yours, or file a signed representation agreement to let your lawyer pay them for you.
+  components:
+  - type: Sprite
+    sprite: _ISS14/Structures/Machines/fine_terminal.rsi
+    snapCardinals: true
+    layers:
+    - state: off
+    - state: normal-unshaded
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: panel
+      map: ["enum.WiresVisualLayers.MaintenancePanel"]
+      visible: false
+  - type: GenericVisualizer
+    visuals:
+      enum.PowerDeviceVisuals.Powered:
+        enum.PowerDeviceVisualLayers.Powered:
+          True: { visible: true }
+          False: { visible: false }
+      enum.WiresVisualLayers.MaintenancePanel:
+        enum.WiresVisualLayers.MaintenancePanel:
+          True: { visible: true }
+          False: { visible: false }
+  - type: Appearance
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.25,-0.45,0.25,0.45"
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
+        density: 200
+  - type: Damageable
+    damageModifierSet: GlassReinforcedMod
+  - type: Repairable
+    doAfterDelay: 8
+  - type: StationAiWhitelist
+  - type: AmbientOnPowered
+  - type: AmbientSound
+    volume: -9
+    range: 3
+    enabled: false
+    sound:
+      path: /Audio/Ambience/Objects/vending_machine_hum.ogg
+  - type: ApcPowerReceiver
+    powerLoad: 150
+  - type: LitOnPowered
+  - type: PointLight
+    enabled: false
+    castShadows: false
+    radius: 1.5
+    color: "#e05f5f"
+  - type: Electrified
+    enabled: false
+    usesApcPower: true
+  - type: WiresPanel
+  - type: WiresVisuals
+  - type: StaticPrice
+    price: 400
+  - type: FineTerminal
+  - type: ItemSlots
+    slots:
+      fine-id:
+        name: fine-terminal-slot-id
+        ejectSound: /Audio/Machines/id_swipe.ogg
+        insertSound: /Audio/Weapons/Guns/MagIn/batrifle_magin.ogg
+        ejectOnBreak: true
+        swap: false
+        whitelist:
+          components:
+          - IdCard
+      fine-mandate:
+        name: fine-terminal-slot-mandate
+        ejectOnBreak: true
+        swap: false
+        whitelist:
+          components:
+          - LegalMandate
+  - type: ContainerContainer
+    containers:
+      fine-id: !type:ContainerSlot
+      fine-mandate: !type:ContainerSlot
+  - type: ActivatableUI
+    key: enum.FineTerminalUiKey.Key
+  - type: ActivatableUIRequiresPower
+  - type: UserInterface
+    interfaces:
+      enum.FineTerminalUiKey.Key:
+        type: FineTerminalBoundUserInterface
+
+
+- type: entity
+  parent: BaseFlatpack
+  id: FineTerminalFlatpack
+  name: legal terminal flatpack
+  description: A flatpack used for constructing a legal terminal.
+  components:
+  - type: Flatpack
+    entity: FineTerminal
+  - type: Sprite
+    layers:
+    - state: base
+    - state: overlay
+      color: "#e05f5f"
+      map: ["enum.FlatpackVisualLayers.Overlay"]
+    - state: icon-default
+
+- type: entity
+  id: CrateFineTerminal
+  parent: CrateGenericSteel
+  name: legal terminal crate
+  description: A crate with a legal terminal flatpack inside. Justice, now self-service.
+  components:
+  - type: StorageFill
+    contents:
+    - id: FineTerminalFlatpack
+
+- type: entity
+  parent: Paper
+  id: PaperLegalMandate
+  name: legal representation agreement
+  description: A standard NanoTrasen form. Once signed by client and attorney and filed at a legal terminal, the attorney may settle the client's fines from the client's account.
+  components:
+  - type: Paper
+    content: paper-legal-mandate-content
+  - type: BlockWriting
+    failWriteMessage: paper-legal-mandate-block-writing
+  - type: LegalMandate
+  - type: PaperVisuals
+    backgroundImagePath: "/Textures/Interface/Paper/paper_background_default.svg.96dpi.png"
+    contentImagePath: "/Textures/Interface/Paper/paper_content_lined.svg.96dpi.png"
+    backgroundPatchMargin: 16.0, 16.0, 16.0, 16.0
+    contentMargin: 16.0, 16.0, 16.0, 16.0

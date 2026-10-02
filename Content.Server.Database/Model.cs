@@ -53,6 +53,10 @@ namespace Content.Server.Database
         public DbSet<CustomVoteLogOption> CustomVoteLogOption { get; set; } = null!;
         public DbSet<MigrationLog> MigrationLog { get; set; } = null!;
         public DbSet<BankAccount> BankAccount { get; set; } = null!; // iss14: Economy
+        public DbSet<BankTransaction> BankTransaction { get; set; } = null!; // iss14: Economy
+        public DbSet<SalaryOverride> SalaryOverride { get; set; } = null!; // iss14: Economy
+        public DbSet<PlayerUnlock> PlayerUnlock { get; set; } = null!; // iss14: Economy
+        public DbSet<PlayerTitle> PlayerTitle { get; set; } = null!; // iss14: Economy
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -311,6 +315,19 @@ namespace Content.Server.Database
             // iss14: Economy
             modelBuilder.Entity<BankAccount>()
                 .HasIndex(b => b.Balance);
+
+            modelBuilder.Entity<BankTransaction>()
+                .HasIndex(t => t.Time);
+
+            modelBuilder.Entity<BankTransaction>()
+                .HasIndex(t => t.FromId);
+
+            modelBuilder.Entity<BankTransaction>()
+                .HasIndex(t => t.ToId);
+
+            modelBuilder.Entity<PlayerUnlock>()
+                .HasIndex(u => new { u.UserId, u.UnlockId })
+                .IsUnique();
 
             ModelBan.OnModelCreating(modelBuilder);
             ModelCustomVoteLog.OnModelCreating(modelBuilder);
@@ -599,6 +616,77 @@ namespace Content.Server.Database
 
         /// <summary>When the last salary was paid out, for display/diagnostics.</summary>
         public DateTime? LastSalaryPayout { get; set; }
+    }
+
+    /// <summary>
+    /// iss14: Economy — one row per booking. <c>FromKind</c>/<c>ToKind</c> are "player", "department", "station",
+    /// "external" (money created or destroyed: salaries, vending, fees); the ids are the user id, the account
+    /// prototype id or empty.
+    /// </summary>
+    [Table("bank_transaction")]
+    public sealed class BankTransaction
+    {
+        [Key]
+        public int Id { get; set; }
+
+        public DateTime Time { get; set; }
+
+        public int? RoundId { get; set; }
+
+        [Required]
+        public string FromKind { get; set; } = string.Empty;
+
+        [Required]
+        public string FromId { get; set; } = string.Empty;
+
+        [Required]
+        public string ToKind { get; set; } = string.Empty;
+
+        [Required]
+        public string ToId { get; set; } = string.Empty;
+
+        public long Amount { get; set; }
+
+        [Required]
+        public string Reason { get; set; } = string.Empty;
+    }
+
+    /// <summary>iss14: Economy — admin override of a job's per-round salary (the prototype table is the default).</summary>
+    [Table("salary_override")]
+    public sealed class SalaryOverride
+    {
+        [Required, Key]
+        public string Job { get; set; } = string.Empty;
+
+        public int Amount { get; set; }
+    }
+
+    /// <summary>iss14: Economy — a store item (title, loadout item) a player has bought.</summary>
+    [Table("player_unlock")]
+    public sealed class PlayerUnlock
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        public Guid UserId { get; set; }
+
+        [Required]
+        public string UnlockId { get; set; } = string.Empty;
+
+        public DateTime Time { get; set; }
+
+        public long Price { get; set; }
+    }
+
+    /// <summary>iss14: Economy — the title a player currently wears (null/empty = none).</summary>
+    [Table("player_title")]
+    public sealed class PlayerTitle
+    {
+        [Required, Key]
+        public Guid UserId { get; set; }
+
+        public string? TitleId { get; set; }
     }
 
     [Table("whitelist")]

@@ -188,6 +188,33 @@ namespace Content.Server.Database
 
         /// <summary>The <paramref name="count"/> richest accounts with the players' last seen names.</summary>
         Task<List<BankTopEntry>> GetTopBankAccountsAsync(int count, CancellationToken cancel = default);
+
+        /// <summary>Appends one booking to the transaction log.</summary>
+        Task AddBankTransactionAsync(BankTransaction transaction);
+
+        /// <summary>Newest transactions involving <paramref name="partyId"/> (a user id or account id), newest first.</summary>
+        Task<List<BankTransaction>> GetBankTransactionsAsync(string partyId, int count, CancellationToken cancel = default);
+
+        /// <summary>All admin salary overrides (job id -> per-round salary).</summary>
+        Task<Dictionary<string, int>> GetSalaryOverridesAsync(CancellationToken cancel = default);
+
+        /// <summary>Sets (or with null, removes) the salary override for a job.</summary>
+        Task SetSalaryOverrideAsync(string job, int? amount);
+
+        /// <summary>Store unlocks owned by the player.</summary>
+        Task<HashSet<string>> GetPlayerUnlocksAsync(NetUserId userId, CancellationToken cancel = default);
+
+        /// <summary>Records a bought/granted unlock. Returns false if the player already owns it.</summary>
+        Task<bool> AddPlayerUnlockAsync(NetUserId userId, string unlockId, long price);
+
+        /// <summary>Revokes an unlock. Returns false if the player didn't own it.</summary>
+        Task<bool> RemovePlayerUnlockAsync(NetUserId userId, string unlockId);
+
+        /// <summary>The title the player wears, or null.</summary>
+        Task<string?> GetPlayerTitleAsync(NetUserId userId, CancellationToken cancel = default);
+
+        /// <summary>Sets (or with null, clears) the title the player wears.</summary>
+        Task SetPlayerTitleAsync(NetUserId userId, string? titleId);
         #endregion
 
         #region User Migration
@@ -717,6 +744,60 @@ namespace Content.Server.Database
         {
             DbReadOpsMetric.Inc();
             return RunDbCommand(() => _db.GetTopBankAccountsAsync(count, cancel));
+        }
+
+        public Task AddBankTransactionAsync(BankTransaction transaction)
+        {
+            DbWriteOpsMetric.Inc();
+            return RunDbCommand(() => _db.AddBankTransactionAsync(transaction));
+        }
+
+        public Task<List<BankTransaction>> GetBankTransactionsAsync(string partyId, int count, CancellationToken cancel = default)
+        {
+            DbReadOpsMetric.Inc();
+            return RunDbCommand(() => _db.GetBankTransactionsAsync(partyId, count, cancel));
+        }
+
+        public Task<Dictionary<string, int>> GetSalaryOverridesAsync(CancellationToken cancel = default)
+        {
+            DbReadOpsMetric.Inc();
+            return RunDbCommand(() => _db.GetSalaryOverridesAsync(cancel));
+        }
+
+        public Task SetSalaryOverrideAsync(string job, int? amount)
+        {
+            DbWriteOpsMetric.Inc();
+            return RunDbCommand(() => _db.SetSalaryOverrideAsync(job, amount));
+        }
+
+        public Task<HashSet<string>> GetPlayerUnlocksAsync(NetUserId userId, CancellationToken cancel = default)
+        {
+            DbReadOpsMetric.Inc();
+            return RunDbCommand(() => _db.GetPlayerUnlocksAsync(userId, cancel));
+        }
+
+        public Task<bool> AddPlayerUnlockAsync(NetUserId userId, string unlockId, long price)
+        {
+            DbWriteOpsMetric.Inc();
+            return RunDbCommand(() => _db.AddPlayerUnlockAsync(userId, unlockId, price));
+        }
+
+        public Task<bool> RemovePlayerUnlockAsync(NetUserId userId, string unlockId)
+        {
+            DbWriteOpsMetric.Inc();
+            return RunDbCommand(() => _db.RemovePlayerUnlockAsync(userId, unlockId));
+        }
+
+        public Task<string?> GetPlayerTitleAsync(NetUserId userId, CancellationToken cancel = default)
+        {
+            DbReadOpsMetric.Inc();
+            return RunDbCommand(() => _db.GetPlayerTitleAsync(userId, cancel));
+        }
+
+        public Task SetPlayerTitleAsync(NetUserId userId, string? titleId)
+        {
+            DbWriteOpsMetric.Inc();
+            return RunDbCommand(() => _db.SetPlayerTitleAsync(userId, titleId));
         }
 
         public Task<List<MigrationLog>> GetMigrationLogsAsync(int limit, CancellationToken cancel = default)

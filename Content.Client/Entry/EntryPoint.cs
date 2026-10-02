@@ -69,6 +69,7 @@ namespace Content.Client.Entry
         [Dependency] private GhostKickManager _ghostKick = default!;
         [Dependency] private ExtendedDisconnectInformationManager _extendedDisconnectInformation = default!;
         [Dependency] private JobRequirementsManager _jobRequirements = default!;
+        [Dependency] private Economy.Store.ClientStoreManager _store = default!; // iss14: Economy
         [Dependency] private ContentLocalizationManager _contentLoc = default!;
         [Dependency] private ContentReplayPlaybackManager _playbackMan = default!;
         [Dependency] private IResourceManager _resourceManager = default!;
@@ -138,6 +139,7 @@ namespace Content.Client.Entry
             _ghostKick.Initialize();
             _extendedDisconnectInformation.Initialize();
             _jobRequirements.Initialize();
+            _store.Initialize(); // iss14: Economy
             _playbackMan.Initialize();
             _clientsidePlaytimeManager.Initialize();
 

@@ -1,0 +1,59 @@
+<!-- iss14: Economy -->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      Title="{Loc fine-terminal-window-title}"
+                      Resizable="True"
+                      MinSize="520 440"
+                      SetSize="620 560">
+    <BoxContainer Orientation="Vertical" Margin="8" HorizontalExpand="True" VerticalExpand="True">
+        <TabContainer Name="Tabs" VerticalExpand="True" HorizontalExpand="True">
+
+            <!-- My fines -->
+            <BoxContainer Name="OwnTab" Orientation="Vertical" Margin="4" VerticalExpand="True">
+                <Label Name="CardLabel" StyleClasses="LabelHeading" />
+                <Label Text="{Loc fine-terminal-own-hint}" StyleClasses="LabelSubText" />
+                <ScrollContainer HScrollEnabled="False" VerticalExpand="True" Margin="0 4 0 0">
+                    <BoxContainer Name="OwnFinesBox" Orientation="Vertical" HorizontalExpand="True" />
+                </ScrollContainer>
+            </BoxContainer>
+
+            <!-- Lawyer -->
+            <BoxContainer Name="LawyerTab" Orientation="Vertical" Margin="4" VerticalExpand="True">
+                <Label Text="{Loc fine-terminal-lawyer-hint}" StyleClasses="LabelSubText" />
+                <BoxContainer Orientation="Horizontal" Margin="0 6 0 0">
+                    <Label Name="MandateLabel" HorizontalExpand="True" />
+                    <Button Name="FileMandateButton" Text="{Loc fine-terminal-file-mandate}" />
+                </BoxContainer>
+                <Label Name="ClientLabel" StyleClasses="LabelHeading" Margin="0 8 0 0" />
+                <ScrollContainer HScrollEnabled="False" VerticalExpand="True" Margin="0 4 0 0">
+                    <BoxContainer Name="ClientFinesBox" Orientation="Vertical" HorizontalExpand="True" />
+                </ScrollContainer>
+            </BoxContainer>
+
+            <!-- Security -->
+            <BoxContainer Name="SecurityTab" Orientation="Horizontal" Margin="4" VerticalExpand="True">
+                <BoxContainer Orientation="Vertical" MinWidth="200" VerticalExpand="True">
+                    <LineEdit Name="RecordSearch" PlaceHolder="{Loc fine-terminal-search}" />
+                    <ItemList Name="RecordList" VerticalExpand="True" Margin="0 4 0 0" />
+                </BoxContainer>
+                <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" Margin="8 0 0 0">
+                    <Label Name="SelectedLabel" StyleClasses="LabelHeading" Text="{Loc fine-terminal-no-selection}" />
+                    <ScrollContainer HScrollEnabled="False" VerticalExpand="True" Margin="0 4 0 4">
+                        <BoxContainer Name="SelectedFinesBox" Orientation="Vertical" HorizontalExpand="True" />
+                    </ScrollContainer>
+                    <PanelContainer StyleClasses="BackgroundDark">
+                        <BoxContainer Orientation="Vertical" Margin="6">
+                            <Label Text="{Loc fine-terminal-issue-heading}" StyleClasses="LabelKeyText" />
+                            <BoxContainer Orientation="Horizontal" Margin="0 4 0 0">
+                                <LineEdit Name="AmountEdit" PlaceHolder="{Loc fine-terminal-amount}" MinWidth="90" />
+                                <LineEdit Name="ReasonEdit" PlaceHolder="{Loc fine-terminal-reason}" HorizontalExpand="True" Margin="4 0 0 0" />
+                                <Button Name="IssueButton" Text="{Loc fine-terminal-issue}" Margin="4 0 0 0" />
+                            </BoxContainer>
+                        </BoxContainer>
+                    </PanelContainer>
+                </BoxContainer>
+            </BoxContainer>
+        </TabContainer>
+        <Label Name="MessageLabel" Margin="0 6 0 0" />
+    </BoxContainer>
+</controls:FancyWindow>

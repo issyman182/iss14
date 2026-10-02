@@ -85,6 +85,13 @@ namespace Content.Client.Cargo.BUI
             };
             _menu.OnOrderApproved += ApproveOrder;
             _menu.OnOrderCanceled += RemoveOrder;
+            // iss14: Economy
+            _menu.OnOrderPaidPrivately += order =>
+            {
+                if (order != null)
+                    SendMessage(new Content.Shared.Economy.CargoConsoleApprovePrivateOrderMessage(order.OrderId));
+            };
+            _menu.OnPrivatePolicy += OpenPrivatePolicy;
             _orderMenu.SubmitButton.OnPressed += (_) =>
             {
                 if (AddOrder())
@@ -142,6 +149,8 @@ namespace Content.Client.Cargo.BUI
             );
 
             _menu?.UpdateStation(station);
+            _station = station; // iss14: Economy
+            _policyWindow?.SetStation(station);
             Populate(cState.Orders);
         }
 
@@ -154,6 +163,30 @@ namespace Content.Client.Cargo.BUI
 
             _menu?.Dispose();
             _orderMenu?.Dispose();
+            _policyWindow?.Dispose(); // iss14: Economy
+        }
+
+        // iss14: Economy — private order blocklist editor
+        [ViewVariables]
+        private CargoPrivatePolicyWindow? _policyWindow;
+
+        private EntityUid? _station;
+
+        private void OpenPrivatePolicy()
+        {
+            if (_station == null)
+                return;
+
+            if (_policyWindow == null)
+            {
+                _policyWindow = new CargoPrivatePolicyWindow(EntMan, IoCManager.Resolve<IPrototypeManager>());
+                _policyWindow.OnSetBlocked += (product, blocked) => SendMessage(new Content.Shared.Economy.CargoConsoleSetPrivateBlockMessage(product, blocked));
+                _policyWindow.OnToggle += () => SendMessage(new Content.Shared.Economy.CargoConsoleTogglePrivateBlocklistMessage());
+                _policyWindow.OnClose += () => _policyWindow = null;
+            }
+
+            _policyWindow.SetStation(_station.Value);
+            _policyWindow.OpenCentered();
         }
 
         private bool AddOrder()

@@ -199,3 +199,36 @@
   cost: 1000
   category: cargoproduct-category-name-service
   group: market
+
+# iss14: Economy
+- type: cargoProduct
+  id: CashRegisterCargo
+  icon:
+    sprite: _ISS14/Objects/Devices/cash_register.rsi
+    state: icon
+  product: CrateCashRegister
+  cost: 500
+  category: cargoproduct-category-name-service
+  group: market
+
+# iss14: Economy
+- type: cargoProduct
+  id: FineTerminalCargo
+  icon:
+    sprite: _ISS14/Structures/Machines/fine_terminal.rsi
+    state: off
+  product: CrateFineTerminal
+  cost: 1200
+  category: cargoproduct-category-name-security
+  group: market
+
+# iss14: Economy
+- type: cargoProduct
+  id: TaskBoardsCargo
+  icon:
+    sprite: _ISS14/Structures/Machines/task_board.rsi
+    state: off
+  product: CrateTaskBoards
+  cost: 1500
+  category: cargoproduct-category-name-service
+  group: market

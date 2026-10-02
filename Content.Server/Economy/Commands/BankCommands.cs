@@ -201,3 +201,62 @@ internal static class BankCommandHelpers
         return CompletionResult.FromHintOptions(options, hint);
     }
 }
+
+/// <summary><c>banklog &lt;player|account&gt; [count]</c> — newest transactions involving a player or a department account.</summary>
+[AdminCommand(AdminFlags.Admin)]
+public sealed partial class BankLogCommand : LocalizedCommands
+{
+    [Dependency] private IServerDbManager _db = default!;
+    [Dependency] private IPlayerLocator _locator = default!;
+    [Dependency] private IPlayerManager _players = default!;
+
+    public override string Command => "banklog";
+
+    public override async void Execute(IConsoleShell shell, string argStr, string[] args)
+    {
+        if (args.Length is < 1 or > 2)
+        {
+            shell.WriteError(Loc.GetString("cmd-banklog-invalid-arguments"));
+            return;
+        }
+
+        var count = 20;
+        if (args.Length == 2 && (!int.TryParse(args[1], out count) || count <= 0))
+        {
+            shell.WriteError(Loc.GetString("cmd-banklog-invalid-arguments"));
+            return;
+        }
+
+        // A player name/guid, else taken literally (department account ids like "Service").
+        var party = args[0];
+        var located = await _locator.LookupIdByNameOrIdAsync(args[0]);
+        if (located != null)
+            party = located.UserId.ToString();
+
+        var rows = await _db.GetBankTransactionsAsync(party, Math.Min(count, 200));
+        if (rows.Count == 0)
+        {
+            shell.WriteLine(Loc.GetString("cmd-banklog-empty"));
+            return;
+        }
+
+        foreach (var row in rows)
+        {
+            shell.WriteLine(Loc.GetString("cmd-banklog-row",
+                ("time", row.Time.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")),
+                ("round", row.RoundId?.ToString() ?? "-"),
+                ("from", $"{row.FromKind}:{row.FromId}"),
+                ("to", $"{row.ToKind}:{row.ToId}"),
+                ("amount", row.Amount),
+                ("reason", row.Reason)));
+        }
+    }
+
+    public override CompletionResult GetCompletion(IConsoleShell shell, string[] args)
+    {
+        if (args.Length == 2)
+            return CompletionResult.FromHint(Loc.GetString("cmd-banklog-completion-count"));
+
+        return BankCommandHelpers.CompletePlayer(_players, args, Loc.GetString("cmd-banklog-completion-party"));
+    }
+}

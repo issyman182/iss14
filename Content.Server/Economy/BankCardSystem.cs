@@ -18,18 +18,53 @@ public sealed partial class BankCardSystem : EntitySystem
 {
     [Dependency] private InventorySystem _inventory = default!;
 
+    /// <summary>Fingerprint -> player, for every character spawned this round (fines, records).</summary>
+    private readonly Dictionary<string, NetUserId> _byFingerprint = new();
+
+    /// <summary>Character name -> player, fallback when no fingerprint is known.</summary>
+    private readonly Dictionary<string, NetUserId> _byName = new();
+
     public override void Initialize()
     {
         base.Initialize();
         SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawnComplete);
+        SubscribeLocalEvent<RoundRestartCleanupEvent>(_ =>
+        {
+            _byFingerprint.Clear();
+            _byName.Clear();
+        });
     }
 
     private void OnPlayerSpawnComplete(PlayerSpawnCompleteEvent ev)
     {
+        Remember(ev.Mob, ev.Player.UserId);
+
         if (!TryFindWornIdCard(ev.Mob, out var card))
             return;
 
         Bind(card, ev.Player.UserId, ev.Mob);
+    }
+
+    /// <summary>Records which player plays a character (by fingerprint and name).</summary>
+    public void Remember(EntityUid mob, NetUserId userId)
+    {
+        if (TryComp<FingerprintComponent>(mob, out var fp) && !string.IsNullOrEmpty(fp.Fingerprint))
+            _byFingerprint[fp.Fingerprint] = userId;
+
+        _byName[Name(mob)] = userId;
+    }
+
+    /// <summary>The player behind a fingerprint and/or character name seen this round.</summary>
+    public bool TryGetUser(string? fingerprint, string? name, out NetUserId userId)
+    {
+        if (!string.IsNullOrEmpty(fingerprint) && _byFingerprint.TryGetValue(fingerprint, out userId))
+            return true;
+
+        if (!string.IsNullOrEmpty(name) && _byName.TryGetValue(name, out userId))
+            return true;
+
+        userId = default;
+        return false;
     }
 
     /// <summary>The ID card in the mob's id slot, unwrapping a PDA if needed.</summary>

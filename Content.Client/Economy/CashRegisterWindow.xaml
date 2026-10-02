@@ -1,0 +1,44 @@
+<!-- iss14: Economy -->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      Title="{Loc cash-register-window-title}"
+                      Resizable="True"
+                      MinSize="460 420"
+                      SetSize="520 520">
+    <BoxContainer Orientation="Vertical" Margin="8" HorizontalExpand="True" VerticalExpand="True">
+        <PanelContainer StyleClasses="BackgroundDark" Margin="0 0 0 6">
+            <BoxContainer Orientation="Horizontal" Margin="8">
+                <Label Name="DepartmentLabel" Text="-" HorizontalExpand="True" />
+                <Button Name="RefreshButton" Text="{Loc cash-register-refresh}" />
+            </BoxContainer>
+        </PanelContainer>
+
+        <TabContainer Name="Tabs" VerticalExpand="True" HorizontalExpand="True">
+            <BoxContainer Name="SaleTab" Orientation="Vertical" VerticalExpand="True" HorizontalExpand="True" Margin="4">
+                <Label Text="{Loc cash-register-items-hint}" StyleClasses="LabelSubText" />
+                <ScrollContainer HScrollEnabled="False" VerticalExpand="True" HorizontalExpand="True" Margin="0 4 0 4">
+                    <BoxContainer Name="ItemsBox" Orientation="Vertical" HorizontalExpand="True" />
+                </ScrollContainer>
+                <BoxContainer Orientation="Horizontal">
+                    <Label Name="SelectionLabel" HorizontalExpand="True" />
+                    <Button Name="CreateBillButton" Text="{Loc cash-register-create-bill}" />
+                </BoxContainer>
+                <PanelContainer StyleClasses="BackgroundDark" Margin="0 6 0 0">
+                    <BoxContainer Orientation="Vertical" Margin="8">
+                        <Label Name="BillHeader" Text="{Loc cash-register-no-open-bill}" StyleClasses="LabelHeading" />
+                        <Label Name="BillLines" />
+                        <Button Name="CancelBillButton" Text="{Loc cash-register-cancel-bill}" Visible="False" HorizontalAlignment="Right" />
+                    </BoxContainer>
+                </PanelContainer>
+            </BoxContainer>
+            <BoxContainer Name="PricesTab" Orientation="Vertical" VerticalExpand="True" HorizontalExpand="True" Margin="4">
+                <Label Text="{Loc cash-register-prices-hint}" StyleClasses="LabelSubText" />
+                <ScrollContainer HScrollEnabled="False" VerticalExpand="True" HorizontalExpand="True" Margin="0 4 0 0">
+                    <BoxContainer Name="PricesBox" Orientation="Vertical" HorizontalExpand="True" />
+                </ScrollContainer>
+            </BoxContainer>
+        </TabContainer>
+
+        <Label Name="MessageLabel" Margin="0 6 0 0" />
+    </BoxContainer>
+</controls:FancyWindow>

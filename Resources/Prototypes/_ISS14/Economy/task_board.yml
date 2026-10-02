@@ -1,0 +1,213 @@
+# iss14: Economy — department task boards. Built from the ATM prototype.
+- type: entity
+  parent: [ BaseMachinePowered, BaseMachineDestructible ]
+  id: TaskBoard
+  name: task board
+  description: A department task board. Claim tasks and contracts, hand in deliveries, get paid.
+  components:
+  - type: Sprite
+    sprite: _ISS14/Structures/Machines/task_board.rsi
+    snapCardinals: true
+    layers:
+    - state: off
+    - state: normal-unshaded
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+    - state: panel
+      map: ["enum.WiresVisualLayers.MaintenancePanel"]
+      visible: false
+  - type: GenericVisualizer
+    visuals:
+      enum.PowerDeviceVisuals.Powered:
+        enum.PowerDeviceVisualLayers.Powered:
+          True: { visible: true }
+          False: { visible: false }
+      enum.WiresVisualLayers.MaintenancePanel:
+        enum.WiresVisualLayers.MaintenancePanel:
+          True: { visible: true }
+          False: { visible: false }
+  - type: Appearance
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.25,-0.45,0.25,0.45"
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
+        density: 200
+  - type: Damageable
+    damageModifierSet: GlassReinforcedMod
+  - type: Repairable
+    doAfterDelay: 8
+  - type: StationAiWhitelist
+  - type: AmbientOnPowered
+  - type: AmbientSound
+    volume: -9
+    range: 3
+    enabled: false
+    sound:
+      path: /Audio/Ambience/Objects/vending_machine_hum.ogg
+  - type: ApcPowerReceiver
+    powerLoad: 150
+  - type: LitOnPowered
+  - type: PointLight
+    enabled: false
+    castShadows: false
+    radius: 1.5
+    color: "#e0c05f"
+  - type: Electrified
+    enabled: false
+    usesApcPower: true
+  - type: WiresPanel
+  - type: WiresVisuals
+  - type: StaticPrice
+    price: 400
+  - type: TaskBoard
+    account: Service
+  - type: ActivatableUI
+    key: enum.TaskBoardUiKey.Key
+  - type: ActivatableUIRequiresPower
+  - type: UserInterface
+    interfaces:
+      enum.TaskBoardUiKey.Key:
+        type: TaskBoardBoundUserInterface
+
+
+- type: entity
+  parent: TaskBoard
+  id: TaskBoardCargo
+  name: logistics task board
+  components:
+  - type: TaskBoard
+    account: Cargo
+  - type: PointLight
+    enabled: false
+    castShadows: false
+    radius: 1.5
+    color: "#e0c05f"
+
+- type: entity
+  parent: TaskBoard
+  id: TaskBoardEngineering
+  name: engineering task board
+  components:
+  - type: TaskBoard
+    account: Engineering
+  - type: PointLight
+    enabled: false
+    castShadows: false
+    radius: 1.5
+    color: "#e0c05f"
+
+- type: entity
+  parent: TaskBoard
+  id: TaskBoardMedical
+  name: medical task board
+  components:
+  - type: TaskBoard
+    account: Medical
+  - type: PointLight
+    enabled: false
+    castShadows: false
+    radius: 1.5
+    color: "#e0c05f"
+
+- type: entity
+  parent: TaskBoard
+  id: TaskBoardScience
+  name: science task board
+  components:
+  - type: TaskBoard
+    account: Science
+  - type: PointLight
+    enabled: false
+    castShadows: false
+    radius: 1.5
+    color: "#e0c05f"
+
+- type: entity
+  parent: TaskBoard
+  id: TaskBoardSecurity
+  name: security task board
+  components:
+  - type: TaskBoard
+    account: Security
+  - type: PointLight
+    enabled: false
+    castShadows: false
+    radius: 1.5
+    color: "#e0c05f"
+
+- type: entity
+  parent: BaseFlatpack
+  id: TaskBoardFlatpack
+  name: task board flatpack
+  description: A flatpack used for constructing a service task board.
+  components:
+  - type: Flatpack
+    entity: TaskBoard
+  - type: Sprite
+    layers:
+    - state: base
+    - state: overlay
+      color: "#e0c05f"
+      map: ["enum.FlatpackVisualLayers.Overlay"]
+    - state: icon-default
+
+- type: entity
+  parent: TaskBoardFlatpack
+  id: TaskBoardCargoFlatpack
+  name: cargo task board flatpack
+  components:
+  - type: Flatpack
+    entity: TaskBoardCargo
+
+- type: entity
+  parent: TaskBoardFlatpack
+  id: TaskBoardEngineeringFlatpack
+  name: engineering task board flatpack
+  components:
+  - type: Flatpack
+    entity: TaskBoardEngineering
+
+- type: entity
+  parent: TaskBoardFlatpack
+  id: TaskBoardMedicalFlatpack
+  name: medical task board flatpack
+  components:
+  - type: Flatpack
+    entity: TaskBoardMedical
+
+- type: entity
+  parent: TaskBoardFlatpack
+  id: TaskBoardScienceFlatpack
+  name: science task board flatpack
+  components:
+  - type: Flatpack
+    entity: TaskBoardScience
+
+- type: entity
+  parent: TaskBoardFlatpack
+  id: TaskBoardSecurityFlatpack
+  name: security task board flatpack
+  components:
+  - type: Flatpack
+    entity: TaskBoardSecurity
+
+- type: entity
+  id: CrateTaskBoards
+  parent: CrateGenericSteel
+  name: task board crate
+  description: One task board flatpack for every department.
+  components:
+  - type: StorageFill
+    contents:
+    - id: TaskBoardFlatpack
+    - id: TaskBoardCargoFlatpack
+    - id: TaskBoardEngineeringFlatpack
+    - id: TaskBoardMedicalFlatpack
+    - id: TaskBoardScienceFlatpack
+    - id: TaskBoardSecurityFlatpack

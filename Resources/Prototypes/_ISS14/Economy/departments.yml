@@ -1,0 +1,30 @@
+# iss14: Economy — who may spend / see each department account. Ids match the cargoAccount prototypes.
+- type: economyDepartment
+  id: Cargo
+  headAccess: [ Quartermaster ]
+  memberAccess: [ Cargo, Salvage ]
+
+- type: economyDepartment
+  id: Engineering
+  headAccess: [ ChiefEngineer ]
+  memberAccess: [ Engineering, Atmospherics ]
+
+- type: economyDepartment
+  id: Medical
+  headAccess: [ ChiefMedicalOfficer ]
+  memberAccess: [ Medical, Chemistry, Paramedic ]
+
+- type: economyDepartment
+  id: Science
+  headAccess: [ ResearchDirector ]
+  memberAccess: [ Research ]
+
+- type: economyDepartment
+  id: Security
+  headAccess: [ HeadOfSecurity ]
+  memberAccess: [ Security, Armory, Brig, Detective ]
+
+- type: economyDepartment
+  id: Service
+  headAccess: [ HeadOfPersonnel ]
+  memberAccess: [ Service, Bar, Kitchen, Hydroponics, Janitor, Theatre, Chapel, Library, Lawyer ]
