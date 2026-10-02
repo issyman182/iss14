@@ -30,6 +30,8 @@ ui-options-general-accessibility = Accessibility
 ui-options-master-volume = Master Volume:
 ui-options-midi-volume = MIDI (Instrument) Volume:
 ui-options-ambient-music-volume = Ambient music volume:
+# iss14: station radio music
+ui-options-station-radio-volume = Station radio volume:
 ui-options-ambience-volume = Ambience volume:
 ui-options-lobby-volume = Lobby & Round-end volume:
 ui-options-interface-volume = Interface volume:

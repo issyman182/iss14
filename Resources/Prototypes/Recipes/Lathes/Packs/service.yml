@@ -39,6 +39,7 @@
   - SodaDispenserMachineCircuitboard
   - SmartFridgeCircuitboard
   - ComputerPeerReviewCircuitboard
+  - StationRadioCircuitboard # iss14: station radio receiver
 
 ## Dynamic
 
@@ -68,3 +69,6 @@
   - ReagentGrinderIndustrialMachineCircuitboard
   - JukeboxCircuitBoard
   - DawInstrumentMachineCircuitboard
+  - VinylPlayerCircuitboard # iss14: station radio, unlocked by RadioMusicCommunications
+  - StationRadioServerCircuitboard
+  - StationRadioRigCircuitboard

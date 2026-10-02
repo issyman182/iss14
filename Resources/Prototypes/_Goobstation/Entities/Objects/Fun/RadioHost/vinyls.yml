@@ -1,0 +1,502 @@
+# iss14: ported from Starlight (https://github.com/ss14Starlight/space-station-14); station radio originally from Goob-Station.
+  # Macleod Songs
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylAirportLounge
+  name: "vinyl: Airport Lounge"
+  description: "A long, relaxing song reminiscent of elevator music. By: Kevin MacLeod" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#7860cf"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/KevinMacleod/AirportLounge.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylBoogiePart
+  name: "vinyl: Boogie Part"
+  description: "A funky jazz song that makes you want to boogie. By: Kevin MacLeod" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#179682"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/KevinMacleod/BoogieParty.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylBurnTheWorldWaltz
+  name: "vinyl: Burn The World Waltz"
+  description: "Heavy metal and brimstone. By: Kevin MacLeod" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#623544"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/KevinMacleod/BurnTheWorldWaltz.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylCorncob
+  name: "vinyl: Corncob"
+  description: "A fast pace country tune. By: Kevin MacLeod" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#06e22b"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/KevinMacleod/Corncob.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylDeadlyRoulette
+  name: "vinyl: Deadly Roulette"
+  description: "A slow pace basey tune. By: Kevin MacLeod" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#d4c0e7"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/KevinMacleod/DeadlyRoulette.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylFeralAngelWaltz
+  name: "vinyl: Feral Angel Waltz"
+  description: "A slow pace rock waltz. By: Kevin MacLeod" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#fe9c24"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/KevinMacleod/FeralAngelWaltz.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylJingleBells
+  name: "vinyl: Jingle Bells"
+  description: "The classic festive tune. By: Kevin MacLeod" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#fc5442"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/KevinMacleod/JingleBells.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylLateNightRadio
+  name: "vinyl: Late Night Radio"
+  description: "A slow pace jazzy tune. By: Kevin MacLeod" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#1c5121"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/KevinMacleod/LateNightRadio.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylMesmerizingGalaxyLoop
+  name: "vinyl: Mesmerizing Galaxy Loop"
+  description: "A hypnotic eletronic tune. By: Kevin MacLeod" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#9515b8"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/KevinMacleod/MesmerizingGalaxyLoop.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylNightInVenice
+  name: "vinyl: Night In Venice"
+  description: "A slow pace jazzy tune with a romantic vibe. By: Kevin MacLeod" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#20c4ea"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/KevinMacleod/NightInVenice.ogg
+
+- type: entity
+  parent: BaseVinylAI
+  id: VinylSpaceJazz
+  name: "vinyl: Space Jazz"
+  description: "A slow pace jazzy tune reminiscent of elevator music. By: Kevin MacLeod" #SL  Addition
+  components:
+  # Starlight-start
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#67659e"
+  # Starlight-end
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/KevinMacleod/SpaceJazz.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylVibingOverVenus
+  name: "vinyl: Vibing Over Venus"
+  description: "A slow pace jazzy tune. By: Kevin MacLeod" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#f2f0d7"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/KevinMacleod/VibingOverVenus.ogg
+
+
+  # Christmas
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylAlsoSprachZarathustra
+  name: "vinyl: Also Sprach Zarathustra"
+  description: "A classical piece that slowly builds to an climactic crescendo. By: PM Music" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#fd99b8"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/PMMusic/AlsoSprachZarathustra.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylRussianDance
+  name: "vinyl: Russian Dance"
+  description: "A classical piece with a fast pace and a lively rhythm. By: PM Music" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#393c39"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/PMMusic/RussianDance.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylTheFlowerDuet
+  name: "vinyl: The Flower Duet"
+  description: "A classical opera duet. By: PM Music" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#3383c4"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/PMMusic/TheFlowerDuet.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylWinterVivaldi
+  name: "vinyl: Vivaldi's Winter"
+  description: "A classical tune from Vivaldi, representing the winter season. By: PM Music" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#bfd3e2"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/PMMusic/WinterVivaldi.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylCelloSuite
+  name: "vinyl: Cello Suite"
+  description: "A classical cello solo. By: PM Music" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#07db3c"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/PMMusic/CelloSuite.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylRideOfTheValkyries
+  name: "vinyl: Ride Of The Valkyries"
+  description: "A classical piece best paired with the charging of cavalry. By: PM Music" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#2202c6"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/PMMusic/RideOfTheValkyries.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylRomeoAndJuliet
+  name: "vinyl: Romeo And Juliet"
+  description: "A classical romantic piece. By: PM Music" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#638414"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/PMMusic/RomeoAndJuliet.ogg
+
+
+  # Loyalty Freak Music
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylEphedrineOverdose
+  name: "vinyl: Ephedrine Overdose"
+  description: "A fast pace electronic tune. By: mrjajkes" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#cd5c04"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/mrjajkes/EphedrineOverdose.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylGetThatAntag
+  name: "vinyl: Get That Antag!"
+  description: "A fast pace electronic tune. By: mrjajkes" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#3b67b1"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/mrjajkes/GetThatAntag.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylGreytideSong
+  name: "vinyl: Greytide Song"
+  description: "A hip tune by DJ Tider. By: mrjajkes" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#b46929"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/mrjajkes/GreytideSong.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylNukiesTrap
+  name: "vinyl: Nukies Trap Remix"
+  description: "A fast pace electronic tune. By: mrjajkes" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#6de56e"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/mrjajkes/NUKIES_TRAP.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylRunningOut
+  name: "vinyl: Running Out"
+  description: "A dramatic fast pace electronic tune. By: mrjajkes" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#a69250"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/mrjajkes/RunningOutCover.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylSponsoredBySyndicate
+  name: "vinyl: Sponsored By Syndicate"
+  description: "A fast pace rock tune. By: mrjajkes" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#c55ab3"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/mrjajkes/SponsoredBySyndicate.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylTraitorousIntent
+  name: "vinyl: Traitorous Intent"
+  description: "A eerie low pace electronic tune. By: mrjajkes" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#c1f6ed"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/mrjajkes/TraitorousIntent.ogg
+
+- type: entity
+  parent: BaseVinylDisc
+  id: VinylViolet
+  name: "vinyl: Violet"
+  description: "A fast pace electronic tune. By: mrjajkes" #SL  Addition
+  components:
+  - type: Sprite
+    state: default
+    layers:
+    - state: default
+    - state: label
+      color: "#22264b"
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/mrjajkes/violet.ogg
+
+
+
+
+  # Other
+- type: entity
+  parent: BaseVinylTTD
+  id: VinylJourney
+  name: "vinyl: Journey"
+  description: "A upbeat electronic tune. By: OpenTTD" #SL  Addition
+  components:
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/OpenTTDJourney.ogg
+
+- type: entity
+  parent: BaseVinylForgotten
+  id: VinylPeakAsshole
+  name: "forgotten vinyl"
+  description: "A song that we have all heard. Just not this bad... By: LuciferMkshelter" #SL  Addition
+  components:
+  - type: Vinyl
+    song:
+      path: /Audio/_Goobstation/RadioStation/Vinyls/music/peakasshole.ogg
+  # Starlight begin
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTypeTrigger
+        damageType: Shock
+        damage: 1
+      behaviors:
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          VinylSpaceAsshole:
+            min: 1
+            max: 1
+      - !type:PopupBehavior
+        popupType: Large
+        popup: vinyl-heal-popup
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+    - trigger:
+        !type:DamageTrigger
+        damage: 20
+      behaviors:
+      - !type:PlaySoundBehavior
+        sound:
+          collection: GlassBreak
+          params:
+            volume: -4
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          VinylBroken:
+            min: 1
+            max: 1
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+  # Starlight end
+
+
+
+  # Fart/Clown Songs

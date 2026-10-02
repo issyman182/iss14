@@ -1,0 +1,137 @@
+# iss14: ported from Starlight (https://github.com/ss14Starlight/space-station-14); station radio originally from Goob-Station.
+- type: entityTable
+  id: RandomCDDisc
+  table: !type:GroupSelector
+    children:
+    - id: CDAdvertBillMovie
+    - id: CDAdvertCaptainTraining
+    - id: CDAdvertCargoniaRecruitment
+    - id: CDAdvertChemistryAdvert
+    - id: CDAdvertDanitosBurritos
+    - id: CDAdvertDansTickets
+    - id: CDAdvertPopeCrunchCereal
+    - id: CDAdvertDansQuickNoodles
+    - id: CDAdvertCloningPSA # PSA announcements are uncommon.
+      weight: 0.75
+    - id: CDAdvertSecurityPSA
+      weight: 0.75
+    - id: CDAdvertBecomeSilicon # Overlord advert should be rarer.
+      weight: 0.5
+    - id: CDMiscDuck # Stupid duck noises.
+      weight: 0.3
+    - id: CDJNEShow # JNE Show should be super rare.
+      weight: 0.2
+    - id: CDJNENextUp
+      weight: 0.2
+    - id: CDJNENinja
+      weight: 0.2
+    - id: CDSyndicateFM # Syndicate CDs should be ultrarare.
+      weight: 0.05
+    - id: CDNukieAnnouncement
+      weight: 0.05
+    - id: CDNukieFigurines
+      weight: 0.05
+    - id: CDNukieResignation
+      weight: 0.05
+    - id: CDNukieSupport
+      weight: 0.05
+
+- type: entityTable
+  id: RandomVinylSleeve
+  table: !type:GroupSelector
+    children:
+    - id: VinylSleeveAI
+    - id: VinylSleeveBlockycraft
+    - id: VinylSleeveChristmas
+    - id: VinylSleeveClown
+    - id: VinylSleeveCoffee
+    - id: VinylSleeveDevil
+    - id: VinylSleeveDJClown
+    - id: VinylSleeveDJTider
+    - id: VinylSleeveEye
+    - id: VinylSleeveFisherman
+    - id: VinylSleeveFlash
+    - id: VinylSleeveHeisenbee
+    - id: VinylSleeveHockey
+    - id: VinylSleeveJanitor
+    - id: VinylSleeveJapan
+    - id: VinylSleeveMGS
+    - id: VinylSleeveNewNanoYork
+    - id: VinylSleeveNukeDisk
+    - id: VinylSleevePDA
+    - id: VinylSleevePeace
+    - id: VinylSleevePickle
+    - id: VinylSleevePizza
+    - id: VinylSleevePlainBeige
+    - id: VinylSleevePlainBlack
+    - id: VinylSleevePlainWhite
+    - id: VinylSleeveQuestional
+    - id: VinylSleeveRat
+    - id: VinylSleeveReactor
+    - id: VinylSleeveRedSun
+    - id: VinylSleeveShulker
+    - id: VinylSleeveSkull
+    - id: VinylSleeveStation13
+    - id: VinylSleeveStation14
+    - id: VinylSleeveSunnySideOfLavaland
+    - id: VinylSleeveTH
+    - id: VinylSleeveVampire
+    - id: VinylSleeveWeird
+    - id: VinylSleeveWelcomeToSS13
+    - id: VinylSleeveNonBinary
+    - id: VinylSleevePride
+    - id: VinylSleeveTrans
+    weight: 0.2
+
+
+- type: entityTable
+  id: RandomVinylDisc
+  table: !type:GroupSelector
+    children:
+    - id: VinylAirportLounge
+    - id: VinylBoogiePart
+    - id: VinylBurnTheWorldWaltz
+    - id: VinylCorncob
+    - id: VinylDeadlyRoulette
+    - id: VinylFeralAngelWaltz
+    - id: VinylJingleBells
+    - id: VinylLateNightRadio
+    - id: VinylMesmerizingGalaxyLoop
+    - id: VinylNightInVenice
+    - id: VinylSpaceJazz
+    - id: VinylVibingOverVenus
+    - id: VinylAlsoSprachZarathustra
+    - id: VinylRussianDance
+    - id: VinylTheFlowerDuet
+    - id: VinylWinterVivaldi
+    - id: VinylCelloSuite
+    - id: VinylRideOfTheValkyries
+    - id: VinylRomeoAndJuliet
+    - id: VinylJourney
+    - id: VinylEphedrineOverdose
+    - id: VinylGetThatAntag
+    - id: VinylGreytideSong
+    - id: VinylNukiesTrap
+    - id: VinylRunningOut
+    - id: VinylSponsoredBySyndicate
+    - id: VinylTraitorousIntent
+    - id: VinylViolet
+    - id: VinylPeakAsshole # Space asshole but deep fried.
+      weight: 0.05
+    #Starlight-start
+    - id: VinylCrazyBot
+    - id: VinylD2
+    - id: VinylAcidRaindream
+    - id: VinylUntitled7
+    - id: VinylSmarties
+    - id: VinylSilverAndCold
+    - id: VinylCirclesOfBlackAndRed
+    - id: VinylDepressedWawaTriesToProtest
+    - id: VinylSpaceAsshole
+    - id: VinylDriverUpdate
+    - id: VinylResonantInfinite
+    - id: VinylVadeRetro
+    - id: VinylConcreteFlavoured
+    - id: VinylDamperII
+    - id: VinylCathode
+    #Starlight-end

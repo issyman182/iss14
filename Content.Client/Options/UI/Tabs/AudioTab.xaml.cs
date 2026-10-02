@@ -40,6 +40,12 @@ public sealed partial class AudioTab : Control
             SliderVolumeAmbientMusic,
             scale: ContentAudioSystem.AmbientMusicMultiplier);
 
+        // iss14: station radio music, applied client-side by StationRadioReceiverSystem. 100% = normal volume.
+        Control.AddOptionPercentSlider(
+            CCVars.StationRadioVolume,
+            SliderStationRadioVolume,
+            scale: 1f);
+
         Control.AddOptionPercentSlider(
             CCVars.AmbienceVolume,
             SliderVolumeAmbience,

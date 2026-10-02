@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "State based Copyright | iss14: subset of states for the Radio Host port",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    {
+      "name": "radiohost",
+      "copyright": "Huaqas"
+    }
+  ]
+}

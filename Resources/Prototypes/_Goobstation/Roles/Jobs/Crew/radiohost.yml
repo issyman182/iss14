@@ -1,0 +1,34 @@
+# iss14: ported from Starlight (https://github.com/ss14Starlight/space-station-14); station radio originally from Goob-Station.
+- type: job
+  id: RadioHost
+  name: job-name-radiohost
+  description: job-description-radiohost
+  playTimeTracker: JobRadioHost
+  startingGear: RadioHostGear
+  icon: "JobIconRadioHost"
+  supervisors: job-supervisors-hop
+  guides: [ Service ]
+  access: # iss14: Starlight-only press access removed
+  - Maintenance
+  - Service
+  extendedAccess: # Starlight
+  - Theatre # Starlight
+
+- type: startingGear
+  id: RadioHostGear
+  equipment:
+    shoes: ClothingShoesColorBlack # iss14: Starlight gives shoes via its CivilianShoes loadout group
+    id: RadioHostPDA
+    ears: ClothingHeadsetAltRadioHost
+    belt: ClothingBeltStorageWaistbag
+
+- type: chameleonOutfit
+  id: RadioHostChameleonOutfit
+  job: RadioHost
+  equipment:
+    eyes: ClothingEyesGlassesCheapSunglasses
+    ears: ClothingHeadsetAltRadioHost
+    belt: ClothingBeltStorageWaistbag
+    jumpsuit: ClothingUniformJumpsuitHawaiBlack
+    shoes: ClothingShoesColorBlack
+    id: RadioHostPDA
