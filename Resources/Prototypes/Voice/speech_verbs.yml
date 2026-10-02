@@ -197,3 +197,12 @@
   - chat-speech-verb-wawa-2
   - chat-speech-verb-wawa-3
   - chat-speech-verb-wawa-4
+
+# iss14: used by the station radio receivers (ported from Goobstation)
+- type: speechVerb
+  id: Radio
+  name: chat-speech-verb-name-radio
+  speechVerbStrings:
+  - chat-speech-verb-radio-1
+  - chat-speech-verb-radio-2
+  - chat-speech-verb-radio-3

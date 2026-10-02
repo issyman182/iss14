@@ -1,4 +1,4 @@
-# iss14: Economy — legal terminal (fines, mandates). Built from the ATM prototype.
+# iss14: Economy — legal terminal (fines, mandates).
 - type: entity
   parent: [ BaseMachinePowered, BaseMachineDestructible ]
   id: FineTerminal

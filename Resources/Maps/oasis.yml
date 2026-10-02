@@ -5,7 +5,7 @@ meta:
   forkId: iss14
   forkVersion: 1.5.0
   time: 07/12/2026 10:59:55
-  entityCount: 31154
+  entityCount: 31169
 maps:
 - 1
 grids:
@@ -38041,6 +38041,18 @@ entities:
     - type: Physics
       canCollide: False
     - type: InsideEntityStorage
+- proto: ATM
+  entities:
+  - uid: 31388
+    components:
+    - type: Transform
+      parent: 2
+      pos: 43.5,-31.5
+  - uid: 31383
+    components:
+    - type: Transform
+      parent: 2
+      pos: -3.5,34.5
 - proto: AtmosDeviceFanDirectional
   entities:
   - uid: 10677
@@ -75845,6 +75857,18 @@ entities:
       rot: 1.5707963267948966 rad
       pos: 6.2322235,9.437229
       parent: 21002
+- proto: CashRegister
+  entities:
+  - uid: 31390
+    components:
+    - type: Transform
+      parent: 2
+      pos: -14.5,19.5
+  - uid: 31389
+    components:
+    - type: Transform
+      parent: 2
+      pos: -27.5,43.5
 - proto: Catwalk
   entities:
   - uid: 499
@@ -81129,6 +81153,13 @@ entities:
       rot: 3.141592653589793 rad
       pos: -9.4977665,-59.404213
       parent: 2
+- proto: ChipExchanger
+  entities:
+  - uid: 31384
+    components:
+    - type: Transform
+      parent: 2
+      pos: -3.5,33.5
 - proto: ChurchBell
   entities:
   - uid: 28892
@@ -98328,6 +98359,13 @@ entities:
     - type: Transform
       pos: 56.943718,13.5
       parent: 2
+- proto: FineTerminal
+  entities:
+  - uid: 31391
+    components:
+    - type: Transform
+      parent: 2
+      pos: 41.5,-18.5
 - proto: FireAlarm
   entities:
   - uid: 410
@@ -171581,6 +171619,25 @@ entities:
       rot: 3.141592653589793 rad
       pos: -12.085021,-50.48558
       parent: 2
+- proto: SlotMachine
+  entities:
+  - uid: 31386
+    components:
+    - type: Transform
+      parent: 2
+      pos: -9.5,34.5
+  - uid: 31385
+    components:
+    - type: Transform
+      parent: 2
+      pos: -5.5,31.5
+- proto: SlotMachineHighRoller
+  entities:
+  - uid: 31387
+    components:
+    - type: Transform
+      parent: 2
+      pos: -9.5,33.5
 - proto: SmartFridge
   entities:
   - uid: 1287
@@ -181430,6 +181487,48 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 58.5,-36.5
       parent: 2
+- proto: TaskBoard
+  entities:
+  - uid: 31393
+    components:
+    - type: Transform
+      parent: 2
+      pos: 42.5,-31.5
+- proto: TaskBoardCargo
+  entities:
+  - uid: 31394
+    components:
+    - type: Transform
+      parent: 2
+      pos: -57.5,-8.5
+- proto: TaskBoardEngineering
+  entities:
+  - uid: 31395
+    components:
+    - type: Transform
+      parent: 2
+      pos: -50.5,-2.5
+- proto: TaskBoardMedical
+  entities:
+  - uid: 31396
+    components:
+    - type: Transform
+      parent: 2
+      pos: 22.5,40.5
+- proto: TaskBoardScience
+  entities:
+  - uid: 31397
+    components:
+    - type: Transform
+      parent: 2
+      pos: -7.5,-32.5
+- proto: TaskBoardSecurity
+  entities:
+  - uid: 31392
+    components:
+    - type: Transform
+      parent: 2
+      pos: 14.5,-33.5
 - proto: TegCenter
   entities:
   - uid: 8122

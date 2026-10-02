@@ -1,4 +1,4 @@
-# iss14: Economy — department task boards. Built from the ATM prototype.
+# iss14: Economy — department task boards.
 - type: entity
   parent: [ BaseMachinePowered, BaseMachineDestructible ]
   id: TaskBoard

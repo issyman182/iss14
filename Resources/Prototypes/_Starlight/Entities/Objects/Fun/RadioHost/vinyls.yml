@@ -50,22 +50,6 @@
 
 - type: entity
   parent: BaseVinylDisc
-  id: VinylUntitled7
-  name: "vinyl: Untitled #7"
-  description: "A slow paced shoegaze esque tune. Heavy synth lead. By: Tommaso Croce"
-  components:
-  - type: Sprite
-    state: default
-    layers:
-    - state: default
-    - state: label
-      color: "#8a8792"
-  - type: Vinyl
-    song:
-      path: /Audio/_Starlight/RadioStation/Vinyls/music/Untitled#7.ogg
-
-- type: entity
-  parent: BaseVinylDisc
   id: VinylSmarties
   name: "vinyl: Smarties"
   description: "An electronic tune with a distorted guitar and synth lead. By: Birds for Scale"

@@ -411,7 +411,7 @@
   - AssistiveItems # iss14
   - Survival
   - Trinkets
-  - Scarves
+  - PassengerNeck
   - GroupSpeciesBreathTool
   - RadioHostGlasses
 
@@ -430,29 +430,9 @@
 
  # Common Areas
 
-# from _Goobstation/Recipes/Lathes/electronics.yml
-- type: latheRecipe
-  parent: [ BaseCircuitboardRecipe, BaseGeneralMachineRecipeCategory ]
-  id: VinylPlayerCircuitboard
-  result: VinylPlayerCircuitboard
 
-# from _Goobstation/Recipes/Lathes/electronics.yml
-- type: latheRecipe
-  parent: [ BaseGoldCircuitboardRecipe, BaseGeneralMachineRecipeCategory ]
-  id: StationRadioServerCircuitboard
-  result: StationRadioServerCircuitboard
 
-# from _Goobstation/Recipes/Lathes/electronics.yml
-- type: latheRecipe
-  parent: [ BaseSilverCircuitboardRecipe, BaseGeneralMachineRecipeCategory ]
-  id: StationRadioRigCircuitboard
-  result: StationRadioRigCircuitboard
 
-# from _Goobstation/Recipes/Lathes/electronics.yml
-- type: latheRecipe
-  parent: [ BaseCheapCircuitboardRecipe, BaseCircuitryRecipeCategory ]
-  id: StationRadioCircuitboard
-  result: StationRadioCircuitboard
 
 # from _Goobstation/Research/civilianservices.yml (iss14: without the tape deck)
 - type: technology

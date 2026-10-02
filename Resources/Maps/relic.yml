@@ -5,7 +5,7 @@ meta:
   forkId: ""
   forkVersion: ""
   time: 08/23/2026 10:23:30
-  entityCount: 11612
+  entityCount: 11620
 maps:
 - 1
 grids:
@@ -4225,6 +4225,13 @@ entities:
     - type: Transform
       parent: 2
       pos: 34.5,51.5
+- proto: ATM
+  entities:
+  - uid: 11613
+    components:
+    - type: Transform
+      parent: 2
+      pos: 58.5,25.5
 - proto: AtmosDeviceFanDirectional
   entities:
   - uid: 102
@@ -22497,6 +22504,13 @@ entities:
       parent: 2
       rot: 3.141592653589793 rad
       pos: 60.5,28.5
+- proto: ComputerCargoOrdersService
+  entities:
+  - uid: 11620
+    components:
+    - type: Transform
+      parent: 2
+      pos: 57.5,22.5
 - proto: ComputerComms
   entities:
   - uid: 2428
@@ -24013,6 +24027,13 @@ entities:
     - type: Transform
       parent: 2
       pos: 59.5,22.5
+- proto: FineTerminal
+  entities:
+  - uid: 11614
+    components:
+    - type: Transform
+      parent: 2
+      pos: 38.5,0.5
 - proto: FireAlarm
   entities:
   - uid: 7
@@ -62324,6 +62345,41 @@ entities:
     - type: Transform
       parent: 2
       pos: 63.5,32.5
+- proto: TaskBoard
+  entities:
+  - uid: 11616
+    components:
+    - type: Transform
+      parent: 2
+      pos: 57.5,23.5
+- proto: TaskBoardEngineering
+  entities:
+  - uid: 11617
+    components:
+    - type: Transform
+      parent: 2
+      pos: 28.5,12.5
+- proto: TaskBoardMedical
+  entities:
+  - uid: 11618
+    components:
+    - type: Transform
+      parent: 2
+      pos: 20.5,41.5
+- proto: TaskBoardScience
+  entities:
+  - uid: 11619
+    components:
+    - type: Transform
+      parent: 2
+      pos: 48.5,6.5
+- proto: TaskBoardSecurity
+  entities:
+  - uid: 11615
+    components:
+    - type: Transform
+      parent: 2
+      pos: 39.5,1.5
 - proto: TegCenter
   entities:
   - uid: 1302

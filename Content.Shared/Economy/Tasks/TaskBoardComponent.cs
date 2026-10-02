@@ -59,6 +59,12 @@ public enum DepartmentTaskKind : byte
 
     /// <summary>Done when the required items were handed in at the board.</summary>
     Delivery,
+
+    /// <summary>
+    /// Done when the claimer has cleaned enough: mopped puddles (real dirt only) and scrubbed graffiti/dirt decals.
+    /// Progress uses the delivery counters.
+    /// </summary>
+    Cleaning,
 }
 
 public enum DepartmentTaskPayer : byte

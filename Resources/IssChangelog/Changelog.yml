@@ -2,6 +2,21 @@ Name: Changelog
 Order: 0
 Entries:
 - author: issyman182
+  version: iss14:1.12.1
+  time: '2026-10-02'
+  changes:
+  - message: 'All stations now come with the economy and casino hardware pre-placed: an ATM, chip exchanger and three slot machines in the arcade/bar, a second ATM near the service desk, cash registers on the bar and kitchen counters, a legal terminal in security and a task board for every department. Every station also has a service cargo order console.'
+    type: Add
+  - message: 'Janitors: service task boards now generate "Clean up N messes" tasks that count automatically while claimed - each mopped puddle (real dirt only, not water you spread yourself) and every graffiti or stain scrubbed off with cleaner counts.'
+    type: Add
+  - message: Legal terminal and task boards got their own sprites.
+    type: Tweak
+  - message: Store titles are also shown in radio and whisper messages.
+    type: Tweak
+  - message: 'Station radio port fixes: duplicate circuit board recipes, the radio host loadout, radio receiver speech verb and a missing vinyl are sorted out.'
+    type: Fix
+  id: 23
+- author: issyman182
   version: iss14:1.12.0
   time: '2026-10-02'
   changes:

@@ -5,7 +5,7 @@ meta:
   forkId: ""
   forkVersion: ""
   time: 09/22/2026 17:17:10
-  entityCount: 19008
+  entityCount: 19022
 maps:
 - 1793
 grids:
@@ -7391,6 +7391,18 @@ entities:
     - type: Transform
       parent: 1
       pos: 58.507614,127.52353
+- proto: ATM
+  entities:
+  - uid: 19014
+    components:
+    - type: Transform
+      parent: 1
+      pos: 49.5,35.5
+  - uid: 19009
+    components:
+    - type: Transform
+      parent: 1
+      pos: 79.5,39.5
 - proto: AtmosDeviceFanDirectional
   entities:
   - uid: 2686
@@ -36936,6 +36948,18 @@ entities:
     - type: Transform
       parent: 1
       pos: 59.421112,70.45693
+- proto: CashRegister
+  entities:
+  - uid: 19016
+    components:
+    - type: Transform
+      parent: 1
+      pos: 44.5,77.5
+  - uid: 19015
+    components:
+    - type: Transform
+      parent: 1
+      pos: 63.5,98.5
 - proto: Catwalk
   entities:
   - uid: 118
@@ -40685,6 +40709,13 @@ entities:
     - type: Transform
       parent: 1
       pos: 55.5,64.5
+- proto: ChipExchanger
+  entities:
+  - uid: 19010
+    components:
+    - type: Transform
+      parent: 1
+      pos: 79.5,44.5
 - proto: ChunkEntity
   entities:
   - uid: 15170
@@ -58149,6 +58180,13 @@ entities:
     - type: Transform
       parent: 1
       pos: 21.5,48.5
+- proto: FineTerminal
+  entities:
+  - uid: 19017
+    components:
+    - type: Transform
+      parent: 1
+      pos: 49.5,37.5
 - proto: FireAlarm
   entities:
   - uid: 1903
@@ -99920,6 +99958,25 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 21.5,90.5
+- proto: SlotMachine
+  entities:
+  - uid: 19012
+    components:
+    - type: Transform
+      parent: 1
+      pos: 83.5,39.5
+  - uid: 19011
+    components:
+    - type: Transform
+      parent: 1
+      pos: 82.5,39.5
+- proto: SlotMachineHighRoller
+  entities:
+  - uid: 19013
+    components:
+    - type: Transform
+      parent: 1
+      pos: 79.5,41.5
 - proto: SmartFridge
   entities:
   - uid: 12257
@@ -105065,6 +105122,41 @@ entities:
     - type: Transform
       parent: 1
       pos: 36.5,90.5
+- proto: TaskBoard
+  entities:
+  - uid: 19019
+    components:
+    - type: Transform
+      parent: 1
+      pos: 48.5,33.5
+- proto: TaskBoardCargo
+  entities:
+  - uid: 19020
+    components:
+    - type: Transform
+      parent: 1
+      pos: 92.5,84.5
+- proto: TaskBoardEngineering
+  entities:
+  - uid: 19021
+    components:
+    - type: Transform
+      parent: 1
+      pos: 92.5,85.5
+- proto: TaskBoardMedical
+  entities:
+  - uid: 19022
+    components:
+    - type: Transform
+      parent: 1
+      pos: 67.5,87.5
+- proto: TaskBoardSecurity
+  entities:
+  - uid: 19018
+    components:
+    - type: Transform
+      parent: 1
+      pos: 14.5,72.5
 - proto: TegCenter
   entities:
   - uid: 5187

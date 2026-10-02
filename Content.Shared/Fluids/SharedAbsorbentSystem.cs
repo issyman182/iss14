@@ -345,6 +345,13 @@ public abstract partial class SharedAbsorbentSystem : EntitySystem
 
         SolutionContainer.AddSolution(absorberSoln, puddleSplit);
 
+        // iss14: janitor task hook — only real dirt counts, water that was mopped back up doesn't.
+        if (puddleSplit.Volume > FixedPoint2.Zero)
+        {
+            var moppedEv = new Content.Shared.Economy.Tasks.PuddleMoppedEvent(user, target, (float) puddleSplit.Volume, isRemoved);
+            RaiseLocalEvent(ref moppedEv);
+        }
+
         _audio.PlayPredicted(absorber.PickupSound, isRemoved ? absorbEnt : target, user);
 
         if (useDelay != null)

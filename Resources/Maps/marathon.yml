@@ -5,7 +5,7 @@ meta:
   forkId: ""
   forkVersion: ""
   time: 09/22/2026 18:29:32
-  entityCount: 23929
+  entityCount: 23944
 maps:
 - 5350
 grids:
@@ -9524,6 +9524,18 @@ entities:
     - type: Transform
       parent: 30
       pos: -73.5,-38.5
+- proto: ATM
+  entities:
+  - uid: 23935
+    components:
+    - type: Transform
+      parent: 30
+      pos: -29.5,53.5
+  - uid: 23930
+    components:
+    - type: Transform
+      parent: 30
+      pos: 22.5,40.5
 - proto: AtmosDeviceFanDirectional
   entities:
   - uid: 380
@@ -43956,6 +43968,18 @@ entities:
     - type: Transform
       parent: 30
       pos: -58.5,-52.5
+- proto: CashRegister
+  entities:
+  - uid: 23937
+    components:
+    - type: Transform
+      parent: 30
+      pos: -15.5,16.5
+  - uid: 23936
+    components:
+    - type: Transform
+      parent: 30
+      pos: 11.5,-23.5
 - proto: Catwalk
   entities:
   - uid: 531
@@ -49292,6 +49316,13 @@ entities:
     - type: Transform
       parent: 30
       pos: -56.515633,10.561228
+- proto: ChipExchanger
+  entities:
+  - uid: 23931
+    components:
+    - type: Transform
+      parent: 30
+      pos: 27.5,39.5
 - proto: ChunkEntity
   entities:
   - uid: 11790
@@ -69335,6 +69366,13 @@ entities:
     - type: Transform
       parent: 30
       pos: -15.5,-31.5
+- proto: FineTerminal
+  entities:
+  - uid: 23938
+    components:
+    - type: Transform
+      parent: 30
+      pos: -42.5,49.5
 - proto: FireAlarm
   entities:
   - uid: 697
@@ -126135,6 +126173,25 @@ entities:
     - type: Transform
       parent: 30
       pos: 3.5163379,42.700695
+- proto: SlotMachine
+  entities:
+  - uid: 23933
+    components:
+    - type: Transform
+      parent: 30
+      pos: 21.5,40.5
+  - uid: 23932
+    components:
+    - type: Transform
+      parent: 30
+      pos: 24.5,40.5
+- proto: SlotMachineHighRoller
+  entities:
+  - uid: 23934
+    components:
+    - type: Transform
+      parent: 30
+      pos: 26.5,40.5
 - proto: SmallLight
   entities:
   - uid: 10040
@@ -133852,6 +133909,48 @@ entities:
       pos: -40.5,59.5
     - type: DamagePopup
       damagePopupType: Total
+- proto: TaskBoard
+  entities:
+  - uid: 23940
+    components:
+    - type: Transform
+      parent: 30
+      pos: -35.5,51.5
+- proto: TaskBoardCargo
+  entities:
+  - uid: 23941
+    components:
+    - type: Transform
+      parent: 30
+      pos: 17.5,-4.5
+- proto: TaskBoardEngineering
+  entities:
+  - uid: 23942
+    components:
+    - type: Transform
+      parent: 30
+      pos: 16.5,1.5
+- proto: TaskBoardMedical
+  entities:
+  - uid: 23943
+    components:
+    - type: Transform
+      parent: 30
+      pos: -24.5,-39.5
+- proto: TaskBoardScience
+  entities:
+  - uid: 23944
+    components:
+    - type: Transform
+      parent: 30
+      pos: -12.5,-21.5
+- proto: TaskBoardSecurity
+  entities:
+  - uid: 23939
+    components:
+    - type: Transform
+      parent: 30
+      pos: 21.5,12.5
 - proto: TegCenter
   entities:
   - uid: 9817

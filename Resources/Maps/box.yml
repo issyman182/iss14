@@ -5,7 +5,7 @@ meta:
   forkId: ""
   forkVersion: ""
   time: 09/22/2026 18:57:50
-  entityCount: 28886
+  entityCount: 28901
 maps:
 - 780
 grids:
@@ -11165,6 +11165,18 @@ entities:
     - type: Transform
       parent: 8364
       pos: 56.5,-79.5
+- proto: ATM
+  entities:
+  - uid: 28892
+    components:
+    - type: Transform
+      parent: 8364
+      pos: 6.5,45.5
+  - uid: 28887
+    components:
+    - type: Transform
+      parent: 8364
+      pos: -32.5,35.5
 - proto: AtmosDeviceFanDirectional
   entities:
   - uid: 556
@@ -56845,6 +56857,18 @@ entities:
     - type: Transform
       parent: 8364
       pos: -8.5,-14.5
+- proto: CashRegister
+  entities:
+  - uid: 28894
+    components:
+    - type: Transform
+      parent: 8364
+      pos: 35.5,-7.5
+  - uid: 28893
+    components:
+    - type: Transform
+      parent: 8364
+      pos: -36.5,18.5
 - proto: Catwalk
   entities:
   - uid: 17
@@ -62559,6 +62583,13 @@ entities:
     - type: Transform
       parent: 8364
       pos: 57.5,15.5
+- proto: ChipExchanger
+  entities:
+  - uid: 28888
+    components:
+    - type: Transform
+      parent: 8364
+      pos: -32.5,36.5
 - proto: ChunkEntity
   entities:
   - uid: 26833
@@ -91907,6 +91938,13 @@ entities:
     - type: Transform
       parent: 8364
       pos: -20.5,-19.5
+- proto: FineTerminal
+  entities:
+  - uid: 28895
+    components:
+    - type: Transform
+      parent: 8364
+      pos: -7.5,32.5
 - proto: FireAlarm
   entities:
   - uid: 935
@@ -155381,6 +155419,25 @@ entities:
       parent: 8364
       rot: -1.5707963267948966 rad
       pos: 7.5,-36.5
+- proto: SlotMachine
+  entities:
+  - uid: 28890
+    components:
+    - type: Transform
+      parent: 8364
+      pos: -29.5,33.5
+  - uid: 28889
+    components:
+    - type: Transform
+      parent: 8364
+      pos: -30.5,33.5
+- proto: SlotMachineHighRoller
+  entities:
+  - uid: 28891
+    components:
+    - type: Transform
+      parent: 8364
+      pos: -28.5,33.5
 - proto: SmartFridge
   entities:
   - uid: 2513
@@ -164026,6 +164083,48 @@ entities:
       rot: 1.5707963267948966 rad
       pos: 17.5,48.5
     - type: Conveyed
+- proto: TaskBoard
+  entities:
+  - uid: 28897
+    components:
+    - type: Transform
+      parent: 8364
+      pos: 2.5,46.5
+- proto: TaskBoardCargo
+  entities:
+  - uid: 28898
+    components:
+    - type: Transform
+      parent: 8364
+      pos: -27.5,-27.5
+- proto: TaskBoardEngineering
+  entities:
+  - uid: 28899
+    components:
+    - type: Transform
+      parent: 8364
+      pos: -20.5,-21.5
+- proto: TaskBoardMedical
+  entities:
+  - uid: 28900
+    components:
+    - type: Transform
+      parent: 8364
+      pos: 1.5,-67.5
+- proto: TaskBoardScience
+  entities:
+  - uid: 28901
+    components:
+    - type: Transform
+      parent: 8364
+      pos: 42.5,-27.5
+- proto: TaskBoardSecurity
+  entities:
+  - uid: 28896
+    components:
+    - type: Transform
+      parent: 8364
+      pos: 69.5,-30.5
 - proto: TegCenter
   entities:
   - uid: 4052

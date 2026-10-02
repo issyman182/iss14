@@ -5,7 +5,7 @@ meta:
   forkId: ""
   forkVersion: ""
   time: 09/22/2026 17:10:03
-  entityCount: 27223
+  entityCount: 27238
 maps:
 - 1
 grids:
@@ -16288,6 +16288,18 @@ entities:
     - type: Transform
       parent: 2
       pos: -76.5,-24.5
+- proto: ATM
+  entities:
+  - uid: 27229
+    components:
+    - type: Transform
+      parent: 2
+      pos: -81.5,-23.5
+  - uid: 27224
+    components:
+    - type: Transform
+      parent: 2
+      pos: -108.5,-17.5
 - proto: AtmosDeviceFanDirectional
   entities:
   - uid: 3444
@@ -52247,6 +52259,18 @@ entities:
     - type: Transform
       parent: 2
       pos: -133.5,-47.5
+- proto: CashRegister
+  entities:
+  - uid: 27231
+    components:
+    - type: Transform
+      parent: 2
+      pos: -47.5,-29.5
+  - uid: 27230
+    components:
+    - type: Transform
+      parent: 2
+      pos: -11.5,-33.5
 - proto: Catwalk
   entities:
   - uid: 15
@@ -59936,6 +59960,13 @@ entities:
     - type: Transform
       parent: 2
       pos: -85.48848,-41.319702
+- proto: ChipExchanger
+  entities:
+  - uid: 27225
+    components:
+    - type: Transform
+      parent: 2
+      pos: -109.5,-17.5
 - proto: ChunkEntity
   entities:
   - uid: 27158
@@ -85334,6 +85365,13 @@ entities:
     - type: Transform
       parent: 2
       pos: -130.5,-18.5
+- proto: FineTerminal
+  entities:
+  - uid: 27232
+    components:
+    - type: Transform
+      parent: 2
+      pos: -84.5,-19.5
 - proto: FireAlarm
   entities:
   - uid: 1213
@@ -151085,6 +151123,25 @@ entities:
       allowedJobs: []
       allowedDepartments:
       - Security
+- proto: SlotMachine
+  entities:
+  - uid: 27227
+    components:
+    - type: Transform
+      parent: 2
+      pos: -108.5,-16.5
+  - uid: 27226
+    components:
+    - type: Transform
+      parent: 2
+      pos: -109.5,-15.5
+- proto: SlotMachineHighRoller
+  entities:
+  - uid: 27228
+    components:
+    - type: Transform
+      parent: 2
+      pos: -112.5,-17.5
 - proto: SmartFridge
   entities:
   - uid: 3405
@@ -159459,6 +159516,48 @@ entities:
     - type: Transform
       parent: 2
       pos: -39.5,0.5
+- proto: TaskBoard
+  entities:
+  - uid: 27234
+    components:
+    - type: Transform
+      parent: 2
+      pos: -83.5,-23.5
+- proto: TaskBoardCargo
+  entities:
+  - uid: 27235
+    components:
+    - type: Transform
+      parent: 2
+      pos: -84.5,24.5
+- proto: TaskBoardEngineering
+  entities:
+  - uid: 27236
+    components:
+    - type: Transform
+      parent: 2
+      pos: -100.5,16.5
+- proto: TaskBoardMedical
+  entities:
+  - uid: 27237
+    components:
+    - type: Transform
+      parent: 2
+      pos: -112.5,-16.5
+- proto: TaskBoardScience
+  entities:
+  - uid: 27238
+    components:
+    - type: Transform
+      parent: 2
+      pos: -21.5,-45.5
+- proto: TaskBoardSecurity
+  entities:
+  - uid: 27233
+    components:
+    - type: Transform
+      parent: 2
+      pos: -131.5,-40.5
 - proto: TegCenter
   entities:
   - uid: 674

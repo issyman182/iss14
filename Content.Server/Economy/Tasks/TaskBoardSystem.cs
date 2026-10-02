@@ -40,6 +40,9 @@ public sealed partial class TaskBoardSystem : EntitySystem
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IAdminLogManager _adminLog = default!;
     [Dependency] private ServerGameTicker _ticker = default!;
+    [Dependency] private EntityLookupSystem _lookup = default!;
+    [Dependency] private Content.Shared.Access.Systems.AccessReaderSystem _access = default!;
+    [Dependency] private SharedMapSystem _map = default!;
 
     public override void Initialize()
     {
@@ -53,10 +56,13 @@ public sealed partial class TaskBoardSystem : EntitySystem
         SubscribeLocalEvent<TaskBoardComponent, TaskBoardCreateMessage>(OnCreate);
         SubscribeLocalEvent<TaskBoardComponent, InteractUsingEvent>(OnInteractUsing);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart);
+        SubscribeLocalEvent<PuddleMoppedEvent>(OnPuddleMopped);
+        SubscribeLocalEvent<DecalsCleanedEvent>(OnDecalsCleaned);
     }
 
     private void OnRoundRestart(RoundRestartCleanupEvent ev)
     {
+        _creditedPuddles.Clear();
         var query = EntityQueryEnumerator<TaskBoardComponent>();
         while (query.MoveNext(out _, out var board))
         {
@@ -142,7 +148,7 @@ public sealed partial class TaskBoardSystem : EntitySystem
             Created = _ticker.RoundDuration(),
             DeliverPrototype = chosen.DeliverPrototype,
             DeliverTag = chosen.DeliverTag,
-            DeliverTarget = chosen.Kind == DepartmentTaskKind.Delivery ? count : 0,
+            DeliverTarget = chosen.Kind is DepartmentTaskKind.Delivery or DepartmentTaskKind.Cleaning ? count : 0,
         };
 
         board.Tasks.Add(task);
@@ -371,6 +377,73 @@ public sealed partial class TaskBoardSystem : EntitySystem
             return true;
 
         return task.DeliverTag != null && _tag.HasTag(item, task.DeliverTag);
+    }
+
+    #endregion
+
+    #region Cleaning
+
+    /// <summary>Credits one cleaning action to every cleaning task the player has claimed (on any board).</summary>
+    private void CreditCleaning(EntityUid cleaner, int amount)
+    {
+        if (amount <= 0 || !_players.TryGetSessionByEntity(cleaner, out var session))
+            return;
+
+        var query = EntityQueryEnumerator<TaskBoardComponent>();
+        while (query.MoveNext(out var uid, out var board))
+        {
+            foreach (var task in board.Tasks)
+            {
+                if (task.Kind != DepartmentTaskKind.Cleaning || task.Status != DepartmentTaskStatus.Claimed || task.ClaimedUser != session.UserId)
+                    continue;
+
+                task.DeliverProgress = Math.Min(task.DeliverTarget, task.DeliverProgress + amount);
+                if (task.DeliverProgress >= task.DeliverTarget)
+                    Complete((uid, board), task, session.UserId, cleaner);
+                else
+                    UpdateUi((uid, board), null);
+            }
+        }
+    }
+
+    /// <summary>Puddles already credited this round, so one puddle counts once however many strokes it takes.</summary>
+    private readonly HashSet<EntityUid> _creditedPuddles = new();
+
+    private void OnPuddleMopped(ref PuddleMoppedEvent ev)
+    {
+        if (!_creditedPuddles.Add(ev.Puddle))
+            return;
+
+        CreditCleaning(ev.User, 1);
+    }
+
+    private void OnDecalsCleaned(ref DecalsCleanedEvent ev)
+    {
+        // Tile reactions carry no user: credit the closest janitor-access mob next to the tile.
+        if (!TryComp<Robust.Shared.Map.Components.MapGridComponent>(ev.Grid, out var grid))
+            return;
+
+        var coords = _map.GridTileToLocal(ev.Grid, grid, ev.Tile);
+        EntityUid? best = null;
+        var bestDist = float.MaxValue;
+        foreach (var uid in _lookup.GetEntitiesInRange(coords, 2.5f, LookupFlags.Dynamic))
+        {
+            if (!HasComp<Content.Shared.Mobs.Components.MobStateComponent>(uid) || !_players.TryGetSessionByEntity(uid, out _))
+                continue;
+
+            if (!_access.FindAccessTags(uid).Contains("Janitor"))
+                continue;
+
+            var dist = (Transform(uid).Coordinates.Position - coords.Position).Length();
+            if (dist < bestDist)
+            {
+                bestDist = dist;
+                best = uid;
+            }
+        }
+
+        if (best != null)
+            CreditCleaning(best.Value, ev.Count);
     }
 
     #endregion

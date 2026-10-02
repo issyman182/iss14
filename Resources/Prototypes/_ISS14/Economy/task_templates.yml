@@ -4,12 +4,27 @@
 
 ## Service ##
 - type: departmentTaskTemplate
-  id: ServiceCleanHall
+  id: ServiceMopPuddles
   department: Service
-  title: task-service-clean-hall-title
-  description: task-service-clean-hall-desc
+  title: task-service-mop-title
+  description: task-service-mop-desc
+  kind: Cleaning
+  deliverMin: 5
+  deliverMax: 12
   rewardMin: 80
-  rewardMax: 160
+  rewardMax: 200
+
+- type: departmentTaskTemplate
+  id: ServiceScrubGraffiti
+  department: Service
+  title: task-service-scrub-title
+  description: task-service-scrub-desc
+  kind: Cleaning
+  deliverMin: 8
+  deliverMax: 20
+  rewardMin: 80
+  rewardMax: 200
+  weight: 0.7
 
 - type: departmentTaskTemplate
   id: ServiceCleanBar

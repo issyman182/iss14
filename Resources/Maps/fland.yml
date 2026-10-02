@@ -5,7 +5,7 @@ meta:
   forkId: iss14
   forkVersion: 1.5.0
   time: 07/12/2026 12:06:22
-  entityCount: 37916
+  entityCount: 37931
 maps:
 - 1
 grids:
@@ -28426,6 +28426,18 @@ entities:
     - type: Transform
       pos: 63.5,-57.5
       parent: 13329
+- proto: ATM
+  entities:
+  - uid: 37922
+    components:
+    - type: Transform
+      parent: 13329
+      pos: 32.5,23.5
+  - uid: 37917
+    components:
+    - type: Transform
+      parent: 13329
+      pos: -25.5,58.5
 - proto: AtmosDeviceFanDirectional
   entities:
   - uid: 1203
@@ -91114,6 +91126,18 @@ entities:
     - type: Transform
       pos: 63.5,47.5
       parent: 13329
+- proto: CashRegister
+  entities:
+  - uid: 37924
+    components:
+    - type: Transform
+      parent: 13329
+      pos: -6.5,27.5
+  - uid: 37923
+    components:
+    - type: Transform
+      parent: 13329
+      pos: 77.5,43.5
 - proto: Catwalk
   entities:
   - uid: 1381
@@ -100807,6 +100831,13 @@ entities:
     - type: Transform
       pos: -16.477627,-24.40009
       parent: 13329
+- proto: ChipExchanger
+  entities:
+  - uid: 37918
+    components:
+    - type: Transform
+      parent: 13329
+      pos: -24.5,57.5
 - proto: Cigar
   entities:
   - uid: 1295
@@ -120229,6 +120260,13 @@ entities:
     - type: Transform
       pos: 11.5,-14.5
       parent: 13329
+- proto: FineTerminal
+  entities:
+  - uid: 37925
+    components:
+    - type: Transform
+      parent: 13329
+      pos: 31.5,16.5
 - proto: FireAlarm
   entities:
   - uid: 658
@@ -196250,6 +196288,25 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 40.5,59.5
       parent: 13329
+- proto: SlotMachine
+  entities:
+  - uid: 37920
+    components:
+    - type: Transform
+      parent: 13329
+      pos: -24.5,53.5
+  - uid: 37919
+    components:
+    - type: Transform
+      parent: 13329
+      pos: -24.5,56.5
+- proto: SlotMachineHighRoller
+  entities:
+  - uid: 37921
+    components:
+    - type: Transform
+      parent: 13329
+      pos: -27.5,57.5
 - proto: SmallLight
   entities:
   - uid: 5419
@@ -208591,6 +208648,48 @@ entities:
     - type: Transform
       pos: 38.5,29.5
       parent: 13329
+- proto: TaskBoard
+  entities:
+  - uid: 37927
+    components:
+    - type: Transform
+      parent: 13329
+      pos: 33.5,21.5
+- proto: TaskBoardCargo
+  entities:
+  - uid: 37928
+    components:
+    - type: Transform
+      parent: 13329
+      pos: 9.5,-11.5
+- proto: TaskBoardEngineering
+  entities:
+  - uid: 37929
+    components:
+    - type: Transform
+      parent: 13329
+      pos: 81.5,56.5
+- proto: TaskBoardMedical
+  entities:
+  - uid: 37930
+    components:
+    - type: Transform
+      parent: 13329
+      pos: 79.5,-11.5
+- proto: TaskBoardScience
+  entities:
+  - uid: 37931
+    components:
+    - type: Transform
+      parent: 13329
+      pos: 7.5,68.5
+- proto: TaskBoardSecurity
+  entities:
+  - uid: 37926
+    components:
+    - type: Transform
+      parent: 13329
+      pos: 42.5,-27.5
 - proto: TegCenter
   entities:
   - uid: 24280

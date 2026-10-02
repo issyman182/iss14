@@ -39,6 +39,7 @@ public sealed partial class CleanDecalsReaction : ITileReaction
         var decals = decalSystem
             .GetDecalsIntersecting(tile.GridUid, lookupSystem.GetLocalBounds(tile, grid.TileSize).Enlarged(0.5f).Translated(new Vector2(-0.5f, -0.5f)));
         var amount = FixedPoint2.Zero;
+        var cleaned = 0;
 
         foreach (var decal in decals)
         {
@@ -50,6 +51,14 @@ public sealed partial class CleanDecalsReaction : ITileReaction
 
             decalSystem.RemoveDecal(tile.GridUid, decal.Index);
             amount += CleanCost;
+            cleaned++;
+        }
+
+        // iss14: janitor task hook
+        if (cleaned > 0)
+        {
+            var ev = new Content.Shared.Economy.Tasks.DecalsCleanedEvent(tile.GridUid, tile.GridIndices, cleaned);
+            entityManager.EventBus.RaiseEvent(EventSource.Local, ref ev);
         }
 
         return amount;
