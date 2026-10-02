@@ -12,6 +12,7 @@ public sealed partial class CharacterTitleSystem : EntitySystem
     [Dependency] private StoreManager _store = default!;
     [Dependency] private BankCardSystem _bankCard = default!;
     [Dependency] private IPlayerManager _players = default!;
+    [Dependency] private Content.Server.Preferences.Managers.IServerPreferencesManager _prefs = default!;
 
     public override void Initialize()
     {
@@ -21,19 +22,22 @@ public sealed partial class CharacterTitleSystem : EntitySystem
 
     private void OnSpawn(PlayerSpawnCompleteEvent ev)
     {
-        Apply(ev.Mob, ev.Player.UserId);
+        Apply(ev.Mob, ev.Player.UserId, ev.Profile.Title);
     }
 
     /// <summary>Re-applies the title to whatever the player currently controls.</summary>
     public void Refresh(NetUserId userId)
     {
-        if (_players.TryGetSessionById(userId, out var session) && session.AttachedEntity is { } mob)
-            Apply(mob, userId);
+        if (!_players.TryGetSessionById(userId, out var session) || session.AttachedEntity is not { } mob)
+            return;
+
+        var profile = _prefs.GetPreferencesOrNull(userId)?.SelectedCharacter as Content.Shared.Preferences.HumanoidCharacterProfile;
+        Apply(mob, userId, profile?.Title);
     }
 
-    public void Apply(EntityUid mob, NetUserId userId)
+    public void Apply(EntityUid mob, NetUserId userId, string? profileTitle)
     {
-        var title = _store.GetTitleText(userId);
+        var title = _store.ResolveTitle(userId, profileTitle);
 
         Set(mob, title);
         if (_bankCard.TryFindWornIdCard(mob, out var card))

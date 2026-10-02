@@ -377,6 +377,7 @@ namespace Content.Server.Database
         public string SkinColor { get; set; } = null!;
         public int SpawnPriority { get; set; } = 0;
         [Column("bark_voice")] public string? BarkVoice { get; set; }
+        [Column("title")] public string? Title { get; set; } // iss14: Economy
         public List<Job> Jobs { get; } = new();
         public List<Antag> Antags { get; } = new();
         public List<Trait> Traits { get; } = new();

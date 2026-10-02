@@ -133,6 +133,13 @@ namespace Content.Shared.Preferences
         [DataField]
         public ProtoId<BarkPrototype> BarkVoice { get; set; } = DefaultBarkVoice;
 
+        /// <summary>
+        /// iss14: Economy — store title this character wears. null = the account's default title, "" = no title,
+        /// otherwise a storeItem id the player owns.
+        /// </summary>
+        [DataField]
+        public string? Title { get; set; }
+
         public static readonly ProtoId<EmoteSoundsPrototype> DefaultVoice = "MaleHuman";
 
         /// <summary>
@@ -206,6 +213,7 @@ namespace Content.Shared.Preferences
                 new Dictionary<string, RoleLoadout>(other.Loadouts))
         {
             BarkVoice = other.BarkVoice; // Barks
+            Title = other.Title; // iss14: Economy
         }
 
         /// <summary>
@@ -342,6 +350,7 @@ namespace Content.Shared.Preferences
             profile.Name = (randomizeCfg & RandomizeCfg.Name) != 0 ? GetName(speciesProto.ID, profile.Gender) : baseProfile.Name;
             profile.Age = (randomizeCfg & RandomizeCfg.Age) != 0 ? RandomAge(speciesProto) : baseProfile.Age;
             profile.BarkVoice = baseProfile.BarkVoice; // Barks: keep the selected bark voice
+            profile.Title = baseProfile.Title; // iss14: Economy
 
             var randomAppearance = HumanoidCharacterAppearance.Random(profile.Species, profile.Sex);
             var baseAppearance = baseProfile.Appearance;
@@ -426,6 +435,12 @@ namespace Content.Shared.Preferences
         public HumanoidCharacterProfile WithBarkVoice(ProtoId<BarkPrototype> barkVoice)
         {
             return new(this) { BarkVoice = barkVoice };
+        }
+
+        /// <summary>iss14: Economy — per-character title override (see <see cref="Title"/>).</summary>
+        public HumanoidCharacterProfile WithTitle(string? title)
+        {
+            return new(this) { Title = title };
         }
 
         public HumanoidCharacterProfile WithAge(int age)
@@ -656,6 +671,7 @@ namespace Content.Shared.Preferences
             if (!Loadouts.SequenceEqual(other.Loadouts)) return false;
             if (FlavorText != other.FlavorText) return false;
             if (BarkVoice != other.BarkVoice) return false; // Barks
+            if (Title != other.Title) return false; // iss14: Economy
             if (Voice != other.Voice) return false; // iss14: upstream voice
             return Appearance.Equals(other.Appearance);
         }
@@ -835,6 +851,15 @@ namespace Content.Shared.Preferences
                 _loadouts.Remove(value);
             }
 
+            // iss14: Economy — a title override must be a title the player actually owns.
+            if (!string.IsNullOrEmpty(Title)
+                && (!prototypeManager.TryIndex<Content.Shared.Economy.Store.StoreItemPrototype>(Title, out var titleProto)
+                    || titleProto.Kind != Content.Shared.Economy.Store.StoreItemKind.Title
+                    || !collection.Resolve<Content.Shared.Economy.Store.ISharedStoreManager>().HasUnlock(session, Title)))
+            {
+                Title = null;
+            }
+
             // Barks: fall back to the default voice if the chosen one is missing or not allowed for this species.
             if (!prototypeManager.TryIndex(BarkVoice, out var barkProto)
                 || !barkProto.RoundStart
@@ -927,6 +952,7 @@ namespace Content.Shared.Preferences
             hashCode.Add((int)SpawnPriority);
             hashCode.Add((int)PreferenceUnavailable);
             hashCode.Add(BarkVoice); // Barks
+            hashCode.Add(Title); // iss14: Economy
             hashCode.Add(Voice); // iss14: upstream voice
             return hashCode.ToHashCode();
         }

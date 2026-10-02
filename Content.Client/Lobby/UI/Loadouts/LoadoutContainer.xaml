@@ -5,6 +5,8 @@
          MouseFilter="Ignore"
          Margin="0 0 0 5">
     <Button Name="SelectButton" ToggleMode="True" Margin="0 0 5 0" HorizontalExpand="True"/>
+    <!-- iss14: Economy — shown when the item is locked behind a store purchase -->
+    <Button Name="StoreButton" Visible="False" Margin="0 0 5 0" Text="{Loc 'store-open-button'}"/>
     <PanelContainer SetSize="64 64" HorizontalAlignment="Right" StyleClasses="PanelDeep">
         <SpriteView Name="Sprite" Scale="4 4" MouseFilter="Stop"/>
     </PanelContainer>

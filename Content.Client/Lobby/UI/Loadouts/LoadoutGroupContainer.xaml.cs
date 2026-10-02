@@ -222,6 +222,15 @@ public sealed partial class LoadoutGroupContainer : BoxContainer
 
         var cont = new LoadoutContainer(proto, !enabled, reason);
 
+        // iss14: Economy — locked behind a store item? Offer the way to unlock it.
+        if (!enabled)
+        {
+            var store = collection.Resolve<Content.Shared.Economy.Store.ISharedStoreManager>();
+            cont.ShowStoreLink = proto.Effects
+                .OfType<Content.Shared.Economy.Store.UnlockLoadoutEffect>()
+                .Any(e => !store.HasUnlock(session, e.Unlock));
+        }
+
         cont.Text = loadoutSystem.GetName(proto);
 
         cont.Select.Pressed = pressed;

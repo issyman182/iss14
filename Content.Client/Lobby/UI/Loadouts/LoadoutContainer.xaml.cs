@@ -26,12 +26,20 @@ public sealed partial class LoadoutContainer : BoxContainer
         set => SelectButton.Text = value;
     }
 
+    /// <summary>iss14: Economy — show the "open store" link for items locked behind a store purchase.</summary>
+    public bool ShowStoreLink
+    {
+        get => StoreButton.Visible;
+        set => StoreButton.Visible = value;
+    }
+
     public LoadoutContainer(ProtoId<LoadoutPrototype> proto, bool disabled, FormattedMessage? reason)
     {
         RobustXamlLoader.Load(this);
         IoCManager.InjectDependencies(this);
 
         SelectButton.Disabled = disabled;
+        StoreButton.OnPressed += _ => UserInterfaceManager.GetUIController<Content.Client.Economy.Store.StoreUIController>().Open(); // iss14: Economy
 
         if (disabled && reason != null)
         {

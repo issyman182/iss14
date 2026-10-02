@@ -77,13 +77,32 @@ public sealed partial class StoreManager : ISharedStoreManager, IPostInjectInit
     public IReadOnlySet<string> GetUnlocks(NetUserId userId)
         => _data.TryGetValue(userId, out var data) ? data.Owned : new HashSet<string>();
 
-    /// <summary>The title text the player wears, or null.</summary>
+    /// <summary>The account-wide title text the player wears, or null.</summary>
     public string? GetTitleText(NetUserId userId)
     {
         if (!_data.TryGetValue(userId, out var data) || data.Title == null)
             return null;
 
-        if (!_proto.TryIndex<StoreItemPrototype>(data.Title, out var proto) || !data.Owned.Contains(data.Title))
+        return TitleTextFor(userId, data.Title);
+    }
+
+    /// <summary>
+    /// The title a character wears: the profile's override when set ("" = none), else the account default.
+    /// </summary>
+    public string? ResolveTitle(NetUserId userId, string? profileTitle)
+    {
+        if (profileTitle == null)
+            return GetTitleText(userId);
+
+        return profileTitle.Length == 0 ? null : TitleTextFor(userId, profileTitle);
+    }
+
+    private string? TitleTextFor(NetUserId userId, string item)
+    {
+        if (!_data.TryGetValue(userId, out var data) || !data.Owned.Contains(item))
+            return null;
+
+        if (!_proto.TryIndex<StoreItemPrototype>(item, out var proto) || proto.Kind != StoreItemKind.Title)
             return null;
 
         return proto.TitleText ?? Loc.GetString(proto.Name);
@@ -148,6 +167,13 @@ public sealed partial class StoreManager : ISharedStoreManager, IPostInjectInit
         if (data.Owned.Contains(item.ID))
         {
             Send(userId, Loc.GetString("store-already-owned"));
+            return;
+        }
+
+        if (item.RequiresUnlock is { } required && !data.Owned.Contains(required))
+        {
+            var reqName = _proto.TryIndex(required, out var reqProto) ? Loc.GetString(reqProto.Name) : required.Id;
+            Send(userId, Loc.GetString("store-requires-item", ("item", reqName)));
             return;
         }
 

@@ -94,6 +94,19 @@ public sealed partial class StoreWindow : FancyWindow
             text.AddChild(new Label { Text = label });
             if (item.Description != null)
                 text.AddChild(new Label { Text = Loc.GetString(item.Description), StyleClasses = { "LabelSubText" } });
+
+            var requirementMissing = false;
+            if (!owned && item.RequiresUnlock is { } required)
+            {
+                requirementMissing = !_store.Owned.Contains(required);
+                var reqName = _proto.TryIndex(required, out var reqProto) ? Loc.GetString(reqProto.Name) : required.Id;
+                text.AddChild(new Label
+                {
+                    Text = Loc.GetString("store-requires-item", ("item", reqName)),
+                    StyleClasses = { "LabelSubText" },
+                    FontColorOverride = requirementMissing ? Color.FromHex("#d0a04a") : null,
+                });
+            }
             row.AddChild(text);
 
             if (!owned)
@@ -101,7 +114,7 @@ public sealed partial class StoreWindow : FancyWindow
                 var buy = new Button
                 {
                     Text = Loc.GetString("store-buy", ("price", item.Price)),
-                    Disabled = _store.Balance < item.Price,
+                    Disabled = _store.Balance < item.Price || requirementMissing,
                     MinWidth = 110,
                 };
                 var id = item.ID;

@@ -164,6 +164,17 @@
                         <humanoid:MarkingPicker Name="Markings" IgnoreCategories="Hair,FacialHair" />
                     </ScrollContainer>
                 </BoxContainer>
+                <BoxContainer Name="StoreTab" Orientation="Vertical" Margin="10">
+                    <!-- iss14: Economy — store & per-character title -->
+                    <BoxContainer Orientation="Horizontal" Margin="0 0 0 6">
+                        <Label Text="{Loc 'humanoid-profile-editor-title-label'}" MinWidth="120" />
+                        <OptionButton Name="TitleButton" HorizontalExpand="True" />
+                    </BoxContainer>
+                    <Label Text="{Loc 'humanoid-profile-editor-title-hint'}" StyleClasses="LabelSubText" />
+                    <Label Name="StoreBalanceLabel" Margin="0 12 0 4" StyleClasses="LabelHeading" />
+                    <Label Text="{Loc 'humanoid-profile-editor-store-hint'}" StyleClasses="LabelSubText" />
+                    <Button Name="OpenStoreButton" Text="{Loc 'store-open-button'}" HorizontalAlignment="Left" Margin="0 8 0 0" />
+                </BoxContainer>
             </TabContainer>
         </BoxContainer>
         <!-- Right side -->

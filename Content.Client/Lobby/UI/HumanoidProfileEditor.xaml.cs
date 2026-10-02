@@ -400,6 +400,31 @@ namespace Content.Client.Lobby.UI
 
             RefreshTraits();
 
+            #region Store (iss14: Economy)
+
+            TabContainer.SetTabTitle(5, Loc.GetString("humanoid-profile-editor-store-tab"));
+            _store = IoCManager.Resolve<Economy.Store.ClientStoreManager>();
+            _store.Updated += OnStoreUpdated;
+            OpenStoreButton.OnPressed += _ => UserInterfaceManager.GetUIController<Economy.Store.StoreUIController>().Open();
+            TitleButton.OnItemSelected += args =>
+            {
+                TitleButton.SelectId(args.Id);
+                if (Profile == null)
+                    return;
+
+                var title = args.Id switch
+                {
+                    0 => null,
+                    1 => string.Empty,
+                    _ => _titleOptions.Count > args.Id - 2 ? _titleOptions[args.Id - 2] : null,
+                };
+                Profile = Profile.WithTitle(title);
+                SetDirty();
+            };
+            UpdateTitleControls();
+
+            #endregion Store
+
             #region Markings
 
             TabContainer.SetTabTitle(4, Loc.GetString("humanoid-profile-editor-markings-tab"));
@@ -507,6 +532,7 @@ namespace Content.Client.Lobby.UI
             UpdateHairPickers();
             UpdateCMarkingsHair();
             UpdateCMarkingsFacialHair();
+            UpdateTitleControls();
 
             RefreshAntags();
             RefreshJobs();
@@ -544,6 +570,55 @@ namespace Content.Client.Lobby.UI
 
             _loadoutWindow?.Dispose();
             _loadoutWindow = null;
+            _store.Updated -= OnStoreUpdated;
+        }
+
+        // iss14: Economy
+        private Economy.Store.ClientStoreManager _store = default!;
+        private readonly List<string> _titleOptions = new();
+
+        private void OnStoreUpdated()
+        {
+            UpdateTitleControls();
+            // A purchase may have unlocked loadout items the open loadout window shows as locked.
+            if (_loadoutWindow != null && _playerManager.LocalSession != null && IoCManager.Instance != null && _loadoutWindow.RoleLoadout != null)
+                _loadoutWindow.RefreshLoadouts(_loadoutWindow.RoleLoadout, _playerManager.LocalSession, IoCManager.Instance);
+        }
+
+        /// <summary>Fills the title dropdown with "account default", "none" and every owned title; selects the profile's choice.</summary>
+        private void UpdateTitleControls()
+        {
+            TitleButton.Clear();
+            _titleOptions.Clear();
+
+            var accountTitle = _store.Title != null && _prototypeManager.TryIndex<Content.Shared.Economy.Store.StoreItemPrototype>(_store.Title, out var accountProto)
+                ? accountProto.TitleText ?? Loc.GetString(accountProto.Name)
+                : null;
+            TitleButton.AddItem(accountTitle == null
+                ? Loc.GetString("humanoid-profile-editor-title-default")
+                : $"{Loc.GetString("humanoid-profile-editor-title-default")} ({accountTitle})", 0);
+            TitleButton.AddItem(Loc.GetString("humanoid-profile-editor-title-none"), 1);
+
+            foreach (var id in _store.Owned.OrderBy(i => i))
+            {
+                if (!_prototypeManager.TryIndex<Content.Shared.Economy.Store.StoreItemPrototype>(id, out var proto)
+                    || proto.Kind != Content.Shared.Economy.Store.StoreItemKind.Title)
+                    continue;
+
+                TitleButton.AddItem(proto.TitleText ?? Loc.GetString(proto.Name), _titleOptions.Count + 2);
+                _titleOptions.Add(id);
+            }
+
+            StoreBalanceLabel.Text = Loc.GetString("store-balance", ("balance", _store.Balance));
+
+            var selected = Profile?.Title switch
+            {
+                null => 0,
+                "" => 1,
+                var t => _titleOptions.IndexOf(t) is var idx and >= 0 ? idx + 2 : 0,
+            };
+            TitleButton.SelectId(selected);
+            TitleButton.Disabled = Profile == null;
         }
 
         protected override void EnteredTree()

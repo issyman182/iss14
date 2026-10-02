@@ -227,6 +227,7 @@ namespace Content.Server.Database
             profile.SkinColor = appearance.SkinColor.ToHex();
             profile.SpawnPriority = (int) humanoid.SpawnPriority;
             profile.BarkVoice = humanoid.BarkVoice; // Barks
+            profile.Title = humanoid.Title; // iss14: Economy
             profile.OrganMarkings = null; // Shitmed Change: organ-scoped markings no longer exist
             profile.Markings = JsonSerializer.SerializeToDocument(markingStrings);
             profile.HairName = appearance.HairStyleId;

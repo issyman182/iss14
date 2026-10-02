@@ -2,6 +2,17 @@ Name: Changelog
 Order: 0
 Entries:
 - author: issyman182
+  version: iss14:1.14.0
+  time: '2026-10-02'
+  changes:
+  - message: 'Character editor: new Store tab. Pick per character which bought title it wears (account default, none or any owned title) and open the store right from the editor.'
+    type: Add
+  - message: Loadout items locked behind a store purchase show an "Open store" button next to them and unlock immediately after buying, without reopening the loadout window.
+    type: Add
+  - message: Store items can require another store item first (unlock chains); the store shows the requirement and the server enforces it.
+    type: Add
+  id: 25
+- author: issyman182
   version: iss14:1.13.0
   time: '2026-10-02'
   changes:

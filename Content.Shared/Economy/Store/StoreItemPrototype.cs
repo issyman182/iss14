@@ -50,4 +50,8 @@ public sealed partial class StoreItemPrototype : IPrototype
     /// <summary>Hidden from the store (admin-granted only).</summary>
     [DataField]
     public bool Hidden;
+
+    /// <summary>Another store item the player must own before this one can be bought (unlock chains).</summary>
+    [DataField]
+    public ProtoId<StoreItemPrototype>? RequiresUnlock;
 }

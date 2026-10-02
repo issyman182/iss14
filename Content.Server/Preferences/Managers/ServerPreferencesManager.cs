@@ -185,6 +185,7 @@ namespace Content.Server.Preferences.Managers
             )
             {
                 BarkVoice = profile.BarkVoice ?? HumanoidCharacterProfile.DefaultBarkVoice, // Barks
+                Title = profile.Title, // iss14: Economy
             };
         }
 

@@ -25,6 +25,9 @@ public sealed partial class LoadoutWindow : FancyWindow
 
     public HumanoidCharacterProfile Profile;
 
+    /// <summary>iss14: Economy — the loadout last shown, so the window can be refreshed after a store purchase.</summary>
+    public RoleLoadout? RoleLoadout;
+
     // CCvar.
     private int _maxLoadoutNameLength;
 
@@ -93,6 +96,7 @@ public sealed partial class LoadoutWindow : FancyWindow
 
     public void RefreshLoadouts(RoleLoadout loadout, ICommonSession session, IDependencyCollection collection)
     {
+        RoleLoadout = loadout;
         foreach (var group in _groups)
         {
             group.RefreshLoadouts(Profile, loadout, session, collection);

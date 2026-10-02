@@ -21,6 +21,16 @@ store-title-not-owned = You don't own that title.
 store-title-set = Title changed.
 store-title-cleared = Title removed.
 store-loadout-locked = Requires the store item "{ $item }".
+store-requires-item = Requires "{ $item }" first.
+store-open-button = Open store
+
+# Character editor
+humanoid-profile-editor-store-tab = Store
+humanoid-profile-editor-title-label = Title
+humanoid-profile-editor-title-default = Account default
+humanoid-profile-editor-title-none = No title
+humanoid-profile-editor-title-hint = The store title this character wears on the ID card, when examined and in chat.
+humanoid-profile-editor-store-hint = Loadout items marked "Requires the store item" are unlocked here. Purchases are shared across all your characters.
 
 character-title-examine = Title: [color=gold]{ $title }[/color]
 character-title-chat-name = { $title } { $name }
