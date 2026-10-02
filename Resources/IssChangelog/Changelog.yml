@@ -2,6 +2,13 @@ Name: Changelog
 Order: 0
 Entries:
 - author: issyman182
+  version: iss14:1.13.0
+  time: '2026-10-02'
+  changes:
+  - message: 'New map: Cloud Station - a compact Box-style station for low to mid pop (0-40 players, in the default map pool). Central bar and kitchen inside a ring corridor, command to the north, service/dorms north-west, evac and arrivals lobby north-east, engineering and atmos west, medbay/chemistry/science east, security/brig/armory and cargo with its own shuttle dock south, plus an arcade with the casino hardware. Fully wired (generators, SMES, substation, APCs), piped (distribution and waste loops, vents and scrubbers in every room), air alarms, firelocks and spawn points for every job.'
+    type: Add
+  id: 24
+- author: issyman182
   version: iss14:1.12.1
   time: '2026-10-02'
   changes:

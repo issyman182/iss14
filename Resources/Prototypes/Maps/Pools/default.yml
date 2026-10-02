@@ -2,6 +2,7 @@
   id: DefaultMapPool
   maps:
   - Bagel
+  - Cloud # iss14
   - Box
   - Elkridge
   - Marathon
