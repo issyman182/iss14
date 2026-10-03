@@ -10,18 +10,22 @@ using Robust.Client.UserInterface.XAML;
 
 namespace Content.Client.Economy;
 
+/// <summary>Cashier window: price list of the job's catalog, the draft bill and the open bill.</summary>
 [GenerateTypedNameReferences]
 public sealed partial class CashRegisterWindow : FancyWindow
 {
-    public event Action<Dictionary<string, int>>? OnCreateBill;
+    /// <summary>(prototype, delta) — adds or removes items from the draft.</summary>
+    public event Action<string, int>? OnAdjustDraft;
+    public event Action? OnClearDraft;
+    public event Action? OnCreateBill;
     public event Action? OnCancelBill;
     public event Action<string, int?>? OnSetPrice;
     public event Action? OnRefresh;
 
-    /// <summary>Selected count per prototype for the next bill.</summary>
-    private readonly Dictionary<string, int> _selection = new();
     private List<CashRegisterItem> _items = new();
-    private readonly Dictionary<string, Label> _countLabels = new();
+    private CashRegisterBill _draft = new();
+    private string _itemsSignature = string.Empty;
+    private bool _nearbyOnly;
 
     public CashRegisterWindow()
     {
@@ -32,35 +36,56 @@ public sealed partial class CashRegisterWindow : FancyWindow
 
         RefreshButton.OnPressed += _ => OnRefresh?.Invoke();
         CancelBillButton.OnPressed += _ => OnCancelBill?.Invoke();
-        CreateBillButton.OnPressed += _ =>
-        {
-            var items = _selection.Where(kv => kv.Value > 0).ToDictionary(kv => kv.Key, kv => kv.Value);
-            if (items.Count == 0)
-                return;
+        ClearDraftButton.OnPressed += _ => OnClearDraft?.Invoke();
+        CreateBillButton.OnPressed += _ => OnCreateBill?.Invoke();
 
-            OnCreateBill?.Invoke(items);
-            _selection.Clear();
+        SaleSearch.OnTextChanged += _ => BuildItems();
+        PriceSearch.OnTextChanged += _ => BuildPrices();
+        NearbyOnly.OnToggled += a =>
+        {
+            _nearbyOnly = a.Pressed;
+            BuildItems();
         };
     }
 
     public void SetState(CashRegisterBuiState state)
     {
         _items = state.Items;
+        _draft = state.Draft;
 
-        DepartmentLabel.Text = Loc.GetString("cash-register-department",
-            ("department", state.Department),
-            ("balance", state.DepartmentBalance),
+        DepartmentLabel.Text = Loc.GetString("cash-register-department", ("department", state.Department), ("balance", state.DepartmentBalance));
+        CommissionLabel.Text = Loc.GetString("cash-register-commission",
             ("commission", state.CommissionPercent.ToString("0.#", CultureInfo.InvariantCulture)));
 
-        // Drop selections of items that vanished.
-        foreach (var key in _selection.Keys.ToList())
+        // Rows are only rebuilt when the list itself changed; a draft change just refreshes the counters.
+        var signature = string.Join("|", _items.Select(i => $"{i.Prototype}:{i.Count}:{i.Price}:{i.Overridden}"));
+        if (signature != _itemsSignature)
         {
-            if (_items.All(i => i.Prototype != key))
-                _selection.Remove(key);
+            _itemsSignature = signature;
+            BuildItems();
+            BuildPrices();
+        }
+        else
+        {
+            UpdateCounters();
         }
 
-        BuildItems();
-        BuildPrices();
+        if (_draft.Lines.Count == 0)
+        {
+            DraftHeader.Text = Loc.GetString("cash-register-draft-empty");
+            DraftLines.Text = string.Empty;
+            DraftTotal.Text = string.Empty;
+        }
+        else
+        {
+            DraftHeader.Text = Loc.GetString("cash-register-draft-header");
+            DraftLines.Text = string.Join("\n", _draft.Lines.Select(l => Loc.GetString("cash-register-bill-line",
+                ("count", l.Count), ("name", l.Name), ("price", l.Price), ("total", l.Total))));
+            DraftTotal.Text = Loc.GetString("cash-register-selection-total", ("total", _draft.Total));
+        }
+
+        ClearDraftButton.Disabled = _draft.Lines.Count == 0;
+        CreateBillButton.Disabled = _draft.Lines.Count == 0 || state.Bill != null;
 
         if (state.Bill is { } bill)
         {
@@ -68,101 +93,135 @@ public sealed partial class CashRegisterWindow : FancyWindow
             BillLines.Text = string.Join("\n", bill.Lines.Select(l => Loc.GetString("cash-register-bill-line",
                 ("count", l.Count), ("name", l.Name), ("price", l.Price), ("total", l.Total))));
             CancelBillButton.Visible = true;
-            CreateBillButton.Disabled = true;
         }
         else
         {
             BillHeader.Text = Loc.GetString("cash-register-no-open-bill");
             BillLines.Text = string.Empty;
             CancelBillButton.Visible = false;
-            CreateBillButton.Disabled = false;
         }
 
         MessageLabel.Text = state.Message;
-        UpdateSelectionLabel();
     }
+
+    private int InDraft(string proto) => _draft.Lines.FirstOrDefault(l => l.Prototype == proto)?.Count ?? 0;
+
+    private static bool MatchesSearch(CashRegisterItem item, string search)
+        => search.Length == 0
+           || item.Name.Contains(search, StringComparison.OrdinalIgnoreCase)
+           || item.Catalog.Contains(search, StringComparison.OrdinalIgnoreCase);
+
+    private readonly Dictionary<string, Label> _countLabels = new();
 
     private void BuildItems()
     {
         ItemsBox.RemoveAllChildren();
         _countLabels.Clear();
 
-        if (_items.Count == 0)
+        var search = SaleSearch.Text.Trim();
+        var shown = _items.Where(i => (!_nearbyOnly || i.Count > 0) && MatchesSearch(i, search)).ToList();
+
+        if (shown.Count == 0)
         {
-            ItemsBox.AddChild(new Label { Text = Loc.GetString("cash-register-no-items"), StyleClasses = { "LabelSubText" } });
+            ItemsBox.AddChild(new Label
+            {
+                Text = Loc.GetString(_items.Count == 0 ? "cash-register-no-items" : "cash-register-no-matches"),
+                StyleClasses = { "LabelSubText" },
+            });
             return;
         }
 
-        foreach (var item in _items)
+        string? catalog = null;
+        foreach (var item in shown)
         {
-            if (item.Count <= 0)
-                continue;
+            if (item.Catalog != catalog)
+            {
+                catalog = item.Catalog;
+                ItemsBox.AddChild(new Label { Text = catalog, StyleClasses = { "LabelHeading" }, Margin = new Thickness(0, 6, 0, 0) });
+            }
 
             var row = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, Margin = new Thickness(0, 2, 0, 0) };
-            row.AddChild(new Label { Text = item.Name, HorizontalExpand = true });
+            row.AddChild(new Label { Text = item.Name, HorizontalExpand = true, ClipText = true });
             row.AddChild(new Label
             {
-                Text = Loc.GetString("cash-register-item-info", ("count", item.Count), ("price", item.Price)),
+                Text = item.Count > 0
+                    ? Loc.GetString("cash-register-item-info", ("count", item.Count), ("price", item.Price))
+                    : Loc.GetString("cash-register-item-price", ("price", item.Price)),
                 StyleClasses = { "LabelSubText" },
-                MinWidth = 120,
+                MinWidth = 130,
+                Align = Label.AlignMode.Right,
+                Margin = new Thickness(0, 0, 6, 0),
             });
 
             var proto = item.Prototype;
-            var max = item.Count;
+            var available = item.Count;
             var minus = new Button { Text = "-", MinWidth = 28 };
-            var countLabel = new Label { Text = _selection.GetValueOrDefault(proto).ToString(), MinWidth = 28, Align = Label.AlignMode.Center };
+            var countLabel = new Label { Text = InDraft(proto).ToString(), MinWidth = 28, Align = Label.AlignMode.Center };
             var plus = new Button { Text = "+", MinWidth = 28 };
-            var all = new Button { Text = Loc.GetString("cash-register-all"), Margin = new Thickness(4, 0, 0, 0) };
 
-            minus.OnPressed += _ => Adjust(proto, -1, max);
-            plus.OnPressed += _ => Adjust(proto, 1, max);
-            all.OnPressed += _ => Adjust(proto, max, max);
-
+            minus.OnPressed += _ => OnAdjustDraft?.Invoke(proto, -1);
+            plus.OnPressed += _ => OnAdjustDraft?.Invoke(proto, 1);
             row.AddChild(minus);
             row.AddChild(countLabel);
             row.AddChild(plus);
-            row.AddChild(all);
+
+            if (available > 0)
+            {
+                var all = new Button { Text = Loc.GetString("cash-register-all"), Margin = new Thickness(4, 0, 0, 0), MinWidth = 40 };
+                all.OnPressed += _ =>
+                {
+                    var delta = available - InDraft(proto);
+                    if (delta > 0)
+                        OnAdjustDraft?.Invoke(proto, delta);
+                };
+                row.AddChild(all);
+            }
+            else
+            {
+                row.AddChild(new Control { MinWidth = 44 });
+            }
+
             _countLabels[proto] = countLabel;
             ItemsBox.AddChild(row);
         }
     }
 
-    private void Adjust(string proto, int delta, int max)
+    private void UpdateCounters()
     {
-        var next = Math.Clamp(_selection.GetValueOrDefault(proto) + delta, 0, max);
-        _selection[proto] = next;
-        if (_countLabels.TryGetValue(proto, out var label))
-            label.Text = next.ToString();
-        UpdateSelectionLabel();
-    }
-
-    private void UpdateSelectionLabel()
-    {
-        var total = 0;
-        foreach (var (proto, count) in _selection)
+        foreach (var (proto, label) in _countLabels)
         {
-            var item = _items.FirstOrDefault(i => i.Prototype == proto);
-            if (item != null)
-                total += count * item.Price;
+            label.Text = InDraft(proto).ToString();
         }
-
-        SelectionLabel.Text = Loc.GetString("cash-register-selection-total", ("total", total));
     }
 
     private void BuildPrices()
     {
         PricesBox.RemoveAllChildren();
 
-        if (_items.Count == 0)
+        var search = PriceSearch.Text.Trim();
+        var shown = _items.Where(i => MatchesSearch(i, search)).ToList();
+
+        if (shown.Count == 0)
         {
-            PricesBox.AddChild(new Label { Text = Loc.GetString("cash-register-no-items"), StyleClasses = { "LabelSubText" } });
+            PricesBox.AddChild(new Label
+            {
+                Text = Loc.GetString(_items.Count == 0 ? "cash-register-no-items" : "cash-register-no-matches"),
+                StyleClasses = { "LabelSubText" },
+            });
             return;
         }
 
-        foreach (var item in _items)
+        string? catalog = null;
+        foreach (var item in shown)
         {
+            if (item.Catalog != catalog)
+            {
+                catalog = item.Catalog;
+                PricesBox.AddChild(new Label { Text = catalog, StyleClasses = { "LabelHeading" }, Margin = new Thickness(0, 6, 0, 0) });
+            }
+
             var row = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, Margin = new Thickness(0, 2, 0, 0) };
-            row.AddChild(new Label { Text = item.Name, HorizontalExpand = true });
+            row.AddChild(new Label { Text = item.Name, HorizontalExpand = true, ClipText = true });
 
             var edit = new LineEdit { Text = item.Price.ToString(CultureInfo.InvariantCulture), MinWidth = 80 };
             var proto = item.Prototype;
@@ -176,20 +235,17 @@ public sealed partial class CashRegisterWindow : FancyWindow
                 Text = Loc.GetString("cash-register-reset-price"),
                 Margin = new Thickness(4, 0, 0, 0),
                 Disabled = !item.Overridden,
-                ToolTip = item.Overridden ? Loc.GetString("cash-register-default-price", ("price", item.DefaultPrice)) : null,
             };
             reset.OnPressed += _ => OnSetPrice?.Invoke(proto, null);
             row.AddChild(reset);
 
-            if (item.Overridden)
+            row.AddChild(new Label
             {
-                row.AddChild(new Label
-                {
-                    Text = Loc.GetString("cash-register-default-price", ("price", item.DefaultPrice)),
-                    StyleClasses = { "LabelSubText" },
-                    Margin = new Thickness(6, 0, 0, 0),
-                });
-            }
+                Text = item.Overridden ? Loc.GetString("cash-register-default-price", ("price", item.DefaultPrice)) : string.Empty,
+                StyleClasses = { "LabelSubText" },
+                MinWidth = 90,
+                Margin = new Thickness(6, 0, 0, 0),
+            });
 
             PricesBox.AddChild(row);
         }

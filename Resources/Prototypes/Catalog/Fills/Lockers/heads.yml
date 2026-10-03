@@ -138,7 +138,7 @@
     - id: ClothingEyesHudCommand
     - id: ATMFlatpack # iss14: Economy
     - id: TaskBoardFlatpack # iss14: Economy
-    - id: CashRegister # iss14: Economy
+    - id: CashRegisterFlatpack # iss14: Economy
     - id: PlushieLizardJobHeadofpersonnel
       prob: 0.02
 

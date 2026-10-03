@@ -1,17 +1,63 @@
 # iss14: Economy — counter cash register (see CashRegisterComponent).
+# The register is an anchored machine: wrench to move it, delivered as a flatpack (multitool to unpack).
+
+## Catalogs: what a job sells. The cashier sees the catalogs matching their access. ##
+- type: cashRegisterCatalog
+  id: Bar
+  name: cash-register-catalog-bar
+  access: [ Bar ]
+  edible: Drink
+  edibleSolution: drink   # glassware from chemistry uses "beaker" and stays out
+  priority: 10
+
+- type: cashRegisterCatalog
+  id: Kitchen
+  name: cash-register-catalog-kitchen
+  access: [ Kitchen ]
+  edible: Food
+  edibleSolution: food
+  blacklistComponents: [ Pill ]
+  priority: 20
+
+- type: cashRegisterCatalog
+  id: Hydroponics
+  name: cash-register-catalog-hydroponics
+  access: [ Hydroponics ]
+  components: [ Produce, Seed ]
+  priority: 30
+
+- type: cashRegisterCatalog
+  id: Medical
+  name: cash-register-catalog-medical
+  access: [ Medical, Chemistry, Paramedic ]
+  components: [ Pill, Healing, Injector ]
+  priority: 40
+
+# No filter: lists only what lies on the counter, minus things nobody sells.
+- type: cashRegisterCatalog
+  id: General
+  name: cash-register-catalog-general
+  blacklistComponents: [ IdCard, Pda, BankCard, Access, Tool ]
+  priority: 100
+
+## The machine ##
 - type: entity
-  parent: BaseItem
+  parent: [ BaseMachine, StructureHealthMachineWeak ]
   id: CashRegister
   name: cash register
-  description: A NanoTrasen point-of-sale terminal. Staff write a bill, customers swipe their ID or hand over spesos.
+  description: A NanoTrasen point-of-sale terminal. Staff ring up the goods, customers pay with their ID or spesos. Wrench to move it.
   components:
   - type: Sprite
     sprite: _ISS14/Objects/Devices/cash_register.rsi
+    drawdepth: SmallObjects
     layers:
     - state: icon
     - state: bill
       map: ["enum.CashRegisterVisualLayers.Screen"]
       visible: false
+  - type: Icon
+    sprite: _ISS14/Objects/Devices/cash_register.rsi
+    state: icon
   - type: Appearance
   - type: GenericVisualizer
     visuals:
@@ -19,22 +65,34 @@
         enum.CashRegisterVisualLayers.Screen:
           True: { visible: true }
           False: { visible: false }
-  - type: Item
-    size: Ginormous
-  - type: MultiHandedItem
+  - type: InteractionOutline
+  - type: Anchorable
+    delay: 2
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.3,-0.25,0.3,0.25"
+        density: 40
+        mask:
+        - TabletopMachineMask
+        layer:
+        - TabletopMachineLayer
   - type: CashRegister
+    catalogs: [ Bar, Kitchen, Hydroponics ]
   - type: StaticPrice
     price: 150
   - type: AccessReader
     access: [["Service"], ["Bar"], ["Kitchen"], ["Hydroponics"], ["HeadOfPersonnel"], ["Captain"]]
-  - type: ActivatableUI
-    key: enum.CashRegisterUiKey.Key
-  - type: ActivatableUIRequiresAccess
-    popupMessage: cash-register-access-denied
   - type: UserInterface
     interfaces:
       enum.CashRegisterUiKey.Key:
         type: CashRegisterBoundUserInterface
+      enum.CashRegisterUiKey.Customer:
+        type: CashRegisterCustomerBoundUserInterface
   - type: Damageable
     damageContainer: Inorganic
     damageModifierSet: Metallic
@@ -60,6 +118,7 @@
   components:
   - type: CashRegister
     account: Security
+    catalogs: [ General ]
   - type: AccessReader
     access: [["Security"], ["HeadOfSecurity"], ["Captain"]]
 
@@ -71,6 +130,7 @@
   components:
   - type: CashRegister
     account: Cargo
+    catalogs: [ General ]
   - type: AccessReader
     access: [["Cargo"], ["Quartermaster"], ["Captain"]]
 
@@ -82,6 +142,7 @@
   components:
   - type: CashRegister
     account: Medical
+    catalogs: [ Medical, General ]
   - type: AccessReader
     access: [["Medical"], ["ChiefMedicalOfficer"], ["Captain"]]
 
@@ -93,6 +154,7 @@
   components:
   - type: CashRegister
     account: Science
+    catalogs: [ General ]
   - type: AccessReader
     access: [["Research"], ["ResearchDirector"], ["Captain"]]
 
@@ -104,15 +166,115 @@
   components:
   - type: CashRegister
     account: Engineering
+    catalogs: [ General ]
   - type: AccessReader
     access: [["Engineering"], ["ChiefEngineer"], ["Captain"]]
+
+## Flatpacks: unpack with a multitool where the register should stand. ##
+- type: entity
+  parent: BaseFlatpack
+  id: CashRegisterFlatpack
+  name: cash register flatpack
+  description: A flatpack used for constructing a cash register. Unpack it with a multitool on the counter.
+  components:
+  - type: Flatpack
+    entity: CashRegister
+  - type: Sprite
+    layers:
+    - state: base
+    - state: overlay
+      color: "#9FED58"
+    - sprite: _ISS14/Objects/Devices/cash_register.rsi
+      state: flatpack
+  - type: StaticPrice
+    price: 150
+
+- type: entity
+  parent: CashRegisterFlatpack
+  id: CashRegisterSecurityFlatpack
+  name: security cash register flatpack
+  description: A flatpack used for constructing a security cash register. Unpack it with a multitool.
+  components:
+  - type: Flatpack
+    entity: CashRegisterSecurity
+  - type: Sprite
+    layers:
+    - state: base
+    - state: overlay
+      color: "#DE3A3A"
+    - sprite: _ISS14/Objects/Devices/cash_register.rsi
+      state: flatpack
+
+- type: entity
+  parent: CashRegisterFlatpack
+  id: CashRegisterCargoFlatpack
+  name: cargo cash register flatpack
+  description: A flatpack used for constructing a cargo cash register. Unpack it with a multitool.
+  components:
+  - type: Flatpack
+    entity: CashRegisterCargo
+  - type: Sprite
+    layers:
+    - state: base
+    - state: overlay
+      color: "#A46106"
+    - sprite: _ISS14/Objects/Devices/cash_register.rsi
+      state: flatpack
+
+- type: entity
+  parent: CashRegisterFlatpack
+  id: CashRegisterMedicalFlatpack
+  name: medical cash register flatpack
+  description: A flatpack used for constructing a medical cash register. Unpack it with a multitool.
+  components:
+  - type: Flatpack
+    entity: CashRegisterMedical
+  - type: Sprite
+    layers:
+    - state: base
+    - state: overlay
+      color: "#52B4E9"
+    - sprite: _ISS14/Objects/Devices/cash_register.rsi
+      state: flatpack
+
+- type: entity
+  parent: CashRegisterFlatpack
+  id: CashRegisterScienceFlatpack
+  name: science cash register flatpack
+  description: A flatpack used for constructing a science cash register. Unpack it with a multitool.
+  components:
+  - type: Flatpack
+    entity: CashRegisterScience
+  - type: Sprite
+    layers:
+    - state: base
+    - state: overlay
+      color: "#D381C9"
+    - sprite: _ISS14/Objects/Devices/cash_register.rsi
+      state: flatpack
+
+- type: entity
+  parent: CashRegisterFlatpack
+  id: CashRegisterEngineeringFlatpack
+  name: engineering cash register flatpack
+  description: A flatpack used for constructing an engineering cash register. Unpack it with a multitool.
+  components:
+  - type: Flatpack
+    entity: CashRegisterEngineering
+  - type: Sprite
+    layers:
+    - state: base
+    - state: overlay
+      color: "#EFB341"
+    - sprite: _ISS14/Objects/Devices/cash_register.rsi
+      state: flatpack
 
 - type: entity
   id: CrateCashRegister
   parent: CrateGenericSteel
   name: cash register crate
-  description: A crate with a cash register inside. Ring it up.
+  description: A crate with a cash register flatpack inside. Unpack it with a multitool, move it with a wrench.
   components:
   - type: StorageFill
     contents:
-    - id: CashRegister
+    - id: CashRegisterFlatpack

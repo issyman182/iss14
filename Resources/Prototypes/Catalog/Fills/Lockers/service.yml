@@ -17,7 +17,7 @@
     - id: DrinkShaker
     - id: ClothingEyesHudBeer
     - id: HandLabeler
-    - id: CashRegister # iss14: Economy
+    - id: CashRegisterFlatpack # iss14: Economy
     - id: DrinkBeerBottleFull
       amount: !type:BinomialNumberSelector
         trials: 3
@@ -51,7 +51,7 @@
   table: !type:AllSelector
     children:
     - id: VariantCubeBox
-    - id: CashRegister # iss14: Economy
+    - id: CashRegisterFlatpack # iss14: Economy
     - id: SprayBottleWater
     - id: FoodBoxCloth
     - id: ReagentContainerSugar
