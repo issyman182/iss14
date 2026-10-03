@@ -28,6 +28,7 @@
             <cc:CommandButton Command="serverperf" Text="{Loc admin-player-actions-window-server-perf}"/>
             <cc:CommandButton Command="connquality" Text="{Loc admin-player-actions-window-conn-quality}"/>
             <cc:CommandButton Command="entitycensus" Text="{Loc admin-player-actions-window-entity-census}"/>
+            <cc:CommandButton Command="entityfinder" Text="{Loc admin-player-actions-window-entity-finder}"/>
             <cc:CommandButton Command="autorestartconfig" Text="{Loc admin-player-actions-window-auto-restart-config}"/>
             <cc:CommandButton Command="adconfig" Text="{Loc admin-player-actions-window-ad-config}"/>
         </GridContainer>

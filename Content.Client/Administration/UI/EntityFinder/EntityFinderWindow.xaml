@@ -1,0 +1,34 @@
+<!-- iss14 -->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      Title="{Loc entity-finder-title}"
+                      Resizable="True"
+                      MinSize="700 420"
+                      SetSize="860 640">
+    <PanelContainer StyleClasses="BackgroundDark">
+        <BoxContainer Orientation="Vertical" Margin="8" HorizontalExpand="True" VerticalExpand="True">
+            <Label Text="{Loc entity-finder-hint}" StyleClasses="LabelSubText" />
+            <BoxContainer Orientation="Horizontal" Margin="0 6 0 0">
+                <LineEdit Name="SearchEdit" PlaceHolder="{Loc entity-finder-search}" HorizontalExpand="True" />
+                <OptionButton Name="CategoryOption" MinWidth="130" Margin="6 0 0 0" />
+                <Label Text="{Loc entity-finder-radius}" Margin="10 0 4 0" VerticalAlignment="Center" />
+                <LineEdit Name="RadiusEdit" PlaceHolder="0" MinWidth="60" />
+                <CheckBox Name="SameMapCheck" Text="{Loc entity-finder-same-map}" Pressed="True" Margin="8 0 0 0" />
+                <Button Name="SearchButton" Text="{Loc entity-finder-refresh}" Margin="8 0 0 0" />
+            </BoxContainer>
+            <Label Name="AdminLabel" StyleClasses="LabelSubText" Margin="0 4 0 0" />
+            <Label Name="CountLabel" StyleClasses="LabelSubText" />
+            <BoxContainer Orientation="Horizontal" Margin="0 6 0 2">
+                <Label Text="{Loc entity-finder-col-name}" StyleClasses="LabelKeyText" HorizontalExpand="True" />
+                <Label Text="{Loc entity-finder-col-grid}" StyleClasses="LabelKeyText" MinWidth="130" />
+                <Label Text="{Loc entity-finder-col-world}" StyleClasses="LabelKeyText" MinWidth="150" />
+                <Label Text="{Loc entity-finder-col-distance}" StyleClasses="LabelKeyText" MinWidth="80" />
+                <Control MinWidth="90" />
+            </BoxContainer>
+            <ScrollContainer HScrollEnabled="False" VerticalExpand="True" HorizontalExpand="True">
+                <BoxContainer Name="RowsBox" Orientation="Vertical" HorizontalExpand="True" />
+            </ScrollContainer>
+            <Label Name="StatusLabel" Margin="0 6 0 0" />
+        </BoxContainer>
+    </PanelContainer>
+</controls:FancyWindow>
