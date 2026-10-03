@@ -27,7 +27,7 @@ public sealed partial class MoneyConfigEui : BaseEui
 
     private string _status = string.Empty;
 
-    private MoneyConfigEuiState _state = new(false, new(), new(), "");
+    private MoneyConfigEuiState _state = new(false, new(), new(), new(), "");
 
     /// <summary>Everything the panel can edit, in display order.</summary>
     private static readonly (string Section, string Label, MoneyConfigKind Kind, object CVar, double Min, double Max)[] Fields =
@@ -149,7 +149,20 @@ public sealed partial class MoneyConfigEui : BaseEui
             return c != 0 ? c : string.Compare(a.JobName, b.JobName, StringComparison.Ordinal);
         });
 
-        _state = new MoneyConfigEuiState(true, entries, rows, _status);
+        var registers = _entMan.System<CashRegisterSystem>();
+        var prices = new List<MoneyPriceRow>();
+        var seen = new HashSet<string>();
+        foreach (var (catalog, entry) in registers.AllCatalogEntries())
+        {
+            if (!seen.Add(entry.Prototype.Id) || !_proto.TryIndex(entry.Prototype, out var protoDef))
+                continue;
+
+            var overridden = registers.TryGetGlobalPrice(entry.Prototype.Id, out var price);
+            prices.Add(new MoneyPriceRow(entry.Prototype.Id, entry.Name, Loc.GetString(catalog.Name),
+                overridden ? price : entry.AppraisedPrice, entry.AppraisedPrice, overridden));
+        }
+
+        _state = new MoneyConfigEuiState(true, entries, rows, prices, _status);
         StateDirty();
     }
 
@@ -170,6 +183,11 @@ public sealed partial class MoneyConfigEui : BaseEui
             case MoneyConfigSetSalaryMessage s:
                 _status = string.Empty;
                 ApplySalary(s);
+                BuildState();
+                break;
+            case MoneyConfigSetPriceMessage p:
+                _status = string.Empty;
+                ApplyPrice(p);
                 BuildState();
                 break;
         }
@@ -205,6 +223,27 @@ public sealed partial class MoneyConfigEui : BaseEui
                     _status = Loc.GetString("money-config-invalid");
                 break;
         }
+    }
+
+    private void ApplyPrice(MoneyConfigSetPriceMessage p)
+    {
+        if (!_proto.HasIndex<EntityPrototype>(p.Prototype))
+            return;
+
+        var registers = _entMan.System<CashRegisterSystem>();
+        if (string.IsNullOrWhiteSpace(p.Value))
+        {
+            registers.SetGlobalPrice(p.Prototype, null);
+            return;
+        }
+
+        if (!int.TryParse(p.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var price) || price < 0)
+        {
+            _status = Loc.GetString("money-config-invalid");
+            return;
+        }
+
+        registers.SetGlobalPrice(p.Prototype, price);
     }
 
     private void ApplySalary(MoneyConfigSetSalaryMessage s)

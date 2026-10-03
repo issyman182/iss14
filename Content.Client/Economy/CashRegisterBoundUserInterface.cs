@@ -18,6 +18,9 @@ public sealed class CashRegisterBoundUserInterface(EntityUid owner, Enum uiKey) 
 
         _window = this.CreateWindow<CashRegisterWindow>();
         _window.OnAdjustDraft += (proto, delta) => SendMessage(new CashRegisterAdjustDraftMessage(proto, delta));
+        _window.OnAddManual += (name, price, count) => SendMessage(new CashRegisterAddManualMessage(name, price, count));
+        _window.OnRemoveLine += index => SendMessage(new CashRegisterRemoveLineMessage(index));
+        _window.OnSetAccount += account => SendMessage(new CashRegisterSetAccountMessage(account));
         _window.OnClearDraft += () => SendMessage(new CashRegisterClearDraftMessage());
         _window.OnCreateBill += () => SendMessage(new CashRegisterCreateBillMessage());
         _window.OnCancelBill += () => SendMessage(new CashRegisterCancelBillMessage());

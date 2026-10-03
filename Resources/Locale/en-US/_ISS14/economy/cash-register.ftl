@@ -5,11 +5,23 @@ cash-register-tab-prices = Prices
 cash-register-refresh = Refresh
 cash-register-department = Account: { $department } ({ $balance } credits)
 cash-register-commission = Cashier commission: { $commission }%
-cash-register-items-hint = Your catalog and whatever lies on the counter. Use + / − or click the register with an item in hand to put it on the bill.
-cash-register-prices-hint = Prices per piece. Reset returns to the default (appraised value).
+cash-register-items-hint = Your catalog and whatever lies on the counter.
+cash-register-items-hint-2 = Use + / −, click the register with an item in hand to scan it, or type something in below.
+cash-register-prices-hint = Prices per piece for this register. Reset returns to the station default (set by admins in the money config, else the appraised value).
 cash-register-search = Search...
 cash-register-nearby-only = Counter only
 cash-register-no-items = Nothing sellable in your catalog or near the register.
+cash-register-no-nearby = Nothing sellable lies on the counter. Untick "Counter only" to see the whole catalog.
+cash-register-filter = Filter...
+cash-register-filter-title = Catalog filter
+cash-register-filter-hint = Untick a catalog to hide its items.
+cash-register-filter-active = Filter on: showing { $catalogs }
+cash-register-filter-none = Filter on: all catalogs hidden
+cash-register-manual-hint = Not on the list (a mixed drink, a special)? Type it in:
+cash-register-manual-name = Name
+cash-register-manual-price = Price
+cash-register-manual-add = Add
+cash-register-manual-invalid = Enter a name, a price above 0 and a count.
 cash-register-no-matches = Nothing matches your search.
 cash-register-item-info = { $count } on counter · { $price } cr
 cash-register-item-price = { $price } cr
@@ -26,13 +38,15 @@ cash-register-bill-line = { $count }x { $name } @ { $price } = { $total }
 cash-register-reset-price = Reset
 cash-register-default-price = default { $price }
 cash-register-access-denied = The register only responds to staff.
+cash-register-no-power = The register has no power.
+cash-register-empty-drink = { $item } is empty. Nobody pays for an empty glass.
+cash-register-examine-unpowered = It is [color=red]unpowered[/color].
 cash-register-catalog-nearby = On the counter
 cash-register-catalog-custom = Custom prices
 cash-register-catalog-bar = Bar
 cash-register-catalog-kitchen = Kitchen
 cash-register-catalog-hydroponics = Hydroponics
 cash-register-catalog-medical = Medical
-cash-register-catalog-general = Goods
 
 # Customer view
 cash-register-customer-department = Paying to: { $department }

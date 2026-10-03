@@ -1,7 +1,10 @@
 # iss14: Economy — counter cash register (see CashRegisterComponent).
-# The register is an anchored machine: wrench to move it, delivered as a flatpack (multitool to unpack).
+# One register for the whole station. Who may use it and what it sells follows from the cashier's ID card:
+# the catalogs below list the access levels of the jobs they are for (the Captain sees all of them).
+# People with no matching catalog are customers. Sales go to the cashier's department account.
+# The register needs APC power (like a microwave), is moved with a wrench and delivered as a flatpack.
 
-## Catalogs: what a job sells. The cashier sees the catalogs matching their access. ##
+## Catalogs: what a job sells. ##
 - type: cashRegisterCatalog
   id: Bar
   name: cash-register-catalog-bar
@@ -32,13 +35,6 @@
   access: [ Medical, Chemistry, Paramedic ]
   components: [ Pill, Healing, Injector ]
   priority: 40
-
-# No filter: lists only what lies on the counter, minus things nobody sells.
-- type: cashRegisterCatalog
-  id: General
-  name: cash-register-catalog-general
-  blacklistComponents: [ IdCard, Pda, BankCard, Access, Tool ]
-  priority: 100
 
 ## The machine ##
 - type: entity
@@ -82,11 +78,11 @@
         layer:
         - TabletopMachineLayer
   - type: CashRegister
-    catalogs: [ Bar, Kitchen, Hydroponics ]
+  - type: ApcPowerReceiver
+    powerLoad: 5
+  - type: ExtensionCableReceiver
   - type: StaticPrice
     price: 150
-  - type: AccessReader
-    access: [["Service"], ["Bar"], ["Kitchen"], ["Hydroponics"], ["HeadOfPersonnel"], ["Captain"]]
   - type: UserInterface
     interfaces:
       enum.CashRegisterUiKey.Key:
@@ -110,67 +106,34 @@
             min: 1
             max: 2
 
+# Legacy ids: there used to be one register per department. Existing maps and flatpacks may still reference
+# these; they are plain cash registers now.
 - type: entity
   parent: CashRegister
   id: CashRegisterSecurity
-  name: security cash register
-  description: A NanoTrasen point-of-sale terminal, bookkept for Security. For fines, bribes and donuts.
-  components:
-  - type: CashRegister
-    account: Security
-    catalogs: [ General ]
-  - type: AccessReader
-    access: [["Security"], ["HeadOfSecurity"], ["Captain"]]
+  suffix: legacy
 
 - type: entity
   parent: CashRegister
   id: CashRegisterCargo
-  name: cargo cash register
-  description: A NanoTrasen point-of-sale terminal, bookkept for Logistics.
-  components:
-  - type: CashRegister
-    account: Cargo
-    catalogs: [ General ]
-  - type: AccessReader
-    access: [["Cargo"], ["Quartermaster"], ["Captain"]]
+  suffix: legacy
 
 - type: entity
   parent: CashRegister
   id: CashRegisterMedical
-  name: medical cash register
-  description: A NanoTrasen point-of-sale terminal, bookkept for Medical.
-  components:
-  - type: CashRegister
-    account: Medical
-    catalogs: [ Medical, General ]
-  - type: AccessReader
-    access: [["Medical"], ["ChiefMedicalOfficer"], ["Captain"]]
+  suffix: legacy
 
 - type: entity
   parent: CashRegister
   id: CashRegisterScience
-  name: science cash register
-  description: A NanoTrasen point-of-sale terminal, bookkept for Epistemics.
-  components:
-  - type: CashRegister
-    account: Science
-    catalogs: [ General ]
-  - type: AccessReader
-    access: [["Research"], ["ResearchDirector"], ["Captain"]]
+  suffix: legacy
 
 - type: entity
   parent: CashRegister
   id: CashRegisterEngineering
-  name: engineering cash register
-  description: A NanoTrasen point-of-sale terminal, bookkept for Engineering.
-  components:
-  - type: CashRegister
-    account: Engineering
-    catalogs: [ General ]
-  - type: AccessReader
-    access: [["Engineering"], ["ChiefEngineer"], ["Captain"]]
+  suffix: legacy
 
-## Flatpacks: unpack with a multitool where the register should stand. ##
+## Flatpack: unpack with a multitool where the register should stand. ##
 - type: entity
   parent: BaseFlatpack
   id: CashRegisterFlatpack
@@ -185,89 +148,36 @@
     - state: overlay
       color: "#9FED58"
     - sprite: _ISS14/Objects/Devices/cash_register.rsi
-      state: flatpack
+      state: icon
+      scale: 0.6, 0.6
   - type: StaticPrice
     price: 150
 
+# Legacy flatpack ids, all unpack into the plain register.
 - type: entity
   parent: CashRegisterFlatpack
   id: CashRegisterSecurityFlatpack
-  name: security cash register flatpack
-  description: A flatpack used for constructing a security cash register. Unpack it with a multitool.
-  components:
-  - type: Flatpack
-    entity: CashRegisterSecurity
-  - type: Sprite
-    layers:
-    - state: base
-    - state: overlay
-      color: "#DE3A3A"
-    - sprite: _ISS14/Objects/Devices/cash_register.rsi
-      state: flatpack
+  suffix: legacy
 
 - type: entity
   parent: CashRegisterFlatpack
   id: CashRegisterCargoFlatpack
-  name: cargo cash register flatpack
-  description: A flatpack used for constructing a cargo cash register. Unpack it with a multitool.
-  components:
-  - type: Flatpack
-    entity: CashRegisterCargo
-  - type: Sprite
-    layers:
-    - state: base
-    - state: overlay
-      color: "#A46106"
-    - sprite: _ISS14/Objects/Devices/cash_register.rsi
-      state: flatpack
+  suffix: legacy
 
 - type: entity
   parent: CashRegisterFlatpack
   id: CashRegisterMedicalFlatpack
-  name: medical cash register flatpack
-  description: A flatpack used for constructing a medical cash register. Unpack it with a multitool.
-  components:
-  - type: Flatpack
-    entity: CashRegisterMedical
-  - type: Sprite
-    layers:
-    - state: base
-    - state: overlay
-      color: "#52B4E9"
-    - sprite: _ISS14/Objects/Devices/cash_register.rsi
-      state: flatpack
+  suffix: legacy
 
 - type: entity
   parent: CashRegisterFlatpack
   id: CashRegisterScienceFlatpack
-  name: science cash register flatpack
-  description: A flatpack used for constructing a science cash register. Unpack it with a multitool.
-  components:
-  - type: Flatpack
-    entity: CashRegisterScience
-  - type: Sprite
-    layers:
-    - state: base
-    - state: overlay
-      color: "#D381C9"
-    - sprite: _ISS14/Objects/Devices/cash_register.rsi
-      state: flatpack
+  suffix: legacy
 
 - type: entity
   parent: CashRegisterFlatpack
   id: CashRegisterEngineeringFlatpack
-  name: engineering cash register flatpack
-  description: A flatpack used for constructing an engineering cash register. Unpack it with a multitool.
-  components:
-  - type: Flatpack
-    entity: CashRegisterEngineering
-  - type: Sprite
-    layers:
-    - state: base
-    - state: overlay
-      color: "#EFB341"
-    - sprite: _ISS14/Objects/Devices/cash_register.rsi
-      state: flatpack
+  suffix: legacy
 
 - type: entity
   id: CrateCashRegister

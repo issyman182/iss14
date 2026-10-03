@@ -6,6 +6,12 @@ cmd-moneyconfig-server = Only players can open the money config panel.
 money-config-title = Money Config
 money-config-tab-settings = Settings
 money-config-tab-salaries = Salaries
+money-config-tab-prices = Default prices
+money-config-prices-hint = Station-wide default prices of everything the cash register catalogs sell. Empty or Reset = appraised value × the cash register multiplier. A register can still set its own price on top.
+money-config-prices-search = Search items, catalogs or prototype ids...
+money-config-prices-overridden-only = Changed only
+money-config-prices-empty = Nothing matches.
+money-config-prices-appraised-hint = (appraised { $price })
 money-config-invalid = Invalid value.
 
 money-config-bank = Bank

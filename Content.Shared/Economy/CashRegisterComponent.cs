@@ -12,32 +12,26 @@ using Robust.Shared.Serialization;
 namespace Content.Shared.Economy;
 
 /// <summary>
-/// A counter cash register: an anchored machine (wrench to move, delivered as a flatpack). Staff (access reader)
-/// click it to open the cashier UI: the sellable goods lying around the register and the full price list of their
-/// job's catalog (<see cref="CashRegisterCatalogPrototype"/>). They put items on the bill from the list or by
-/// "scanning" — clicking the register with the item in hand — and write the bill. Customers click the register to
-/// see the bill and pay with the ID card they carry, or swipe their ID/PDA or hand over cash directly.
-/// Proceeds go to the register's department account, minus a commission for the cashier.
+/// A counter cash register: an anchored, APC-powered machine (wrench to move, delivered as a flatpack). There is
+/// one kind of register for the whole station; who may use it and what it sells follows from the ID card of the
+/// person clicking it:
+/// <list type="bullet">
+/// <item>The cashier sees the catalogs (<see cref="CashRegisterCatalogPrototype"/>) matching their access — a
+/// bartender the bar, a chef the kitchen, the Captain all of them. Someone with no matching catalog is a customer.</item>
+/// <item>Sales are booked to the cashier's department account (chosen in the UI when they belong to several).</item>
+/// </list>
+/// The cashier puts items on a draft bill from the list, by "scanning" (clicking the register with the item in
+/// hand) or by typing a name and price, then writes the bill. Customers click the register to see it and pay with
+/// the ID card they carry, or swipe their ID/PDA or hand over cash. A commission goes to the cashier.
 /// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class CashRegisterComponent : Component
 {
-    /// <summary>Department account that receives the sales.</summary>
-    [DataField, AutoNetworkedField]
-    public ProtoId<CargoAccountPrototype> Account = "Service";
-
-    /// <summary>
-    /// Catalogs this register sells from. The cashier sees the catalogs matching their access (a bartender sees the
-    /// bar catalog, a chef the kitchen); heads and anyone matching none of them see all of them.
-    /// </summary>
-    [DataField]
-    public List<ProtoId<CashRegisterCatalogPrototype>> Catalogs = new();
-
     /// <summary>How far around the register items are listed as sellable.</summary>
     [DataField]
     public float Range = 1.6f;
 
-    /// <summary>Staff price overrides per item prototype (credits). Missing = default price.</summary>
+    /// <summary>Price overrides of this register (prototype id -> price per piece), on top of the global defaults.</summary>
     [DataField]
     public Dictionary<EntProtoId, int> Prices = new();
 
@@ -49,7 +43,6 @@ public sealed partial class CashRegisterComponent : Component
     [DataField, AutoNetworkedField]
     public CashRegisterBill? Bill;
 
-    /// <summary>Cash change is paid out as this stack.</summary>
     [DataField]
     public EntProtoId CashPrototype = "SpaceCash";
 
@@ -62,16 +55,15 @@ public sealed partial class CashRegisterComponent : Component
     [DataField]
     public SoundSpecifier? DenySound = new SoundPathSpecifier("/Audio/Machines/buzz-two.ogg");
 
-    /// <summary>Player who wrote the current bill (gets the commission).</summary>
+    /// <summary>The player who wrote the open bill (receives the commission).</summary>
     [ViewVariables]
     public NetUserId? CashierUserId;
 }
 
 /// <summary>
-/// What a job sells at a cash register: the full price list the cashier gets and the filter for the items the
-/// register auto-detects around it. An item matches when it has any of <see cref="Components"/>, any of
-/// <see cref="Tags"/>, or the given <see cref="Edible"/> kind — and none of <see cref="BlacklistComponents"/>.
-/// A catalog with no positive filter matches every item with a price.
+/// What a job sells at a cash register: the price list the cashier gets and the filter for the items the register
+/// auto-detects around it. An item matches when it has any of <see cref="Components"/>, any of <see cref="Tags"/>,
+/// or the given <see cref="Edible"/> kind — and none of <see cref="BlacklistComponents"/>.
 /// </summary>
 [Prototype]
 public sealed partial class CashRegisterCatalogPrototype : IPrototype
@@ -82,8 +74,11 @@ public sealed partial class CashRegisterCatalogPrototype : IPrototype
     [DataField(required: true)]
     public LocId Name;
 
-    /// <summary>Access levels of the jobs this catalog is for. Empty: shown to every cashier of the register.</summary>
-    [DataField]
+    /// <summary>
+    /// Access levels of the jobs this catalog is for. A person with any of them may use the register as a cashier
+    /// and sells from this catalog. The Captain sees every catalog.
+    /// </summary>
+    [DataField(required: true)]
     public List<ProtoId<AccessLevelPrototype>> Access = new();
 
     /// <summary>Component names (as in prototypes, e.g. <c>Produce</c>) of which an item needs any.</summary>
@@ -113,12 +108,13 @@ public sealed partial class CashRegisterCatalogPrototype : IPrototype
     public int Priority;
 }
 
-/// <summary>One line of a bill.</summary>
+/// <summary>One line of a bill. Lines with the same name and price are merged.</summary>
 [Serializable, NetSerializable, DataDefinition]
 public sealed partial class CashRegisterLine
 {
+    /// <summary>The item prototype, or null for a line the cashier typed in by hand.</summary>
     [DataField]
-    public EntProtoId Prototype;
+    public EntProtoId? Prototype;
 
     [DataField]
     public string Name = string.Empty;
@@ -142,15 +138,17 @@ public sealed partial class CashRegisterBill
     [DataField]
     public string Cashier = string.Empty;
 
+    /// <summary>Department account the sale is booked to (the cashier's department).</summary>
+    [DataField]
+    public ProtoId<CargoAccountPrototype> Account = "Service";
+
     public int Total
     {
         get
         {
             var total = 0;
             foreach (var line in Lines)
-            {
                 total += line.Total;
-            }
             return total;
         }
     }
@@ -159,7 +157,7 @@ public sealed partial class CashRegisterBill
 [Serializable, NetSerializable]
 public enum CashRegisterUiKey : byte
 {
-    /// <summary>Cashier UI (access required).</summary>
+    /// <summary>Cashier UI (needs a matching catalog).</summary>
     Key,
 
     /// <summary>Customer UI: the open bill and a pay button.</summary>
@@ -177,15 +175,27 @@ public sealed class CashRegisterItem(string prototype, string name, int count, i
     public readonly int Count = count;
     public readonly int Price = price;
     public readonly int DefaultPrice = defaultPrice;
+
+    /// <summary>True when this register has its own price for the item.</summary>
     public readonly bool Overridden = overridden;
 
     /// <summary>Localized catalog name the item belongs to.</summary>
     public readonly string Catalog = catalog;
 }
 
+/// <summary>A department account the cashier may book sales to.</summary>
+[Serializable, NetSerializable]
+public sealed class CashRegisterAccount(string id, string name)
+{
+    public readonly string Id = id;
+    public readonly string Name = name;
+}
+
 [Serializable, NetSerializable]
 public sealed class CashRegisterBuiState(
     List<CashRegisterItem> items,
+    List<string> catalogs,
+    List<CashRegisterAccount> accounts,
     CashRegisterBill draft,
     CashRegisterBill? bill,
     string department,
@@ -196,8 +206,17 @@ public sealed class CashRegisterBuiState(
 {
     /// <summary>Everything in the cashier's catalogs plus whatever sellable lies around the register.</summary>
     public readonly List<CashRegisterItem> Items = items;
+
+    /// <summary>Localized names of the catalogs the cashier sells from (for the filter window).</summary>
+    public readonly List<string> Catalogs = catalogs;
+
+    /// <summary>Department accounts the cashier may book to; the draft's account is the selected one.</summary>
+    public readonly List<CashRegisterAccount> Accounts = accounts;
+
     public readonly CashRegisterBill Draft = draft;
     public readonly CashRegisterBill? Bill = bill;
+
+    /// <summary>Name of the selected department account.</summary>
     public readonly string Department = department;
     public readonly int DepartmentBalance = departmentBalance;
     public readonly float CommissionPercent = commissionPercent;
@@ -221,6 +240,29 @@ public sealed class CashRegisterAdjustDraftMessage(string prototype, int count) 
     public readonly int Count = count;
 }
 
+/// <summary>Cashier: adds a hand-written line (e.g. a mixed drink not on the list) to the draft.</summary>
+[Serializable, NetSerializable]
+public sealed class CashRegisterAddManualMessage(string name, int price, int count) : BoundUserInterfaceMessage
+{
+    public readonly string Name = name;
+    public readonly int Price = price;
+    public readonly int Count = count;
+}
+
+/// <summary>Cashier: removes a draft line by index.</summary>
+[Serializable, NetSerializable]
+public sealed class CashRegisterRemoveLineMessage(int index) : BoundUserInterfaceMessage
+{
+    public readonly int Index = index;
+}
+
+/// <summary>Cashier: selects the department account the sale is booked to.</summary>
+[Serializable, NetSerializable]
+public sealed class CashRegisterSetAccountMessage(string account) : BoundUserInterfaceMessage
+{
+    public readonly string Account = account;
+}
+
 /// <summary>Cashier: empties the draft.</summary>
 [Serializable, NetSerializable]
 public sealed class CashRegisterClearDraftMessage : BoundUserInterfaceMessage;
@@ -232,7 +274,7 @@ public sealed class CashRegisterCreateBillMessage : BoundUserInterfaceMessage;
 [Serializable, NetSerializable]
 public sealed class CashRegisterCancelBillMessage : BoundUserInterfaceMessage;
 
-/// <summary>Sets a price override; null resets to the default.</summary>
+/// <summary>Cashier: sets this register's price for a prototype; null resets to the default.</summary>
 [Serializable, NetSerializable]
 public sealed class CashRegisterSetPriceMessage(string prototype, int? price) : BoundUserInterfaceMessage
 {

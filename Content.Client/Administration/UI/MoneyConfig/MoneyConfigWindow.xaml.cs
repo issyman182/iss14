@@ -19,6 +19,7 @@ public sealed partial class MoneyConfigWindow : FancyWindow
 {
     public event Action<string, string>? OnSet;
     public event Action<string, string>? OnSetSalary;
+    public event Action<string, string>? OnSetPrice;
 
     private bool _updating;
     private readonly Dictionary<string, Control> _editors = new();
@@ -26,11 +27,19 @@ public sealed partial class MoneyConfigWindow : FancyWindow
     private readonly Dictionary<string, string> _salaryValues = new();
     private bool _built;
 
+    private List<MoneyPriceRow> _prices = new();
+    private readonly Dictionary<string, string> _priceValues = new();
+    private bool _canEdit;
+
     public MoneyConfigWindow()
     {
         RobustXamlLoader.Load(this);
         Tabs.SetTabTitle(0, Loc.GetString("money-config-tab-settings"));
         Tabs.SetTabTitle(1, Loc.GetString("money-config-tab-salaries"));
+        Tabs.SetTabTitle(2, Loc.GetString("money-config-tab-prices"));
+
+        PriceSearch.OnTextChanged += _ => BuildPrices();
+        PriceOverriddenOnly.OnToggled += _ => BuildPrices();
     }
 
     public void SetState(MoneyConfigEuiState state)
@@ -75,8 +84,90 @@ public sealed partial class MoneyConfigWindow : FancyWindow
                 : string.Empty;
         }
 
+        _canEdit = state.CanEdit;
+        var priceSignature = string.Join("|", state.Prices.Select(p => $"{p.Prototype}:{p.Price}:{p.Overridden}"));
+        if (priceSignature != _priceSignature)
+        {
+            _priceSignature = priceSignature;
+            _prices = state.Prices;
+            BuildPrices();
+        }
+
         StatusLabel.Text = state.Status;
         _updating = false;
+    }
+
+    private string _priceSignature = string.Empty;
+
+    /// <summary>Default price table of the cash register catalogs, filtered by the search box.</summary>
+    private void BuildPrices()
+    {
+        _updating = true;
+        PricesBox.RemoveAllChildren();
+        _priceValues.Clear();
+
+        var search = PriceSearch.Text.Trim();
+        var shown = _prices
+            .Where(p => !PriceOverriddenOnly.Pressed || p.Overridden)
+            .Where(p => search.Length == 0
+                        || p.Name.Contains(search, StringComparison.OrdinalIgnoreCase)
+                        || p.Catalog.Contains(search, StringComparison.OrdinalIgnoreCase)
+                        || p.Prototype.Contains(search, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(p => p.Catalog, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (shown.Count == 0)
+            PricesBox.AddChild(new Label { Text = Loc.GetString("money-config-prices-empty"), StyleClasses = { "LabelSubText" } });
+
+        string? catalog = null;
+        foreach (var price in shown)
+        {
+            if (price.Catalog != catalog)
+            {
+                catalog = price.Catalog;
+                PricesBox.AddChild(new Label
+                {
+                    Text = catalog,
+                    StyleClasses = { "LabelHeading" },
+                    Margin = new Thickness(0, PricesBox.ChildCount == 0 ? 0 : 10, 0, 0),
+                });
+            }
+
+            var row = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, Margin = new Thickness(0, 2, 0, 0) };
+            row.AddChild(new Label { Text = price.Name, HorizontalExpand = true, ClipText = true, ToolTip = price.Prototype });
+            var text = price.Price.ToString(CultureInfo.InvariantCulture);
+            _priceValues[price.Prototype] = text;
+            var edit = new LineEdit { MinWidth = 90, Text = text, Editable = _canEdit };
+            var proto = price.Prototype;
+            edit.OnTextEntered += a => SetPrice(proto, a.Text);
+            edit.OnFocusExit += a => SetPrice(proto, a.Text);
+            row.AddChild(edit);
+            var reset = new Button { Text = Loc.GetString("money-config-salary-reset"), Margin = new Thickness(6, 0, 0, 0), Disabled = !_canEdit || !price.Overridden };
+            reset.OnPressed += _ => SetPrice(proto, string.Empty);
+            row.AddChild(reset);
+            row.AddChild(new Label
+            {
+                Text = price.Overridden ? Loc.GetString("money-config-prices-appraised-hint", ("price", price.AppraisedPrice)) : string.Empty,
+                StyleClasses = { "LabelSubText" },
+                MinWidth = 110,
+                Margin = new Thickness(6, 0, 0, 0),
+            });
+            PricesBox.AddChild(row);
+        }
+
+        _updating = false;
+    }
+
+    private void SetPrice(string proto, string value)
+    {
+        if (_updating)
+            return;
+
+        if (value != string.Empty && _priceValues.TryGetValue(proto, out var known) && known == value.Trim())
+            return;
+
+        OnSetPrice?.Invoke(proto, value);
     }
 
     private void Build(MoneyConfigEuiState state)

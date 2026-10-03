@@ -51,14 +51,44 @@ public sealed class MoneySalaryRow(string jobId, string jobName, string departme
 }
 
 /// <summary>State for the economy config admin EUI (<c>moneyconfig</c>).</summary>
+/// <summary>One cash register catalog item in the default price table.</summary>
 [Serializable, NetSerializable]
-public sealed class MoneyConfigEuiState(bool canEdit, List<MoneyConfigEntry> entries, List<MoneySalaryRow> salaries, string status)
+public sealed class MoneyPriceRow(string prototype, string name, string catalog, int price, int appraisedPrice, bool overridden)
+{
+    public readonly string Prototype = prototype;
+    public readonly string Name = name;
+
+    /// <summary>Localized catalog name.</summary>
+    public readonly string Catalog = catalog;
+
+    /// <summary>Effective station default (admin price if set, else appraised).</summary>
+    public readonly int Price = price;
+
+    /// <summary>Appraised value × multiplier.</summary>
+    public readonly int AppraisedPrice = appraisedPrice;
+
+    public readonly bool Overridden = overridden;
+}
+
+[Serializable, NetSerializable]
+public sealed class MoneyConfigEuiState(bool canEdit, List<MoneyConfigEntry> entries, List<MoneySalaryRow> salaries, List<MoneyPriceRow> prices, string status)
     : EuiStateBase
 {
     public readonly bool CanEdit = canEdit;
     public readonly List<MoneyConfigEntry> Entries = entries;
     public readonly List<MoneySalaryRow> Salaries = salaries;
+
+    /// <summary>Default prices of the cash register catalogs.</summary>
+    public readonly List<MoneyPriceRow> Prices = prices;
     public readonly string Status = status;
+}
+
+/// <summary>Sets a cash register default price; an empty value resets to the appraised price.</summary>
+[Serializable, NetSerializable]
+public sealed class MoneyConfigSetPriceMessage(string prototype, string value) : EuiMessageBase
+{
+    public readonly string Prototype = prototype;
+    public readonly string Value = value;
 }
 
 /// <summary>Sets one economy CVar. The server parses <see cref="Value"/> according to the entry's kind.</summary>

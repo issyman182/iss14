@@ -17,6 +17,16 @@
                         <BoxContainer Name="SalaryBox" Orientation="Vertical" HorizontalExpand="True" />
                     </ScrollContainer>
                 </BoxContainer>
+                <BoxContainer Name="PricesTab" Orientation="Vertical" VerticalExpand="True" HorizontalExpand="True" Margin="4">
+                    <Label Text="{Loc money-config-prices-hint}" StyleClasses="LabelSubText" />
+                    <BoxContainer Orientation="Horizontal" Margin="0 4 0 0">
+                        <LineEdit Name="PriceSearch" PlaceHolder="{Loc money-config-prices-search}" HorizontalExpand="True" />
+                        <CheckBox Name="PriceOverriddenOnly" Text="{Loc money-config-prices-overridden-only}" Margin="6 0 0 0" />
+                    </BoxContainer>
+                    <ScrollContainer HScrollEnabled="False" VerticalExpand="True" HorizontalExpand="True" Margin="0 4 0 0">
+                        <BoxContainer Name="PricesBox" Orientation="Vertical" HorizontalExpand="True" />
+                    </ScrollContainer>
+                </BoxContainer>
             </TabContainer>
             <Label Name="StatusLabel" Margin="0 6 0 0" />
             <Label Text="{Loc money-config-hint}" StyleClasses="LabelSubText" Margin="0 4 0 0" />
