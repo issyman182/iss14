@@ -442,13 +442,18 @@ public sealed partial class WoundSystem
 
         var holdingWoundable = comp.HoldingWoundable;
 
+        // iss14 fix: HoldingWoundable can be Invalid (e.g. client got the wound's state before its parent's)
+        // or already deleted (healing runs as a deferred job), so don't assume the woundable comp exists.
+        if (!TryComp<WoundableComponent>(holdingWoundable, out var holdingWoundableComp))
+            return false;
+
         var ev = new WoundHealAttemptOnWoundableEvent((wound, comp));
         RaiseLocalEvent(holdingWoundable, ref ev);
 
         if (ev.Cancelled)
             return false;
 
-        var ev1 = new WoundHealAttemptEvent((holdingWoundable, Comp<WoundableComponent>(holdingWoundable)), ignoreBlockers);
+        var ev1 = new WoundHealAttemptEvent((holdingWoundable, holdingWoundableComp), ignoreBlockers);
         RaiseLocalEvent(wound, ref ev1);
 
         return !ev1.Cancelled;

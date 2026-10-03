@@ -155,6 +155,10 @@ public sealed partial class WoundSystem : EntitySystem
 
     private void ProcessHealing(Entity<WoundableComponent> woundable, EntityUid bodyEnt)
     {
+        // iss14 fix: the job runs later than it was queued; the part or body may be gone by now.
+        if (TerminatingOrDeleted(woundable) || TerminatingOrDeleted(bodyEnt))
+            return;
+
         if (woundable.Comp.CanHealBleeds)
             TryHealBleedingWounds(woundable, (float) -woundable.Comp.BleedingTreatmentAbility, out _, woundable);
 

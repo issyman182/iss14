@@ -100,6 +100,10 @@ public sealed partial class WoundSystem
 
         var oldHoldingWoundable = wound.HoldingWoundable;
         wound.HoldingWoundable = EntityUid.Invalid;
+        // iss14 fix: must be dirtied. On the client this removal is usually predicted (heal -> RemoveWound); on
+        // misprediction reset the woundable's container is rolled back and the wound re-inserted, but an undirtied
+        // WoundComponent is NOT reset, leaving a wound in the container with HoldingWoundable == Invalid forever.
+        Dirty(woundableEntity, wound);
 
         var ev = new WoundRemovedEvent(wound, oldParentWoundable, oldWoundableRoot);
         RaiseLocalEvent(oldHoldingWoundable, ref ev);
