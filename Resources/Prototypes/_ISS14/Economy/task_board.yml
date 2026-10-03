@@ -1,9 +1,11 @@
-# iss14: Economy — department task boards.
+# iss14: Economy — the station task board.
+# One board serves every department: the ID card of the person using it decides which departments' tasks they
+# see. People with no department see nothing.
 - type: entity
   parent: [ BaseMachinePowered, BaseMachineDestructible ]
   id: TaskBoard
   name: task board
-  description: A department task board. Claim tasks and contracts, hand in deliveries, get paid.
+  description: The station task board. Department staff claim tasks and contracts, hand in deliveries and get paid.
   components:
   - type: Sprite
     sprite: _ISS14/Structures/Machines/task_board.rsi
@@ -66,7 +68,6 @@
   - type: StaticPrice
     price: 400
   - type: TaskBoard
-    account: Service
   - type: ActivatableUI
     key: enum.TaskBoardUiKey.Key
   - type: ActivatableUIRequiresPower
@@ -76,76 +77,38 @@
         type: TaskBoardBoundUserInterface
 
 
+# Legacy ids: there used to be one board per department. Existing maps and flatpacks may still reference these;
+# they are plain task boards now.
 - type: entity
   parent: TaskBoard
   id: TaskBoardCargo
-  name: logistics task board
-  components:
-  - type: TaskBoard
-    account: Cargo
-  - type: PointLight
-    enabled: false
-    castShadows: false
-    radius: 1.5
-    color: "#e0c05f"
+  suffix: legacy
 
 - type: entity
   parent: TaskBoard
   id: TaskBoardEngineering
-  name: engineering task board
-  components:
-  - type: TaskBoard
-    account: Engineering
-  - type: PointLight
-    enabled: false
-    castShadows: false
-    radius: 1.5
-    color: "#e0c05f"
+  suffix: legacy
 
 - type: entity
   parent: TaskBoard
   id: TaskBoardMedical
-  name: medical task board
-  components:
-  - type: TaskBoard
-    account: Medical
-  - type: PointLight
-    enabled: false
-    castShadows: false
-    radius: 1.5
-    color: "#e0c05f"
+  suffix: legacy
 
 - type: entity
   parent: TaskBoard
   id: TaskBoardScience
-  name: science task board
-  components:
-  - type: TaskBoard
-    account: Science
-  - type: PointLight
-    enabled: false
-    castShadows: false
-    radius: 1.5
-    color: "#e0c05f"
+  suffix: legacy
 
 - type: entity
   parent: TaskBoard
   id: TaskBoardSecurity
-  name: security task board
-  components:
-  - type: TaskBoard
-    account: Security
-  - type: PointLight
-    enabled: false
-    castShadows: false
-    radius: 1.5
-    color: "#e0c05f"
+  suffix: legacy
 
 - type: entity
   parent: BaseFlatpack
   id: TaskBoardFlatpack
   name: task board flatpack
-  description: A flatpack used for constructing a service task board.
+  description: A flatpack used for constructing a task board.
   components:
   - type: Flatpack
     entity: TaskBoard
@@ -157,57 +120,39 @@
       map: ["enum.FlatpackVisualLayers.Overlay"]
     - state: icon-default
 
+# Legacy flatpack ids, all unpack into the plain board.
 - type: entity
   parent: TaskBoardFlatpack
   id: TaskBoardCargoFlatpack
-  name: cargo task board flatpack
-  components:
-  - type: Flatpack
-    entity: TaskBoardCargo
+  suffix: legacy
 
 - type: entity
   parent: TaskBoardFlatpack
   id: TaskBoardEngineeringFlatpack
-  name: engineering task board flatpack
-  components:
-  - type: Flatpack
-    entity: TaskBoardEngineering
+  suffix: legacy
 
 - type: entity
   parent: TaskBoardFlatpack
   id: TaskBoardMedicalFlatpack
-  name: medical task board flatpack
-  components:
-  - type: Flatpack
-    entity: TaskBoardMedical
+  suffix: legacy
 
 - type: entity
   parent: TaskBoardFlatpack
   id: TaskBoardScienceFlatpack
-  name: science task board flatpack
-  components:
-  - type: Flatpack
-    entity: TaskBoardScience
+  suffix: legacy
 
 - type: entity
   parent: TaskBoardFlatpack
   id: TaskBoardSecurityFlatpack
-  name: security task board flatpack
-  components:
-  - type: Flatpack
-    entity: TaskBoardSecurity
+  suffix: legacy
 
 - type: entity
   id: CrateTaskBoards
   parent: CrateGenericSteel
   name: task board crate
-  description: One task board flatpack for every department.
+  description: Two task board flatpacks.
   components:
   - type: StorageFill
     contents:
     - id: TaskBoardFlatpack
-    - id: TaskBoardCargoFlatpack
-    - id: TaskBoardEngineeringFlatpack
-    - id: TaskBoardMedicalFlatpack
-    - id: TaskBoardScienceFlatpack
-    - id: TaskBoardSecurityFlatpack
+      amount: 2

@@ -245,6 +245,56 @@
   rewardMin: 60
   rewardMax: 140
 
+# Action tasks: the game counts the healing done on other people while the task is claimed.
+- type: departmentTaskTemplate
+  id: MedicalHealBrute
+  department: Medical
+  title: task-medical-heal-brute-title
+  description: task-medical-heal-brute-desc
+  kind: Action
+  action: HealDamage
+  actionDamageGroup: Brute
+  deliverMin: 40
+  deliverMax: 100
+  rewardMin: 120
+  rewardMax: 260
+  weight: 1.5
+
+- type: departmentTaskTemplate
+  id: MedicalHealBurn
+  department: Medical
+  title: task-medical-heal-burn-title
+  description: task-medical-heal-burn-desc
+  kind: Action
+  action: HealDamage
+  actionDamageGroup: Burn
+  deliverMin: 30
+  deliverMax: 80
+  rewardMin: 120
+  rewardMax: 260
+
+- type: departmentTaskTemplate
+  id: MedicalHealAny
+  department: Medical
+  title: task-medical-heal-any-title
+  description: task-medical-heal-any-desc
+  kind: Action
+  action: HealDamage
+  deliverMin: 60
+  deliverMax: 150
+  rewardMin: 150
+  rewardMax: 300
+
+- type: departmentTaskTemplate
+  id: MedicalHouseCall
+  department: Medical
+  title: task-medical-house-call-title
+  description: task-medical-house-call-desc
+  kind: Action
+  action: Visit
+  rewardMin: 60
+  rewardMax: 120
+
 ## Science ##
 - type: departmentTaskTemplate
   id: ScienceDisk
@@ -275,11 +325,65 @@
   rewardMax: 400
 
 ## Security ##
+# Patrol: pass by N different station beacons (nav map names) while the task is claimed.
 - type: departmentTaskTemplate
   id: SecurityPatrol
   department: Security
   title: task-security-patrol-title
   description: task-security-patrol-desc
+  kind: Action
+  action: Patrol
+  deliverMin: 5
+  deliverMax: 9
+  rewardMin: 100
+  rewardMax: 200
+  weight: 1.5
+
+# Go to one random station beacon.
+- type: departmentTaskTemplate
+  id: SecurityCheckArea
+  department: Security
+  title: task-security-check-area-title
+  description: task-security-check-area-desc
+  kind: Action
+  action: Visit
+  rewardMin: 50
+  rewardMax: 100
+
+# Records: counts when an officer changes a criminal record at a console.
+- type: departmentTaskTemplate
+  id: SecurityDetain
+  department: Security
+  title: task-security-detain-title
+  description: task-security-detain-desc
+  kind: Action
+  action: SetRecordStatus
+  actionStatus: Detained
+  rewardMin: 150
+  rewardMax: 300
+
+- type: departmentTaskTemplate
+  id: SecurityCatchWanted
+  department: Security
+  title: task-security-catch-wanted-title
+  description: task-security-catch-wanted-desc
+  kind: Action
+  action: SetRecordStatus
+  actionStatus: Detained
+  actionFromStatus: Wanted
+  rewardMin: 200
+  rewardMax: 400
+
+- type: departmentTaskTemplate
+  id: SecurityWanted
+  department: Security
+  title: task-security-wanted-title
+  description: task-security-wanted-desc
+  kind: Action
+  action: SetRecordStatus
+  actionStatus: Wanted
+  deliverMin: 1
+  deliverMax: 2
   rewardMin: 80
   rewardMax: 160
 

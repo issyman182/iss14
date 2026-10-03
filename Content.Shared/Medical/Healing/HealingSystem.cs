@@ -130,6 +130,13 @@ public sealed partial class HealingSystem : EntitySystem
 
         var total = healed?.GetTotal() ?? FixedPoint2.Zero;
 
+        // iss14: tell the task boards someone got patched up by another player.
+        if (healed != null && target.Owner != args.Args.User)
+        {
+            var healedEv = new HealedByPlayerEvent(args.Args.User, target.Owner, -healed);
+            RaiseLocalEvent(ref healedEv);
+        }
+
         // Re-verify that we can heal the damage.
         var dontRepeat = false;
         if (TryComp<StackComponent>(args.Used.Value, out var stackComp))
@@ -418,7 +425,10 @@ public sealed partial class HealingSystem : EntitySystem
         else
         {
             if (_damageable.TryChangeDamage(ent, healing.Damage * _damageable.UniversalTopicalsHealModifier, out var healed, true, origin: args.User))
+            {
                 healingLeft -= healed;
+                healedTotal += -healed; // iss14: was never counted for bodies without woundables
+            }
         }
 
         var isAnyTypeFullyConsumed = healingLeft.DamageDict.Any(d => d.Value == 0);
@@ -450,6 +460,10 @@ public sealed partial class HealingSystem : EntitySystem
         {
             _adminLogger.Add(LogType.Healed,
                 $"{ToPrettyString(args.User):user} healed {ToPrettyString(ent):target} for {healedTotal.GetTotal():damage} damage"); // Goobstation
+
+            // iss14: tell the task boards someone got patched up by another player.
+            var healedEv = new HealedByPlayerEvent(args.User, ent, healedTotal);
+            RaiseLocalEvent(ref healedEv);
         }
         else
         {
@@ -604,3 +618,10 @@ public sealed partial class HealingSystem : EntitySystem
         return Math.Max(output, 1);
     }
 }
+
+/// <summary>
+/// iss14: raised (broadcast) after a healing item (bruise pack, ointment, gauze, ...) was applied to someone else.
+/// <see cref="Healed"/> holds the amounts healed per damage type as positive values.
+/// </summary>
+[ByRefEvent]
+public readonly record struct HealedByPlayerEvent(EntityUid Healer, EntityUid Patient, DamageSpecifier Healed);

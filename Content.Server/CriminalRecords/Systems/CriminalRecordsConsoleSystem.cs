@@ -127,6 +127,10 @@ public sealed partial class CriminalRecordsConsoleSystem : SharedCriminalRecords
 
         _criminalRecords.TryChangeStatus(key.Value, msg.Status, msg.Reason, officer);
 
+        // iss14: let the task boards (and whoever else) know an officer changed someone's status.
+        var statusEv = new CriminalStatusSetByOfficerEvent(mob.Value, oldStatus, msg.Status, reason);
+        RaiseLocalEvent(ref statusEv);
+
         (string, object)[] args;
         if (reason != null)
             args = new (string, object)[] { ("name", name), ("officer", officer), ("reason", reason), ("job", jobName) };
@@ -271,3 +275,9 @@ public sealed partial class CriminalRecordsConsoleSystem : SharedCriminalRecords
         return true;
     }
 }
+
+/// <summary>
+/// iss14: raised (broadcast) when a player sets a criminal record status at a records console.
+/// </summary>
+[ByRefEvent]
+public readonly record struct CriminalStatusSetByOfficerEvent(EntityUid Officer, SecurityStatus Old, SecurityStatus New, string? Reason);
