@@ -4,6 +4,7 @@ store-window-title = NanoTrasen Store
 store-hint = Bought with your persistent bank balance. Titles are shown on your ID card, when examined and in chat.
 store-balance = Balance: { $balance } credits
 store-no-title = Wear no title
+store-no-title-tooltip = Take off the title you currently wear.
 store-empty = Nothing for sale yet.
 store-item-title = { $name } — "{ $title }"
 store-buy = Buy ({ $price })
@@ -42,7 +43,7 @@ store-title-entrepreneur-desc = Business is business.
 store-title-high-roller = High Roller
 store-title-high-roller-desc = The casino knows your name.
 store-title-centcomm-favorite = CentComm's Favorite
-store-title-centcomm-favorite-desc = Someone up there likes you.
+store-title-centcomm-favorite-desc = Someone up there likes you. Worn as the short title "CCF" so it does not clutter the chat.
 
 cmd-storegrant-desc = Grants a player a store item without payment.
 cmd-storegrant-help = Usage: storegrant <player> <storeItem>

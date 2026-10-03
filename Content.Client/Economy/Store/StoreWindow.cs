@@ -15,6 +15,7 @@ public sealed partial class StoreWindow : FancyWindow
     [Dependency] private IPrototypeManager _proto = default!;
 
     private readonly Label _balance;
+    private readonly Button _noTitle;
     private readonly Label _status;
     private readonly BoxContainer _list;
 
@@ -29,12 +30,12 @@ public sealed partial class StoreWindow : FancyWindow
 
         var root = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, Margin = new Thickness(8), VerticalExpand = true };
 
-        var header = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal };
-        _balance = new Label { StyleClasses = { "LabelHeading" }, HorizontalExpand = true };
-        var noTitle = new Button { Text = Loc.GetString("store-no-title") };
-        noTitle.OnPressed += _ => _store.SetTitle(null);
+        var header = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, Margin = new Thickness(0, 0, 0, 4) };
+        _balance = new Label { StyleClasses = { "LabelHeading" }, HorizontalExpand = true, VerticalAlignment = VAlignment.Center };
+        _noTitle = new Button { Text = Loc.GetString("store-no-title"), ToolTip = Loc.GetString("store-no-title-tooltip") };
+        _noTitle.OnPressed += _ => _store.SetTitle(null);
         header.AddChild(_balance);
-        header.AddChild(noTitle);
+        header.AddChild(_noTitle);
         root.AddChild(header);
         root.AddChild(new Label { Text = Loc.GetString("store-hint"), StyleClasses = { "LabelSubText" } });
 
@@ -46,7 +47,8 @@ public sealed partial class StoreWindow : FancyWindow
         _status = new Label { Margin = new Thickness(0, 6, 0, 0) };
         root.AddChild(_status);
 
-        AddChild(root);
+        // FancyWindow: content goes below the title bar, not over it.
+        ContentsContainer.AddChild(root);
 
         _store.Updated += Rebuild;
         OnClose += () => _store.Updated -= Rebuild;
@@ -57,6 +59,7 @@ public sealed partial class StoreWindow : FancyWindow
     private void Rebuild()
     {
         _balance.Text = Loc.GetString("store-balance", ("balance", _store.Balance));
+        _noTitle.Disabled = _store.Title == null;
         _status.Text = _store.Status;
         _list.RemoveAllChildren();
 
