@@ -4,6 +4,7 @@ using Content.Server.Power.Components;
 using Content.Server.Power.NodeGroups;
 using Content.Server.Power.Pow3r;
 using Content.Shared.CCVar;
+using Content.Shared.GameTicking;
 using Content.Shared.Power;
 using Content.Shared.Power.Components;
 using Content.Shared.Power.EntitySystems;
@@ -36,12 +37,22 @@ namespace Content.Server.Power.EntitySystems
 
         private BatteryRampPegSolver _solver = new();
 
+        /// <summary>
+        /// iss14: debug "free power" mode (freepower command). While true, every APC power receiver counts as
+        /// powered, no matter whether its APC/grid actually delivers power. Runtime only, resets every round restart.
+        /// </summary>
+        [ViewVariables(VVAccess.ReadWrite)]
+        public bool FreePower { get; set; }
+
         public override void Initialize()
         {
             base.Initialize();
 
             UpdatesAfter.Add(typeof(NodeGroupSystem));
             _solver = new(_cfg.GetCVar(CCVars.DebugPow3rDisableParallel));
+
+            // iss14: free power is a per-round debug toggle, switch it off when the round restarts.
+            SubscribeLocalEvent<RoundRestartCleanupEvent>(_ => FreePower = false);
 
             SubscribeLocalEvent<ApcPowerReceiverComponent, MapInitEvent>(ApcPowerReceiverMapInit);
             SubscribeLocalEvent<ApcPowerReceiverComponent, ComponentInit>(ApcPowerReceiverInit);
@@ -325,8 +336,8 @@ namespace Content.Server.Power.EntitySystems
             if (comp.PowerDisabled)
                 return false;
 
-            // Doesn't need power, so always powered
-            if (!comp.NeedsPower)
+            // Doesn't need power (or free power debug mode is on), so always powered
+            if (!comp.NeedsPower || FreePower)
                 return true;
 
             return comp.Load > 0 && MathHelper.CloseToPercent(comp.NetworkLoad.ReceivingPower, comp.Load);
