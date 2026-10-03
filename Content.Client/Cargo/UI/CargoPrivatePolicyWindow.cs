@@ -16,7 +16,8 @@ namespace Content.Client.Cargo.UI;
 /// </summary>
 public sealed class CargoPrivatePolicyWindow : FancyWindow
 {
-    public event Action<string, bool>? OnSetBlocked;
+    /// <summary>(products, blocked)</summary>
+    public event Action<List<string>, bool>? OnSetBlocked;
     public event Action? OnToggle;
 
     private readonly IEntityManager _entMan;
@@ -29,6 +30,7 @@ public sealed class CargoPrivatePolicyWindow : FancyWindow
 
     private EntityUid? _station;
     private readonly Dictionary<string, CheckBox> _checks = new();
+    private readonly List<(CheckBox Check, List<string> Products, string Name)> _categoryChecks = new();
     private bool _updating;
 
     public CargoPrivatePolicyWindow(IEntityManager entMan, IPrototypeManager proto)
@@ -37,16 +39,16 @@ public sealed class CargoPrivatePolicyWindow : FancyWindow
         _proto = proto;
 
         Title = Loc.GetString("cargo-private-policy-title");
-        MinSize = new System.Numerics.Vector2(420, 400);
-        SetSize = new System.Numerics.Vector2(480, 560);
+        MinSize = new System.Numerics.Vector2(500, 460);
+        SetSize = new System.Numerics.Vector2(560, 660);
         Resizable = true;
 
         var root = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, Margin = new Thickness(8), VerticalExpand = true };
         root.AddChild(new Label { Text = Loc.GetString("cargo-private-policy-hint"), StyleClasses = { "LabelSubText" } });
 
         var header = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, Margin = new Thickness(0, 6, 0, 6) };
-        _status = new Label { HorizontalExpand = true };
-        _toggle = new Button();
+        _status = new Label { HorizontalExpand = true, VerticalAlignment = VAlignment.Center };
+        _toggle = new Button { MinWidth = 110 };
         _toggle.OnPressed += _ => OnToggle?.Invoke();
         header.AddChild(_status);
         header.AddChild(_toggle);
@@ -61,7 +63,8 @@ public sealed class CargoPrivatePolicyWindow : FancyWindow
         scroll.AddChild(_list);
         root.AddChild(scroll);
 
-        AddChild(root);
+        // FancyWindow: content goes below the title bar, not over it.
+        ContentsContainer.AddChild(root);
     }
 
     public void SetStation(EntityUid station)
@@ -84,6 +87,7 @@ public sealed class CargoPrivatePolicyWindow : FancyWindow
     {
         _list.RemoveAllChildren();
         _checks.Clear();
+        _categoryChecks.Clear();
 
         var filter = _search.Text.Trim();
         var products = _proto.EnumeratePrototypes<CargoProductPrototype>()
@@ -94,24 +98,42 @@ public sealed class CargoPrivatePolicyWindow : FancyWindow
             .ThenBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        string? category = null;
-        foreach (var (product, name, cat) in products)
+        foreach (var group in products.GroupBy(p => p.Category))
         {
-            if (cat != category)
-            {
-                category = cat;
-                _list.AddChild(new Label { Text = cat, StyleClasses = { "LabelHeading" }, Margin = new Thickness(0, 6, 0, 0) });
-            }
+            var ids = group.Select(p => p.Product.ID).ToList();
 
-            var check = new CheckBox { Text = name };
-            var id = product.ID;
-            check.OnToggled += a =>
+            // Category row: one checkbox that flips every product of the category.
+            var categoryCheck = new CheckBox
             {
-                if (!_updating)
-                    OnSetBlocked?.Invoke(id, a.Pressed);
+                Text = group.Key,
+                Margin = new Thickness(0, 8, 0, 2),
+                ToolTip = Loc.GetString("cargo-private-policy-category-tooltip"),
             };
-            _list.AddChild(check);
-            _checks[product.ID] = check;
+            categoryCheck.OnToggled += a =>
+            {
+                if (_updating)
+                    return;
+
+                var policy = Policy;
+                var changed = ids.Where(id => policy == null || policy.Blocked.Contains(id) != a.Pressed).ToList();
+                if (changed.Count > 0)
+                    OnSetBlocked?.Invoke(changed, a.Pressed);
+            };
+            _list.AddChild(categoryCheck);
+            _categoryChecks.Add((categoryCheck, ids, group.Key));
+
+            foreach (var (product, name, _) in group)
+            {
+                var check = new CheckBox { Text = name, Margin = new Thickness(16, 0, 0, 0) };
+                var id = product.ID;
+                check.OnToggled += a =>
+                {
+                    if (!_updating)
+                        OnSetBlocked?.Invoke(new List<string> { id }, a.Pressed);
+                };
+                _list.AddChild(check);
+                _checks[product.ID] = check;
+            }
         }
 
         Refresh();
@@ -126,10 +148,12 @@ public sealed class CargoPrivatePolicyWindow : FancyWindow
         {
             _status.Text = Loc.GetString("cargo-private-policy-no-station");
             _toggle.Text = Loc.GetString("cargo-private-policy-enable");
+            _toggle.Disabled = true;
             _updating = false;
             return;
         }
 
+        _toggle.Disabled = false;
         _status.Text = Loc.GetString(policy.BlocklistEnabled ? "cargo-private-policy-status-on" : "cargo-private-policy-status-off",
             ("count", policy.Blocked.Count));
         _toggle.Text = Loc.GetString(policy.BlocklistEnabled ? "cargo-private-policy-disable" : "cargo-private-policy-enable");
@@ -139,6 +163,18 @@ public sealed class CargoPrivatePolicyWindow : FancyWindow
             var blocked = policy.Blocked.Contains(id);
             if (check.Pressed != blocked)
                 check.Pressed = blocked;
+        }
+
+        foreach (var (check, ids, name) in _categoryChecks)
+        {
+            var blocked = ids.Count(id => policy.Blocked.Contains(id));
+            var all = blocked == ids.Count;
+            if (check.Pressed != all)
+                check.Pressed = all;
+
+            var text = Loc.GetString("cargo-private-policy-category", ("category", name), ("blocked", blocked), ("total", ids.Count));
+            if (check.Text != text)
+                check.Text = text;
         }
 
         _updating = false;

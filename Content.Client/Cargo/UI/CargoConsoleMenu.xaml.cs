@@ -338,6 +338,12 @@ namespace Content.Client.Cargo.UI
                                            _timing.CurTime < orderConsole.NextAccountActionTime;
 
             RightPart.Visible = orderConsole.Mode != CargoOrderConsoleMode.PrintSlip;
+
+            // iss14: Economy — the private-order blocklist is a Logistics policy: only the console of the primary account edits it.
+            PrivatePolicyBox.Visible = orderConsole.Account == bankAccount.PrimaryAccount;
+            AccountLimitToggleButton.Text = Loc.GetString(orderConsole.TransferUnbounded
+                ? "cargo-console-menu-toggle-account-lock-button-restore"
+                : "cargo-console-menu-toggle-account-lock-button");
         }
     }
 }

@@ -170,6 +170,8 @@
           </BoxContainer>
           <!-- Funds tab -->
           <BoxContainer Orientation="Vertical" Margin="15">
+              <!-- iss14: Economy — say what this tab is for -->
+              <RichTextLabel Name="FundsHint" Text="{Loc 'cargo-console-menu-funds-hint'}" Margin="0 0 0 10"/>
               <BoxContainer Orientation="Horizontal">
                   <RichTextLabel Name="TransferLimitLabel" Margin="0 0 15 0"/>
                   <RichTextLabel Name="UnlimitedNotifier" Text="{Loc 'cargo-console-menu-account-action-transfer-limit-unlimited-notifier'}"/>
@@ -188,13 +190,20 @@
                   <Button Name="AccountActionButton" Text="{ Loc 'cargo-console-menu-account-action-button'}" MinHeight="45" MinWidth="120"/>
               </BoxContainer>
               <Control MinHeight="15"/>
-              <!-- iss14: Economy -->
-              <BoxContainer HorizontalAlignment="Center">
-                  <Button Name="PrivatePolicyButton" Text="{ Loc 'cargo-console-menu-private-policy-button'}" MinHeight="45" MinWidth="120"/>
+              <!-- iss14: Economy — Logistics only: which products crew may not buy with private money -->
+              <BoxContainer Name="PrivatePolicyBox" Orientation="Vertical" Visible="False">
+                  <controls:Separator StyleClasses="LowDivider" Margin="0 0 0 10"/>
+                  <RichTextLabel Text="{Loc 'cargo-console-menu-private-policy-hint'}" Margin="0 0 0 6"/>
+                  <BoxContainer HorizontalAlignment="Center">
+                      <Button Name="PrivatePolicyButton" Text="{ Loc 'cargo-console-menu-private-policy-button'}" MinHeight="45" MinWidth="120"/>
+                  </BoxContainer>
               </BoxContainer>
               <Control VerticalExpand="True"/>
-              <BoxContainer VerticalAlignment="Bottom" HorizontalAlignment="Center">
-                  <Button Name="AccountLimitToggleButton" Text="{ Loc 'cargo-console-menu-toggle-account-lock-button'}" MinHeight="45" MinWidth="120"/>
+              <BoxContainer Orientation="Vertical" VerticalAlignment="Bottom">
+                  <RichTextLabel Text="{Loc 'cargo-console-menu-toggle-account-lock-hint'}" Margin="0 0 0 6"/>
+                  <BoxContainer HorizontalAlignment="Center">
+                      <Button Name="AccountLimitToggleButton" Text="{ Loc 'cargo-console-menu-toggle-account-lock-button'}" MinHeight="45" MinWidth="120"/>
+                  </BoxContainer>
               </BoxContainer>
           </BoxContainer>
         </TabContainer>

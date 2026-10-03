@@ -3,6 +3,7 @@ using System.Linq;
 using Content.Server.Cargo.Components;
 using Content.Server.Economy;
 using Content.Shared.Access.Systems;
+using Content.Shared.Cargo;
 using Content.Shared.Cargo.Components;
 using Content.Shared.Cargo.Events;
 using Content.Shared.Cargo.Prototypes;
@@ -24,6 +25,7 @@ public sealed partial class CargoSystem
     private void InitializeEconomy()
     {
         SubscribeLocalEvent<CargoOrderConsoleComponent, CargoConsoleApprovePrivateOrderMessage>(OnApprovePrivateOrder);
+        SubscribeLocalEvent<CargoOrderConsoleComponent, CargoConsoleAddPrivateOrderMessage>(OnAddPrivateOrder);
         SubscribeLocalEvent<CargoOrderConsoleComponent, CargoConsoleSetPrivateBlockMessage>(OnSetPrivateBlock);
         SubscribeLocalEvent<CargoOrderConsoleComponent, CargoConsoleTogglePrivateBlocklistMessage>(OnTogglePrivateBlocklist);
     }
@@ -80,18 +82,11 @@ public sealed partial class CargoSystem
         if (args.Actor is not { Valid: true } player)
             return;
 
-        if (!_cfg.GetCVar(CCVars.EconomyCargoPrivateOrders))
-        {
-            _popup.PopupCursor(Loc.GetString("cargo-console-private-disabled"), player);
-            PlayDenySound(ent);
-            return;
-        }
-
         if (ent.Comp.Mode != CargoOrderConsoleMode.DirectOrder)
             return;
 
         var station = _station.GetOwningStation(ent.Owner);
-        if (!_stationQuery.TryComp(station, out var stationData) || !TryGetOrderDatabase(station, out var orderDatabase))
+        if (!TryGetOrderDatabase(station, out var orderDatabase))
         {
             _popup.PopupCursor(Loc.GetString("cargo-console-station-not-found"), player);
             PlayDenySound(ent);
@@ -100,17 +95,81 @@ public sealed partial class CargoSystem
 
         var orderId = args.OrderId;
         var order = orderDatabase.Orders[ent.Comp.Account].Find(o => orderId == o.OrderId && !o.Approved);
-        if (order == null || !ProtoMan.Resolve(order.Product, out var product))
+        if (order == null)
             return;
 
-        if (IsPrivatelyBlocked(station.Value, order.Product))
+        if (TryPayPrivately(ent, player, order, station.Value, orderDatabase))
         {
-            _popup.PopupCursor(Loc.GetString("cargo-console-private-blocked"), player);
+            orderDatabase.Orders[ent.Comp.Account].Remove(order);
+            UpdateOrders(station.Value);
+        }
+    }
+
+    /// <summary>
+    /// Order form with "private" payment selected: the order is created and paid from the buyer's own account at
+    /// once, on any console (department request computers included) — no approval by Logistics needed.
+    /// </summary>
+    private void OnAddPrivateOrder(Entity<CargoOrderConsoleComponent> ent, ref CargoConsoleAddPrivateOrderMessage args)
+    {
+        if (args.Actor is not { Valid: true } player)
+            return;
+
+        if (args.Amount <= 0 || ent.Comp.Mode == CargoOrderConsoleMode.PrintSlip)
+            return;
+
+        var station = _station.GetOwningStation(ent.Owner);
+        if (!TryGetOrderDatabase(station, out var orderDatabase))
+        {
+            _popup.PopupCursor(Loc.GetString("cargo-console-station-not-found"), player);
             PlayDenySound(ent);
             return;
         }
 
-        // The buyer pays with the ID card they carry; fingerprint policy as everywhere else.
+        if (!ProtoMan.TryIndex<CargoProductPrototype>(args.CargoProductId, out var product)
+            || !GetAvailableProducts(ent).Contains(args.CargoProductId))
+            return;
+
+        var requester = args.Requester.Length > 0 ? args.Requester : _identity.GetIdentityShortInfo(player, ent.Owner) ?? string.Empty;
+        var order = new CargoOrderData(GenerateOrderId(orderDatabase), product.ID, args.Amount, requester, args.Reason, ent.Comp.Account);
+
+        if (!TryPayPrivately(ent, player, order, station.Value, orderDatabase))
+            return;
+
+        _adminLogger.Add(LogType.Action, LogImpact.Low,
+            $"{ToPrettyString(player):user} placed private order [orderId:{order.OrderId}, quantity:{order.OrderQuantity}, product:{order.Product}, requester:{order.Requester}, reason:{order.Reason}]");
+        UpdateOrders(station.Value);
+    }
+
+    /// <summary>
+    /// Approves <paramref name="order"/> paid from the player's own bank account (ID card they carry, fingerprint
+    /// policy as everywhere else) and sends it on its way. The caller removes it from any request list.
+    /// </summary>
+    private bool TryPayPrivately(Entity<CargoOrderConsoleComponent> ent, EntityUid player, CargoOrderData order, EntityUid station, StationCargoOrderDatabaseComponent orderDatabase)
+    {
+        if (!_cfg.GetCVar(CCVars.EconomyCargoPrivateOrders))
+        {
+            _popup.PopupCursor(Loc.GetString("cargo-console-private-disabled"), player);
+            PlayDenySound(ent);
+            return false;
+        }
+
+        if (!_stationQuery.TryComp(station, out var stationData))
+        {
+            _popup.PopupCursor(Loc.GetString("cargo-console-station-not-found"), player);
+            PlayDenySound(ent);
+            return false;
+        }
+
+        if (!ProtoMan.Resolve(order.Product, out var product))
+            return false;
+
+        if (IsPrivatelyBlocked(station, order.Product))
+        {
+            _popup.PopupCursor(Loc.GetString("cargo-console-private-blocked"), player);
+            PlayDenySound(ent);
+            return false;
+        }
+
         var error = EconomyPaymentError.None;
         if (!_idCardSystem.TryFindIdCard(player, out var card)
             || !_economy.TryGetCardPayer(card, player, out var payer, out error))
@@ -119,16 +178,16 @@ public sealed partial class CargoSystem
                 ? Loc.GetString("cargo-console-private-no-card")
                 : _economy.ErrorText(error), player);
             PlayDenySound(ent);
-            return;
+            return false;
         }
 
-        var amount = GetOutstandingOrderCount((station.Value, orderDatabase), order.Account);
+        var amount = GetOutstandingOrderCount((station, orderDatabase), order.Account);
         var capacity = orderDatabase.Capacity;
         if (amount >= capacity)
         {
             _popup.PopupCursor(Loc.GetString("cargo-console-too-many"), player);
             PlayDenySound(ent);
-            return;
+            return false;
         }
 
         var cappedAmount = Math.Min(capacity - amount, order.OrderQuantity);
@@ -144,7 +203,7 @@ public sealed partial class CargoSystem
         {
             _popup.PopupCursor(Loc.GetString("cargo-console-private-insufficient", ("cost", cost)), player);
             PlayDenySound(ent);
-            return;
+            return false;
         }
 
         var emagged = _emag.CheckFlag(ent.Owner, EmagType.Interaction);
@@ -154,13 +213,13 @@ public sealed partial class CargoSystem
         order.ApprovingConsole = GetNetEntity(ent.Owner);
         order.Approved = true;
 
-        var ev = new FulfillCargoOrderEvent((station.Value, stationData), order);
+        var ev = new FulfillCargoOrderEvent((station, stationData), order);
         RaiseLocalEvent(ref ev);
-        ev.FulfillmentEntity ??= station.Value;
+        ev.FulfillmentEntity ??= station;
 
         if (!ev.Handled)
         {
-            ev.FulfillmentEntity = TryFulfillOrder((station.Value, stationData), order.Account, order, orderDatabase);
+            ev.FulfillmentEntity = TryFulfillOrder((station, stationData), order.Account, order, orderDatabase);
 
             if (ev.FulfillmentEntity == null)
             {
@@ -169,7 +228,7 @@ public sealed partial class CargoSystem
                 order.Approver = null;
                 order.ApprovingConsole = null;
                 order.Approved = false;
-                return;
+                return false;
             }
         }
 
@@ -183,7 +242,7 @@ public sealed partial class CargoSystem
             order.Approver = null;
             order.ApprovingConsole = null;
             order.Approved = false;
-            return;
+            return false;
         }
 
         _audio.PlayPvs(ApproveSound, ent.Owner);
@@ -205,9 +264,7 @@ public sealed partial class CargoSystem
 
         _adminLogger.Add(LogType.Economy, LogImpact.Low,
             $"{ToPrettyString(player):user} privately paid order [orderId:{order.OrderId}, quantity:{order.OrderQuantity}, product:{order.Product}, requester:{order.Requester}] for {cost} credits");
-
-        orderDatabase.Orders[ent.Comp.Account].Remove(order);
-        UpdateOrders(station.Value);
+        return true;
     }
 
     private bool CanEditPrivatePolicy(Entity<CargoOrderConsoleComponent> ent, EntityUid actor)
@@ -234,18 +291,23 @@ public sealed partial class CargoSystem
         if (!CanEditPrivatePolicy(ent, args.Actor) || _station.GetOwningStation(ent.Owner) is not { } station)
             return;
 
-        if (!ProtoMan.HasIndex<CargoProductPrototype>(args.Product))
-            return;
-
         var policy = EnsurePrivatePolicy(station);
-        if (args.Blocked)
-            policy.Blocked.Add(args.Product);
-        else
-            policy.Blocked.Remove(args.Product);
+        var changed = new List<string>();
+        foreach (var product in args.Products.Take(1000))
+        {
+            if (!ProtoMan.HasIndex<CargoProductPrototype>(product))
+                continue;
+
+            if (args.Blocked ? policy.Blocked.Add(product) : policy.Blocked.Remove(product))
+                changed.Add(product);
+        }
+
+        if (changed.Count == 0)
+            return;
 
         Dirty(station, policy);
         _adminLogger.Add(LogType.Economy, LogImpact.Low,
-            $"{ToPrettyString(args.Actor):user} {(args.Blocked ? "blocked" : "allowed")} private orders of {args.Product}");
+            $"{ToPrettyString(args.Actor):user} {(args.Blocked ? "blocked" : "allowed")} private orders of {string.Join(", ", changed)}");
     }
 
     private void OnTogglePrivateBlocklist(Entity<CargoOrderConsoleComponent> ent, ref CargoConsoleTogglePrivateBlocklistMessage args)

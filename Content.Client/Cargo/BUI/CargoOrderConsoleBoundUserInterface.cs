@@ -16,6 +16,7 @@ namespace Content.Client.Cargo.BUI
     {
         [Dependency] private SharedCargoSystem _cargoSystem = default!;
         [Dependency] private IdentitySystem _identity = default!;
+        [Dependency] private Robust.Shared.Configuration.IConfigurationManager _cfg = default!; // iss14: Economy
 
         [ViewVariables]
         private CargoConsoleMenu? _menu;
@@ -79,6 +80,7 @@ namespace Content.Client.Cargo.BUI
                 _orderMenu.Requester.Text = orderRequester;
                 _orderMenu.Reason.Text = "";
                 _orderMenu.Amount.Value = 1;
+                SetupPayment(); // iss14: Economy
 
                 _orderMenu.OpenCentered();
                 _orderMenu.SetPositionLast();
@@ -99,6 +101,13 @@ namespace Content.Client.Cargo.BUI
                     _orderMenu.Close();
                 }
             };
+            // iss14: Economy
+            _orderMenu.Payment.OnItemSelected += args =>
+            {
+                _orderMenu.Payment.SelectId(args.Id);
+                UpdatePaymentHint();
+            };
+            _orderMenu.Amount.ValueChanged += _ => UpdatePaymentHint();
 
             _menu.OnAccountAction += (account, amount) =>
             {
@@ -180,7 +189,7 @@ namespace Content.Client.Cargo.BUI
             if (_policyWindow == null)
             {
                 _policyWindow = new CargoPrivatePolicyWindow(EntMan, IoCManager.Resolve<IPrototypeManager>());
-                _policyWindow.OnSetBlocked += (product, blocked) => SendMessage(new Content.Shared.Economy.CargoConsoleSetPrivateBlockMessage(product, blocked));
+                _policyWindow.OnSetBlocked += (products, blocked) => SendMessage(new Content.Shared.Economy.CargoConsoleSetPrivateBlockMessage(products, blocked));
                 _policyWindow.OnToggle += () => SendMessage(new Content.Shared.Economy.CargoConsoleTogglePrivateBlocklistMessage());
                 _policyWindow.OnClose += () => _policyWindow = null;
             }
@@ -197,6 +206,17 @@ namespace Content.Client.Cargo.BUI
                 return false;
             }
 
+            // iss14: Economy — private payment: created and paid right away, no approval.
+            if (_orderMenu?.Payment.SelectedId == PaymentPrivate)
+            {
+                SendMessage(new Content.Shared.Economy.CargoConsoleAddPrivateOrderMessage(
+                    _orderMenu.Requester.Text,
+                    _orderMenu.Reason.Text,
+                    _product?.ID ?? "",
+                    orderAmt));
+                return true;
+            }
+
             SendMessage(new CargoConsoleAddOrderMessage(
                 _orderMenu?.Requester.Text ?? "",
                 _orderMenu?.Reason.Text ?? "",
@@ -204,6 +224,77 @@ namespace Content.Client.Cargo.BUI
                 orderAmt));
 
             return true;
+        }
+
+        // iss14: Economy — payment selector on the order form
+        private const int PaymentDepartment = 0;
+        private const int PaymentPrivate = 1;
+
+        private void SetupPayment()
+        {
+            if (_orderMenu == null || !EntMan.TryGetComponent<CargoOrderConsoleComponent>(Owner, out var console))
+                return;
+
+            var protoMan = IoCManager.Resolve<IPrototypeManager>();
+            var accountName = protoMan.TryIndex(console.Account, out var accountProto) ? Loc.GetString(accountProto.Name) : console.Account.Id;
+
+            _orderMenu.Payment.Clear();
+            _orderMenu.Payment.AddItem(Loc.GetString("cargo-console-order-menu-payment-department", ("account", accountName)), PaymentDepartment);
+
+            var privateAllowed = _cfg.GetCVar(Content.Shared.CCVar.CCVars.EconomyCargoPrivateOrders)
+                                 && console.Mode != CargoOrderConsoleMode.PrintSlip;
+            if (privateAllowed)
+                _orderMenu.Payment.AddItem(PrivateOptionText(), PaymentPrivate);
+
+            _orderMenu.Payment.SelectId(PaymentDepartment);
+            _orderMenu.Payment.Disabled = !privateAllowed;
+            UpdatePaymentHint();
+        }
+
+        private int PrivateCost()
+        {
+            var markup = _cfg.GetCVar(Content.Shared.CCVar.CCVars.EconomyCargoPrivateMarkup);
+            var amount = Math.Max(1, _orderMenu?.Amount.Value ?? 1);
+            return (int) Math.Ceiling((_product?.Cost ?? 0) * amount * markup);
+        }
+
+        private string PrivateOptionText() => Loc.GetString("cargo-console-order-menu-payment-private", ("cost", PrivateCost()));
+
+        private bool IsPrivatelyBlocked()
+        {
+            if (_product == null || _station == null || !_cfg.GetCVar(Content.Shared.CCVar.CCVars.EconomyCargoPrivateBlocklist))
+                return false;
+
+            return EntMan.TryGetComponent<Content.Shared.Economy.CargoPrivateOrderPolicyComponent>(_station.Value, out var policy)
+                   && policy.BlocklistEnabled && policy.Blocked.Contains(_product.ID);
+        }
+
+        private void UpdatePaymentHint()
+        {
+            if (_orderMenu == null)
+                return;
+
+            // Keep the private option's price in step with the amount.
+            for (var i = 0; i < _orderMenu.Payment.ItemCount; i++)
+            {
+                if (_orderMenu.Payment.GetItemId(i) == PaymentPrivate)
+                    _orderMenu.Payment.SetItemText(i, PrivateOptionText());
+            }
+
+            if (_orderMenu.Payment.SelectedId == PaymentPrivate)
+            {
+                var blocked = IsPrivatelyBlocked();
+                _orderMenu.PaymentHint.Text = blocked
+                    ? Loc.GetString("cargo-console-order-menu-payment-hint-blocked")
+                    : Loc.GetString("cargo-console-order-menu-payment-hint-private",
+                        ("markup", _cfg.GetCVar(Content.Shared.CCVar.CCVars.EconomyCargoPrivateMarkup).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)));
+                _orderMenu.SubmitButton.Disabled = blocked;
+            }
+            else
+            {
+                _orderMenu.PaymentHint.Text = Loc.GetString("cargo-console-order-menu-payment-hint-department");
+                _orderMenu.SubmitButton.Disabled = false;
+            }
         }
 
         private void RemoveOrder(CargoOrderData? order)

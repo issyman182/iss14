@@ -48,11 +48,21 @@ public sealed class CargoConsoleApprovePrivateOrderMessage(int orderId) : BoundU
     public readonly int OrderId = orderId;
 }
 
-/// <summary>Cargo staff: block or unblock a product for private orders this round.</summary>
+/// <summary>Order form: places an order and pays it from the actor's own bank account right away.</summary>
 [Serializable, NetSerializable]
-public sealed class CargoConsoleSetPrivateBlockMessage(string product, bool blocked) : BoundUserInterfaceMessage
+public sealed class CargoConsoleAddPrivateOrderMessage(string requester, string reason, string cargoProductId, int amount) : BoundUserInterfaceMessage
 {
-    public readonly string Product = product;
+    public readonly string Requester = requester;
+    public readonly string Reason = reason;
+    public readonly string CargoProductId = cargoProductId;
+    public readonly int Amount = amount;
+}
+
+/// <summary>Cargo staff: block or unblock products (one, or a whole category) for private orders this round.</summary>
+[Serializable, NetSerializable]
+public sealed class CargoConsoleSetPrivateBlockMessage(List<string> products, bool blocked) : BoundUserInterfaceMessage
+{
+    public readonly List<string> Products = products;
     public readonly bool Blocked = blocked;
 }
 
