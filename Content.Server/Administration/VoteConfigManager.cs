@@ -21,6 +21,7 @@ namespace Content.Server.Administration;
 /// Admin-editable, persistent configuration for voting: which vote types are enabled, plus named profiles of
 /// maps and gamemodes. The active map profile overrides the map pool (drives both random-on-restart selection
 /// and map voting); the active gamemode profile is the random-on-restart source and filters preset voting.
+/// Also holds the fallback gamemode/map used when the normal selection can't start a round.
 /// Persisted as JSON to the server user-data dir.
 /// </summary>
 public sealed partial class VoteConfigManager
@@ -72,6 +73,18 @@ public sealed partial class VoteConfigManager
     private string _activePresetProfile = "";
     private readonly Dictionary<string, List<string>> _presetProfiles = new();
 
+    // Fallback gamemode: used once a gamemode failed to start FallbackAfterFailures times in a row.
+    // Empty = disabled (failed gamemodes keep being retried, the old behaviour).
+    public const string DefaultFallbackPreset = "Extended";
+    private string _fallbackPreset = DefaultFallbackPreset;
+
+    // Fallback map: used when no map of the pool is available (empty pool, nothing fits the player count).
+    // Empty = use the maps flagged as fallback in their prototype (the old behaviour).
+    private string _fallbackMap = "";
+
+    /// <summary>How many failed start attempts in a row before the fallback gamemode is used.</summary>
+    public const int FallbackAfterFailures = 2;
+
     public void Initialize()
     {
         _sawmill = Logger.GetSawmill("vote_config");
@@ -94,6 +107,7 @@ public sealed partial class VoteConfigManager
         }
 
         _maps.RuntimeMapPoolFilterByPlayerCount = _filterMapsByPlayerCount;
+        _maps.SetRuntimeFallbackMap(ValidFallbackMap());
         ApplyMapPlayerRanges();
         ApplyMapPool();
     }
@@ -252,6 +266,42 @@ public sealed partial class VoteConfigManager
 
     #endregion
 
+    #region Fallbacks
+
+    /// <summary>The configured fallback gamemode id, or empty when disabled.</summary>
+    public string FallbackPreset => _fallbackPreset;
+
+    /// <summary>The configured fallback map id, or empty when disabled.</summary>
+    public string FallbackMap => _fallbackMap;
+
+    public void SetFallbackPreset(string presetId)
+    {
+        _fallbackPreset = presetId.Length != 0 && _proto.HasIndex<GamePresetPrototype>(presetId) ? presetId : "";
+        Save();
+    }
+
+    public void SetFallbackMap(string mapId)
+    {
+        _fallbackMap = mapId.Length != 0 && _proto.HasIndex<GameMapPrototype>(mapId) ? mapId : "";
+        _maps.SetRuntimeFallbackMap(ValidFallbackMap());
+        ApplyMapPool();
+        Save();
+    }
+
+    /// <summary>The fallback gamemode, if one is configured and still exists.</summary>
+    public bool TryGetFallbackPreset([NotNullWhen(true)] out GamePresetPrototype? preset)
+    {
+        preset = null;
+        return _fallbackPreset.Length != 0 && _proto.TryIndex<GamePresetPrototype>(_fallbackPreset, out preset);
+    }
+
+    private string? ValidFallbackMap()
+    {
+        return _fallbackMap.Length != 0 && _proto.HasIndex<GameMapPrototype>(_fallbackMap) ? _fallbackMap : null;
+    }
+
+    #endregion
+
     #region Map player ranges
 
     public bool TryGetMapPlayerRange(string mapId, out int min, out int max)
@@ -321,8 +371,12 @@ public sealed partial class VoteConfigManager
         return null;
     }
 
-    /// <summary>Picks a random gamemode from the active profile, for random-on-restart selection.</summary>
-    public bool TryGetRandomPreset([NotNullWhen(true)] out string? presetId)
+    /// <summary>
+    /// Picks a random gamemode from the active profile, for random-on-restart selection.
+    /// Gamemodes in <paramref name="exclude"/> (e.g. ones that just failed to start) are skipped,
+    /// unless that would leave nothing to pick from.
+    /// </summary>
+    public bool TryGetRandomPreset([NotNullWhen(true)] out string? presetId, IReadOnlySet<string>? exclude = null)
     {
         presetId = null;
         if (_activePresetProfile.Length == 0 || !_presetProfiles.TryGetValue(_activePresetProfile, out var list))
@@ -332,23 +386,39 @@ public sealed partial class VoteConfigManager
         if (valid.Count == 0)
             return false;
 
+        if (exclude is { Count: > 0 })
+        {
+            var remaining = valid.Where(id => !exclude.Contains(id)).ToList();
+            if (remaining.Count > 0)
+                valid = remaining;
+        }
+
         presetId = _random.Pick(valid);
         return true;
     }
 
     private void ApplyMapPool()
     {
-        if (_activeMapProfile.Length != 0
-            && _mapProfiles.TryGetValue(_activeMapProfile, out var list)
-            && list.Count > 0)
+        if (_activeMapProfile.Length != 0 && _mapProfiles.TryGetValue(_activeMapProfile, out var list))
         {
             // Only include maps that still exist.
-            _maps.SetRuntimeMapPool(list.Where(id => _proto.HasIndex<GameMapPrototype>(id)).ToHashSet());
+            var valid = list.Where(id => _proto.HasIndex<GameMapPrototype>(id)).ToHashSet();
+            if (valid.Count > 0)
+            {
+                _maps.SetRuntimeMapPool(valid);
+                return;
+            }
+
+            // Active profile with no (valid) maps: with a fallback map configured, an empty pool makes the
+            // map selection use it. Without one, keep the old behaviour (default pool).
+            if (ValidFallbackMap() != null)
+            {
+                _maps.SetRuntimeMapPool(valid);
+                return;
+            }
         }
-        else
-        {
-            _maps.SetRuntimeMapPool(null);
-        }
+
+        _maps.SetRuntimeMapPool(null);
     }
 
     #endregion
@@ -410,6 +480,12 @@ public sealed partial class VoteConfigManager
             _presetProfiles.Clear();
             foreach (var (k, v) in data.PresetProfiles)
                 _presetProfiles[k] = v;
+
+            // Older config files don't have these; keep the defaults then.
+            if (data.FallbackPreset != null)
+                _fallbackPreset = data.FallbackPreset;
+            if (data.FallbackMap != null)
+                _fallbackMap = data.FallbackMap;
         }
         catch (Exception e)
         {
@@ -439,6 +515,8 @@ public sealed partial class VoteConfigManager
             MapPlayerRanges = _mapPlayerRanges.ToDictionary(kv => kv.Key, kv => kv.Value),
             ActivePresetProfile = _activePresetProfile,
             PresetProfiles = _presetProfiles.ToDictionary(kv => kv.Key, kv => kv.Value),
+            FallbackPreset = _fallbackPreset,
+            FallbackMap = _fallbackMap,
         };
     }
 
@@ -474,6 +552,8 @@ public sealed partial class VoteConfigManager
         public Dictionary<string, MapPlayerRange> MapPlayerRanges { get; set; } = new();
         public string ActivePresetProfile { get; set; } = "";
         public Dictionary<string, List<string>> PresetProfiles { get; set; } = new();
+        public string? FallbackPreset { get; set; }
+        public string? FallbackMap { get; set; }
     }
 
     /// <summary>A per-map player-count override. Max 0 = unlimited.</summary>

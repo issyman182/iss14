@@ -19,9 +19,13 @@ public sealed partial class VoteConfigWindow : FancyWindow
     public event Action<bool>? OnDeleteProfile;
     public event Action<bool, string, bool>? OnSetItem;
     public event Action<string, int, int, bool>? OnSetMapRange;
+    public event Action<bool, string>? OnSetFallback;
 
     private List<string> _mapProfiles = new();
     private List<string> _presetProfiles = new();
+    // Item ids behind the fallback dropdowns (index = option id - 1; option id 0 = none).
+    private List<string> _fallbackMapIds = new();
+    private List<string> _fallbackPresetIds = new();
     private bool _updating;
 
     // Last known-good value for each timer field, used to restore on invalid input.
@@ -76,6 +80,19 @@ public sealed partial class VoteConfigWindow : FancyWindow
                 OnCreateProfile?.Invoke(false, name);
         };
         PresetDeleteButton.OnPressed += _ => OnDeleteProfile?.Invoke(false);
+
+        FallbackMapOption.OnItemSelected += a =>
+        {
+            FallbackMapOption.SelectId(a.Id);
+            if (!_updating)
+                OnSetFallback?.Invoke(true, ProfileValue(_fallbackMapIds, a.Id));
+        };
+        FallbackPresetOption.OnItemSelected += a =>
+        {
+            FallbackPresetOption.SelectId(a.Id);
+            if (!_updating)
+                OnSetFallback?.Invoke(false, ProfileValue(_fallbackPresetIds, a.Id));
+        };
     }
 
     private void Toggle(VoteToggle toggle, bool value)
@@ -131,6 +148,10 @@ public sealed partial class VoteConfigWindow : FancyWindow
         PopulateProfiles(MapProfileOption, _mapProfiles, state.ActiveMapProfile);
         _presetProfiles = state.PresetProfiles;
         PopulateProfiles(PresetProfileOption, _presetProfiles, state.ActivePresetProfile);
+
+        _fallbackMapIds = PopulateFallback(FallbackMapOption, state.Maps, state.FallbackMap);
+        _fallbackPresetIds = PopulateFallback(FallbackPresetOption, state.Presets, state.FallbackPreset);
+        FallbackMapOption.Disabled = FallbackPresetOption.Disabled = !state.CanEdit;
 
         _updating = false;
 
@@ -243,6 +264,26 @@ public sealed partial class VoteConfigWindow : FancyWindow
         }
 
         option.SelectId(selected);
+    }
+
+    /// <summary>Fills a fallback dropdown with "(none)" + all items; returns the ids behind option ids 1..</summary>
+    private static List<string> PopulateFallback(OptionButton option, List<VoteConfigItem> items, string selectedId)
+    {
+        var ids = new List<string>(items.Count);
+        option.Clear();
+        option.AddItem(Loc.GetString("vote-config-fallback-none"), 0);
+
+        var selected = 0;
+        for (var i = 0; i < items.Count; i++)
+        {
+            option.AddItem($"{items[i].Display} ({items[i].Id})", i + 1);
+            ids.Add(items[i].Id);
+            if (items[i].Id == selectedId)
+                selected = i + 1;
+        }
+
+        option.SelectId(selected);
+        return ids;
     }
 
     private void BuildItems(BoxContainer container, List<VoteConfigItem> items, bool isMap, bool canEdit, bool hasActive)

@@ -45,7 +45,7 @@ public sealed partial class VoteConfigEui : BaseEui
     public override EuiStateBase GetNewState() => _state;
 
     private VoteConfigEuiState _state = new(false, true, true, true, false, true,
-        false, 60, 30, 90, 10, 45, new(), "", new(), new(), "", new(), new());
+        false, 60, 30, 90, 10, 45, new(), "", new(), new(), "", new(), new(), "", "");
 
     public void BuildState()
     {
@@ -93,7 +93,9 @@ public sealed partial class VoteConfigEui : BaseEui
             _config.PresetProfileNames.ToList(),
             _config.ActivePresetProfile,
             presets,
-            ranges);
+            ranges,
+            _config.FallbackPreset,
+            _config.FallbackMap);
 
         StateDirty();
     }
@@ -127,6 +129,12 @@ public sealed partial class VoteConfigEui : BaseEui
                 break;
             case VoteConfigSetItemMessage m:
                 _config.SetItem(m.IsMap, m.ItemId, m.Included);
+                break;
+            case VoteConfigSetFallbackMessage m:
+                if (m.IsMap)
+                    _config.SetFallbackMap(m.Id);
+                else
+                    _config.SetFallbackPreset(m.Id);
                 break;
             case VoteConfigSetMapRangeMessage m:
                 if (m.Clear)

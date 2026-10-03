@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Content.Server.Chat.Managers;
 using Content.Server.GameTicking;
+using Content.Shared.Chat;
 using Content.Shared.CCVar;
 using Content.Shared.Maps;
 using Robust.Server.Player;
@@ -21,6 +23,7 @@ public sealed partial class GameMapManager : IGameMapManager
     [Dependency] private IPlayerManager _playerManager = default!;
     [Dependency] private IResourceManager _resMan = default!;
     [Dependency] private IRobustRandom _random = default!;
+    [Dependency] private IChatManager _chatManager = default!;
 
     [ViewVariables(VVAccess.ReadOnly)]
     private readonly Queue<string> _previousMaps = new();
@@ -39,6 +42,10 @@ public sealed partial class GameMapManager : IGameMapManager
     private bool _runtimeMapPoolFilterByPlayerCount;
     // Admin-defined per-map player-count ranges (set by VoteConfigManager); override prototype MinPlayers/MaxPlayers.
     private IReadOnlyDictionary<string, (int Min, int Max)>? _runtimeMapPlayerRanges;
+    // Admin-defined fallback map (set by VoteConfigManager), used when no pool map is eligible.
+    private string? _runtimeFallbackMap;
+    // Whether the fallback-map chat notice was already sent for the current selection cycle (avoids spam).
+    private bool _fallbackMapAnnounced;
 
     private ISawmill _log = default!;
 
@@ -103,6 +110,17 @@ public sealed partial class GameMapManager : IGameMapManager
 
     public IEnumerable<GameMapPrototype> CurrentlyEligibleMaps()
     {
+        return GetEligibleMaps(out _);
+    }
+
+    /// <summary>
+    /// Same as <see cref="CurrentlyEligibleMaps"/>, but reports whether the admin fallback map had to be used
+    /// because nothing in the pool was eligible.
+    /// </summary>
+    private GameMapPrototype[] GetEligibleMaps(out bool usedAdminFallback)
+    {
+        usedAdminFallback = false;
+
         // When an admin profile (runtime pool) is active it is authoritative: return exactly those maps,
         // bypassing the usual condition eligibility filtering and the fallback list. Player-count filtering
         // is applied only when the admin opted into it via RuntimeMapPoolFilterByPlayerCount.
@@ -118,7 +136,38 @@ public sealed partial class GameMapManager : IGameMapManager
         }
 
         var maps = AllVotableMaps().Where(IsMapEligible).ToArray();
-        return maps.Length == 0 ? AllMaps().Where(x => x.Fallback) : maps;
+        if (maps.Length != 0)
+            return maps;
+
+        // iss14: nothing in the pool is eligible (empty pool, too few/many players, ...). Use the admin
+        // fallback map from the voting config if one is set, otherwise the prototype-flagged fallback maps.
+        if (_runtimeFallbackMap != null && _prototypeManager.TryIndex<GameMapPrototype>(_runtimeFallbackMap, out var fallback))
+        {
+            usedAdminFallback = true;
+            return [fallback];
+        }
+
+        return AllMaps().Where(x => x.Fallback).ToArray();
+    }
+
+    public void SetRuntimeFallbackMap(string? mapId)
+    {
+        _runtimeFallbackMap = mapId;
+    }
+
+    /// <summary>Tells everyone in chat that the fallback map is used because no pool map was available.</summary>
+    private void AnnounceFallbackMap(GameMapPrototype map)
+    {
+        if (_fallbackMapAnnounced)
+            return;
+
+        _fallbackMapAnnounced = true;
+        var message = Loc.GetString("game-ticker-map-fallback",
+            ("players", _playerManager.PlayerCount),
+            ("fallbackMap", Loc.GetString(map.MapName)));
+        _log.Info(message);
+        var wrapped = Loc.GetString("chat-manager-server-wrap-message", ("message", message));
+        _chatManager.ChatMessageToAll(ChatChannel.Server, message, wrapped, default, false, true);
     }
 
     public void SetRuntimeMapPool(IReadOnlySet<string>? maps)
@@ -193,6 +242,7 @@ public sealed partial class GameMapManager : IGameMapManager
     public void ClearSelectedMap()
     {
         _selectedMap = default!;
+        _fallbackMapAnnounced = false;
     }
 
     public bool TrySelectMapIfEligible(string gameMap)
@@ -212,8 +262,11 @@ public sealed partial class GameMapManager : IGameMapManager
 
     public void SelectMapRandom()
     {
-        var maps = CurrentlyEligibleMaps().ToList();
+        var maps = GetEligibleMaps(out var usedFallback);
         _selectedMap = _random.Pick(maps);
+
+        if (usedFallback)
+            AnnounceFallbackMap(_selectedMap);
     }
 
     public void SelectMapFromRotationQueue(bool markAsPlayed = false)
@@ -285,7 +338,11 @@ public sealed partial class GameMapManager : IGameMapManager
     {
         _log.Info($"map queue: {string.Join(", ", _previousMaps)}");
 
-        var eligible = CurrentlyEligibleMaps()
+        var eligibleMaps = GetEligibleMaps(out var usedFallback);
+        if (usedFallback && eligibleMaps.Length != 0)
+            AnnounceFallbackMap(eligibleMaps[0]);
+
+        var eligible = eligibleMaps
             .Select(x => (proto: x, weight: GetMapRotationQueuePriority(x.ID)))
             .OrderByDescending(x => x.weight)
             .ToArray();

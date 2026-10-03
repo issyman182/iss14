@@ -40,6 +40,15 @@ public sealed partial class ServerGameTicker
     /// </summary>
     public int? ResetCountdown;
 
+    // iss14: fallback gamemode handling (see VoteConfigManager fallback settings).
+    // Failed start attempts in a row. Only reset when a non-fallback gamemode starts, so after a fallback round
+    // a gamemode that still can't start falls back again right away instead of failing twice more.
+    private int _presetFailStreak;
+    // Gamemodes that failed during the current streak; skipped when re-rolling from the active gamemode profile.
+    private readonly HashSet<string> _failedPresets = new();
+    // Fallback gamemode to switch to on the next round restart.
+    private string? _pendingFallbackPreset;
+
     private bool StartPreset(ICommonSession[] origReadyPlayers, bool force)
     {
         Log.Info($"Attempting to start preset '{CurrentPreset?.ID}'");
@@ -47,7 +56,10 @@ public sealed partial class ServerGameTicker
         RaiseLocalEvent(startAttempt);
 
         if (!startAttempt.Cancelled)
+        {
+            OnPresetStarted();
             return true;
+        }
 
         var presetTitle = CurrentPreset != null ? Loc.GetString(CurrentPreset.ModeTitle) : string.Empty;
 
@@ -101,6 +113,19 @@ public sealed partial class ServerGameTicker
         {
             // iss14: clean restart instead of same-tick fallback; delayed by PresetFailedCooldownIncrease.
             Log.Info($"Failed to start preset '{CurrentPreset?.ID}'. Restarting round with a {PresetFailedCooldownIncrease} second delay.");
+
+            _presetFailStreak++;
+            if (CurrentPreset != null)
+                _failedPresets.Add(CurrentPreset.ID);
+
+            // Failed too often in a row: switch to the admin fallback gamemode (voting config) on the restart.
+            if (TryQueueFallbackPreset(presetTitle))
+            {
+                RestartRound();
+                DelayStart(TimeSpan.FromSeconds(PresetFailedCooldownIncrease));
+                return false;
+            }
+
             FailedPresetRestart();
             return false;
         }
@@ -108,12 +133,54 @@ public sealed partial class ServerGameTicker
         return true;
     }
 
+    /// <summary>
+    /// Queues the fallback gamemode for the next round once the failure streak is long enough.
+    /// Returns false (normal failed-preset restart) when no fallback applies.
+    /// </summary>
+    private bool TryQueueFallbackPreset(string failedTitle)
+    {
+        if (_presetFailStreak < Administration.VoteConfigManager.FallbackAfterFailures)
+            return false;
+
+        if (!_voteConfig.TryGetFallbackPreset(out var fallback))
+            return false;
+
+        if (fallback.ID == CurrentPreset?.ID)
+        {
+            // The fallback itself can't start; nothing more we can do automatically.
+            _chatManager.SendAdminAnnouncement(Loc.GetString("game-ticker-start-round-fallback-failed",
+                ("fallbackMode", failedTitle)));
+            return false;
+        }
+
+        _pendingFallbackPreset = fallback.ID;
+        var message = Loc.GetString("game-ticker-start-round-cannot-start-game-mode-use-fallback",
+            ("failedGameMode", failedTitle),
+            ("count", _presetFailStreak),
+            ("fallbackMode", Loc.GetString(fallback.ModeTitle)));
+        Log.Info(message);
+        SendServerMessage(message);
+        return true;
+    }
+
+    private void OnPresetStarted()
+    {
+        // A fallback round doesn't end the streak: the normal gamemode gets one try next round and
+        // falls back again immediately if it still can't start.
+        if (CurrentPreset != null && CurrentPreset.ID == _voteConfig.FallbackPreset)
+            return;
+
+        _presetFailStreak = 0;
+        _failedPresets.Clear();
+    }
+
     [Dependency] private Administration.VoteConfigManager _voteConfig = default!;
 
     private void InitializeGamePreset()
     {
         // If an admin gamemode profile is active, start a random gamemode from it instead of the default.
-        if (_voteConfig.TryGetRandomPreset(out var randomPreset))
+        // Gamemodes that just failed to start are skipped if the profile has others ("try the next one").
+        if (_voteConfig.TryGetRandomPreset(out var randomPreset, _failedPresets))
         {
             SetGamePreset(randomPreset);
             return;
@@ -225,6 +292,20 @@ public sealed partial class ServerGameTicker
 
     private void TryResetPreset()
     {
+        // iss14: a gamemode failed too often; play the fallback gamemode for one round, then resume the
+        // normal selection (ResetCountdown 0 = reset at the next restart).
+        if (_pendingFallbackPreset != null)
+        {
+            var fallback = _pendingFallbackPreset;
+            _pendingFallbackPreset = null;
+            if (FindGamePreset(fallback) is { } fallbackProto)
+            {
+                SetGamePreset(fallbackProto);
+                ResetCountdown = 0;
+                return;
+            }
+        }
+
         // iss14 fix: when an admin gamemode profile is active, re-roll a random preset from it every
         // round restart (previously it was only rolled once at server start). An admin-set preset with a
         // pending reset countdown (setgamepreset <rounds>) still takes precedence until it expires.

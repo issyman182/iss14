@@ -38,6 +38,11 @@
 
                 <Label Text="{Loc vote-config-maps}" StyleClasses="LabelHeading" Margin="0 12 0 2" />
                 <CheckBox Name="MapFilterPlayerCountCheck" Text="{Loc vote-config-map-filter-playercount}" Margin="0 0 0 2" />
+                <BoxContainer Orientation="Horizontal" Margin="0 0 0 2">
+                    <Label Text="{Loc vote-config-fallback-map}" MinWidth="200" />
+                    <OptionButton Name="FallbackMapOption" MinWidth="200" />
+                </BoxContainer>
+                <Label Text="{Loc vote-config-fallback-map-hint}" StyleClasses="LabelSubText" Margin="0 0 0 4" />
                 <BoxContainer Orientation="Horizontal">
                     <OptionButton Name="MapProfileOption" MinWidth="150" />
                     <Button Name="MapDeleteButton" Text="{Loc vote-config-delete}" Margin="4 0 0 0" />
@@ -51,6 +56,11 @@
                 <BoxContainer Name="MapRangeList" Orientation="Vertical" Margin="0 2 0 0" />
 
                 <Label Text="{Loc vote-config-gamemodes}" StyleClasses="LabelHeading" Margin="0 12 0 2" />
+                <BoxContainer Orientation="Horizontal" Margin="0 0 0 2">
+                    <Label Text="{Loc vote-config-fallback-preset}" MinWidth="200" />
+                    <OptionButton Name="FallbackPresetOption" MinWidth="200" />
+                </BoxContainer>
+                <Label Text="{Loc vote-config-fallback-preset-hint}" StyleClasses="LabelSubText" Margin="0 0 0 4" />
                 <BoxContainer Orientation="Horizontal">
                     <OptionButton Name="PresetProfileOption" MinWidth="150" />
                     <Button Name="PresetDeleteButton" Text="{Loc vote-config-delete}" Margin="4 0 0 0" />

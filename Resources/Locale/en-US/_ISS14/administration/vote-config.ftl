@@ -26,6 +26,11 @@ vote-config-map-range-max = Max
 vote-config-map-range-unlimited = unlimited
 vote-config-gamemodes = Gamemode pool (active list = random-on-restart + gamemode vote)
 vote-config-default = (default)
+vote-config-fallback-none = (none)
+vote-config-fallback-map = Fallback map
+vote-config-fallback-map-hint = Used when no map of the pool can be picked (empty pool, not enough/too many players). (none) = maps flagged as fallback in their prototype.
+vote-config-fallback-preset = Fallback gamemode
+vote-config-fallback-preset-hint = Used for one round when gamemodes failed to start twice in a row (e.g. too few players). (none) = keep retrying.
 vote-config-new-name = New profile name...
 vote-config-create = Create
 vote-config-delete = Delete

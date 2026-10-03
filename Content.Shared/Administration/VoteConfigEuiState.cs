@@ -69,7 +69,9 @@ public sealed class VoteConfigEuiState(
     List<string> presetProfiles,
     string activePresetProfile,
     List<VoteConfigItem> presets,
-    List<VoteConfigMapRange> mapRanges)
+    List<VoteConfigMapRange> mapRanges,
+    string fallbackPreset,
+    string fallbackMap)
     : EuiStateBase
 {
     public readonly bool CanEdit = canEdit;
@@ -97,6 +99,12 @@ public sealed class VoteConfigEuiState(
     public readonly List<VoteConfigItem> Presets = presets;
 
     public readonly List<VoteConfigMapRange> MapRanges = mapRanges;
+
+    /// <summary>Fallback gamemode id, empty = none.</summary>
+    public readonly string FallbackPreset = fallbackPreset;
+
+    /// <summary>Fallback map id, empty = none (prototype fallback maps).</summary>
+    public readonly string FallbackMap = fallbackMap;
 }
 
 // ---- Client -> server messages ----
@@ -147,6 +155,14 @@ public sealed class VoteConfigSetItemMessage(bool isMap, string itemId, bool inc
     public readonly bool IsMap = isMap;
     public readonly string ItemId = itemId;
     public readonly bool Included = included;
+}
+
+/// <summary>Sets the fallback map (<paramref name="isMap"/>) or fallback gamemode. Empty id = none.</summary>
+[Serializable, NetSerializable]
+public sealed class VoteConfigSetFallbackMessage(bool isMap, string id) : EuiMessageBase
+{
+    public readonly bool IsMap = isMap;
+    public readonly string Id = id;
 }
 
 /// <summary>Sets (or clears) a per-map player-count range override. Max 0 = unlimited.</summary>

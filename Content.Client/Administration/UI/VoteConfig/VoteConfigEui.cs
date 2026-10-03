@@ -21,6 +21,7 @@ public sealed class VoteConfigEui : BaseEui
         _window.OnCreateProfile += (isMap, name) => SendMessage(new VoteConfigCreateProfileMessage(isMap, name));
         _window.OnDeleteProfile += isMap => SendMessage(new VoteConfigDeleteProfileMessage(isMap));
         _window.OnSetItem += (isMap, id, included) => SendMessage(new VoteConfigSetItemMessage(isMap, id, included));
+        _window.OnSetFallback += (isMap, id) => SendMessage(new VoteConfigSetFallbackMessage(isMap, id));
         _window.OnSetMapRange += (mapId, min, max, clear) => SendMessage(new VoteConfigSetMapRangeMessage(mapId, min, max, clear));
         _window.OnClose += () => SendMessage(new CloseEuiMessage());
     }

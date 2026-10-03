@@ -41,6 +41,12 @@ public interface IGameMapManager
     void SetRuntimeMapPlayerRanges(IReadOnlyDictionary<string, (int Min, int Max)>? ranges);
 
     /// <summary>
+    /// Sets the admin fallback map (from VoteConfigManager), used when no map of the pool is currently eligible.
+    /// Null disables it, so the prototype-flagged fallback maps are used instead.
+    /// </summary>
+    void SetRuntimeFallbackMap(string? mapId);
+
+    /// <summary>
     /// Returns all maps.
     /// </summary>
     /// <returns>enumerator of map prototypes</returns>
