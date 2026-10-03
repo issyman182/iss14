@@ -6,6 +6,7 @@ using Content.Server.GameTicking;
 using Content.Server.Station.Systems;
 using Content.Shared.CCVar;
 using Content.Shared.Chat;
+using Content.Shared.Contraband;
 using Content.Shared.Database;
 using Content.Shared.Economy;
 using Content.Shared.Economy.Tasks;
@@ -43,6 +44,7 @@ public sealed partial class TaskBoardSystem : EntitySystem
     [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private Content.Shared.Access.Systems.AccessReaderSystem _access = default!;
     [Dependency] private SharedMapSystem _map = default!;
+    [Dependency] private IComponentFactory _factory = default!;
 
     public override void Initialize()
     {
@@ -148,6 +150,8 @@ public sealed partial class TaskBoardSystem : EntitySystem
             Created = _ticker.RoundDuration(),
             DeliverPrototype = chosen.DeliverPrototype,
             DeliverTag = chosen.DeliverTag,
+            DeliverComponent = chosen.DeliverComponent,
+            DeliverContrabandSeverities = chosen.DeliverContrabandSeverities,
             DeliverTarget = chosen.Kind is DepartmentTaskKind.Delivery or DepartmentTaskKind.Cleaning ? count : 0,
         };
 
@@ -245,6 +249,13 @@ public sealed partial class TaskBoardSystem : EntitySystem
         if (task.ClaimedUser is not { } worker)
         {
             Fail(ent, args.Actor, Loc.GetString("task-board-no-worker"));
+            return;
+        }
+
+        // Nobody signs off their own work — a Captain (head of everything) could otherwise claim and confirm at will.
+        if (_players.TryGetSessionByEntity(args.Actor, out var confirmer) && confirmer.UserId == worker)
+        {
+            Fail(ent, args.Actor, Loc.GetString("task-board-self-confirm"));
             return;
         }
 
@@ -376,7 +387,18 @@ public sealed partial class TaskBoardSystem : EntitySystem
         if (task.DeliverPrototype is { } proto && MetaData(item).EntityPrototype?.ID == proto.Id)
             return true;
 
-        return task.DeliverTag != null && _tag.HasTag(item, task.DeliverTag);
+        if (task.DeliverTag != null && _tag.HasTag(item, task.DeliverTag))
+            return true;
+
+        if (task.DeliverComponent is { } component && _factory.TryGetRegistration(component, out var registration) && HasComp(item, registration.Type))
+        {
+            if (task.DeliverContrabandSeverities.Count == 0)
+                return true;
+
+            return TryComp<ContrabandComponent>(item, out var contraband) && task.DeliverContrabandSeverities.Contains(contraband.Severity);
+        }
+
+        return false;
     }
 
     #endregion

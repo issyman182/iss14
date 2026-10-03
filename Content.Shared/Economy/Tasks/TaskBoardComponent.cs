@@ -1,5 +1,6 @@
 // iss14: Economy
 using Content.Shared.Cargo.Prototypes;
+using Content.Shared.Contraband;
 using Robust.Shared.Audio;
 using Robust.Shared.GameStates;
 using Robust.Shared.Network;
@@ -126,6 +127,14 @@ public sealed partial class DepartmentTask
     [DataField]
     public string? DeliverTag;
 
+    /// <summary>Component name a delivered item must have (e.g. <c>Contraband</c>).</summary>
+    [DataField]
+    public string? DeliverComponent;
+
+    /// <summary>With <see cref="DeliverComponent"/> = Contraband: accepted severities (empty = any).</summary>
+    [DataField]
+    public List<ProtoId<ContrabandSeverityPrototype>> DeliverContrabandSeverities = new();
+
     [DataField]
     public int DeliverTarget;
 
@@ -169,6 +178,14 @@ public sealed partial class DepartmentTaskTemplatePrototype : IPrototype
 
     [DataField]
     public string? DeliverTag;
+
+    /// <summary>Component name a delivered item must have (e.g. <c>Contraband</c>).</summary>
+    [DataField]
+    public string? DeliverComponent;
+
+    /// <summary>With <see cref="DeliverComponent"/> = Contraband: accepted severities (empty = any).</summary>
+    [DataField]
+    public List<ProtoId<ContrabandSeverityPrototype>> DeliverContrabandSeverities = new();
 
     [DataField]
     public int DeliverMin = 1;

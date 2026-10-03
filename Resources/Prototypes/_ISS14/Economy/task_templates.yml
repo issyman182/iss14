@@ -283,11 +283,17 @@
   rewardMin: 80
   rewardMax: 160
 
+# Hand real contraband in at the board; it is confiscated (deleted) and the reward paid.
 - type: departmentTaskTemplate
   id: SecurityContraband
   department: Security
   title: task-security-contraband-title
   description: task-security-contraband-desc
+  kind: Delivery
+  deliverComponent: Contraband
+  deliverContrabandSeverities: [ Major, HighlyIllegal, Syndicate, GrandTheft ]
+  deliverMin: 2
+  deliverMax: 4
   rewardMin: 150
   rewardMax: 300
 

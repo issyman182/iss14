@@ -26,6 +26,7 @@ task-board-not-open = That task is not open.
 task-board-not-yours = You did not claim that task.
 task-board-not-head = Only a department head may do that.
 task-board-cannot-confirm = Only claimed manual tasks can be confirmed.
+task-board-self-confirm = You cannot confirm a task you claimed yourself. Another head has to sign it off.
 task-board-no-worker = Nobody is working on that task.
 task-board-full = The board is full.
 task-board-invalid = Enter a title and a positive reward.
@@ -97,7 +98,7 @@ task-science-borg-desc = Assemble a working cyborg chassis. The Research Directo
 
 task-security-patrol-title = Patrol the station
 task-security-patrol-desc = Complete a full patrol round. The Head of Security confirms.
-task-security-contraband-title = Confiscate contraband
-task-security-contraband-desc = Find and secure contraband in the evidence locker. The Head of Security confirms.
+task-security-contraband-title = Confiscate { $count } contraband items
+task-security-contraband-desc = Find serious contraband (major, syndicate, highly illegal or stolen goods) and hand { $count } pieces in at this board. They are confiscated on the spot.
 task-security-donuts-title = Donut run: { $count }
 task-security-donuts-desc = Hand { $count } donuts in at the board. Morale matters.
