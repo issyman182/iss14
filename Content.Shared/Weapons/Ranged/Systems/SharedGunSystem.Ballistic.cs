@@ -16,7 +16,6 @@ namespace Content.Shared.Weapons.Ranged.Systems;
 
 public abstract partial class SharedGunSystem
 {
-    [Dependency] private SharedDoAfterSystem _doAfter = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
     [Dependency] private SharedStackSystem _stack = null!;
 

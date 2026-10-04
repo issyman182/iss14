@@ -1,14 +1,18 @@
 using Content.Shared.Actions;
+using Content.Shared.DoAfter;
 using Content.Shared.Examine;
 using Content.Shared.Hands;
 using Content.Shared.Verbs;
 using Content.Shared.Weapons.Ranged.Components;
+using Content.Shared.Weapons.Ranged.Events;
 using Robust.Shared.Utility;
 
 namespace Content.Shared.Weapons.Ranged.Systems;
 
 public abstract partial class SharedGunSystem
 {
+    private const double ClearJamTime = 5d;
+
     private void OnExamine(EntityUid uid, GunComponent component, ExaminedEvent args)
     {
         if (!args.IsInDetailsRange || !component.ShowExamineText)
@@ -30,7 +34,21 @@ public abstract partial class SharedGunSystem
 
     private void OnAltVerb(EntityUid uid, GunComponent component, GetVerbsEvent<AlternativeVerb> args)
     {
-        if (!args.CanAccess || !args.CanInteract || !args.CanComplexInteract || args.Hands == null || component.SelectedMode == component.AvailableModes)
+        if (!args.CanAccess || !args.CanInteract || !args.CanComplexInteract || args.Hands == null)
+            return;
+
+        if (component.Jammed)
+        {
+            args.Verbs.Add(new AlternativeVerb
+            {
+                Act = () => StartClearJam((uid, component), args.User),
+                Text = Loc.GetString("gun-clear-jam"),
+                Disabled = component.ClearingJam,
+                Priority = 2,
+            });
+        }
+
+        if (component.SelectedMode == component.AvailableModes)
             return;
 
         var nextMode = GetNextMode(component);
@@ -43,6 +61,49 @@ public abstract partial class SharedGunSystem
         };
 
         args.Verbs.Add(verb);
+    }
+
+    private void StartClearJam(Entity<GunComponent> gun, EntityUid user)
+    {
+        if (!gun.Comp.Jammed || gun.Comp.ClearingJam)
+            return;
+
+        gun.Comp.ClearingJam = true;
+        Dirty(gun);
+
+        var doAfterArgs = new DoAfterArgs(
+            EntityManager,
+            user,
+            TimeSpan.FromSeconds(ClearJamTime),
+            new ClearJamDoAfterEvent(),
+            gun,
+            target: gun,
+            used: gun)
+        {
+            BreakOnMove = true,
+            NeedHand = true,
+        };
+
+        if (!_doAfter.TryStartDoAfter(doAfterArgs))
+        {
+            gun.Comp.ClearingJam = false;
+            Dirty(gun);
+        }
+    }
+
+    private void OnClearJamDoAfter(Entity<GunComponent> gun, ref ClearJamDoAfterEvent args)
+    {
+        gun.Comp.ClearingJam = false;
+
+        if (!args.Cancelled)
+        {
+            gun.Comp.Jammed = false;
+            gun.Comp.ShotCounter = 0;
+            gun.Comp.BurstActivated = false;
+            gun.Comp.BurstShotsCount = 0;
+        }
+
+        Dirty(gun);
     }
 
     private SelectiveFire GetNextMode(GunComponent component)

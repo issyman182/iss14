@@ -259,6 +259,18 @@ public sealed partial class GunComponent : Component
     public bool ClumsyProof = false;
 
     /// <summary>
+    /// Whether this firearm is currently jammed and must be cleared before it can fire again.
+    /// </summary>
+    [AutoNetworkedField, ViewVariables]
+    public bool Jammed = false;
+
+    /// <summary>
+    /// Whether someone is currently attempting to clear this firearm's jam.
+    /// </summary>
+    [AutoNetworkedField, ViewVariables]
+    public bool ClearingJam = false;
+
+    /// <summary>
     /// Firing direction for an item not being held (e.g. shuttle cannons, thrown guns still firing).
     /// </summary>
     [DataField]

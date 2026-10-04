@@ -3,6 +3,8 @@ gun-selected-mode-examine = Current selected fire mode is [color={$color}]{$mode
 gun-fire-rate-examine = Fire rate is [color={$color}]{$fireRate}[/color] per second.
 gun-selector-verb = Change to {$mode}
 gun-selected-mode = Selected {$mode}
+gun-clear-jam = Clear Jam
+gun-jammed = The firearm jams.
 gun-disabled = You can't use guns!
 gun-set-fire-mode-examine = Set to [color=yellow]{$mode}[/color].
 gun-set-fire-mode-popup = Changed to {$mode}

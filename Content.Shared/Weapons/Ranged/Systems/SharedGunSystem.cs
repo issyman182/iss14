@@ -8,6 +8,7 @@ using Content.Shared.CombatMode;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
+using Content.Shared.DoAfter;
 using Content.Shared.Examine;
 using Content.Shared.Hands;
 using Content.Shared.Hands.EntitySystems;
@@ -47,6 +48,7 @@ public abstract partial class SharedGunSystem : EntitySystem
     [Dependency] private RechargeBasicEntityAmmoSystem _recharge = default!;
     [Dependency] private SharedCombatModeSystem _combatMode = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
+    [Dependency] private SharedDoAfterSystem _doAfter = default!;
     [Dependency] private UseDelaySystem _useDelay = default!;
     [Dependency] protected DamageableSystem Damageable = default!;
     [Dependency] protected ExamineSystemShared Examine = default!;
@@ -115,6 +117,7 @@ public abstract partial class SharedGunSystem : EntitySystem
         SubscribeLocalEvent<GunComponent, CycleModeEvent>(OnCycleMode);
         SubscribeLocalEvent<GunComponent, HandSelectedEvent>(OnGunSelected);
         SubscribeLocalEvent<GunComponent, MapInitEvent>(OnMapInit);
+        SubscribeLocalEvent<GunComponent, ClearJamDoAfterEvent>(OnClearJamDoAfter);
     }
 
     private void OnMapInit(Entity<GunComponent> gun, ref MapInitEvent args)
@@ -252,6 +255,9 @@ public abstract partial class SharedGunSystem : EntitySystem
 
     private bool AttemptShoot(EntityUid user, Entity<GunComponent> gun)
     {
+        if (gun.Comp.Jammed)
+            return false;
+
         if (gun.Comp.FireRateModified <= 0f ||
             !_actionBlockerSystem.CanAttack(user))
         {
@@ -342,6 +348,19 @@ public abstract partial class SharedGunSystem : EntitySystem
             gun.Comp.BurstActivated = false;
             gun.Comp.BurstShotsCount = 0;
             gun.Comp.NextFire = TimeSpan.FromSeconds(Math.Max(lastFire.TotalSeconds + SafetyNextFire, gun.Comp.NextFire.TotalSeconds));
+            return false;
+        }
+
+        // The server owns the roll so clients cannot desynchronise the firearm's jam state.
+        if (_netManager.IsServer && shots > 0 && Random.Prob(0.02f))
+        {
+            gun.Comp.Jammed = true;
+            gun.Comp.ClearingJam = false;
+            gun.Comp.BurstActivated = false;
+            gun.Comp.BurstShotsCount = 0;
+            gun.Comp.ShotCounter = 0;
+            Dirty(gun);
+            PopupSystem.PopupEntity(Loc.GetString("gun-jammed"), gun, user);
             return false;
         }
 
