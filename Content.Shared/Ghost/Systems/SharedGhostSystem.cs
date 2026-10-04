@@ -257,6 +257,15 @@ public sealed class GhostNewLifeRequest : EntityEventArgs
 }
 
 /// <summary>
+/// A client to server request for their ghost to respawn as a straggler.
+/// The server creates a random character on a non-station, non-trade-station grid.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class GhostStragglerRequest : EntityEventArgs
+{
+}
+
+/// <summary>
 /// A client to server request for their ghost to return to body
 /// </summary>
 [Serializable, NetSerializable]

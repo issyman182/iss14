@@ -26,6 +26,7 @@ public sealed partial class GhostGui : UIWidget
     public event Action? ReturnToBodyPressed;
     public event Action? GhostRolesPressed;
     public event Action? NewLifePressed;
+    public event Action? StragglerPressed;
     private int _prevNumberRoles;
 
     public GhostGui()
@@ -38,6 +39,7 @@ public sealed partial class GhostGui : UIWidget
 
         GhostWarpButton.OnPressed += _ => RequestWarpsPressed?.Invoke();
         ReturnToBodyButton.OnPressed += _ => ReturnToBodyPressed?.Invoke();
+        StragglerButton.OnPressed += _ => StragglerPressed?.Invoke();
         GhostRolesButton.OnPressed += _ => GhostRolesPressed?.Invoke();
         GhostRolesButton.OnPressed += _ => GhostRolesButton.StyleClasses.Remove(StyleClass.Negative);
         NewLifeButton.OnPressed += _ => NewLifePressed?.Invoke();
@@ -46,12 +48,14 @@ public sealed partial class GhostGui : UIWidget
     public void Hide()
     {
         TargetWindow.Close();
+        StragglerButton.Visible = false;
         Visible = false;
     }
 
     public void Update(int? roles, bool? canReturnToBody, GhostNewLifeInfo newLife = default)
     {
         ReturnToBodyButton.Disabled = !canReturnToBody ?? true;
+        StragglerButton.Visible = canReturnToBody != null;
 
         UpdateNewLife(newLife);
 

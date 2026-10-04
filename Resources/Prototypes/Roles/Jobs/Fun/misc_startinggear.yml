@@ -194,3 +194,15 @@
   equipment:
     jumpsuit: ClothingUniformJumpsuitColorGrey
     shoes: ClothingShoesColorBlack
+
+# Randomized mid-round straggler equipment.
+- type: startingGear
+  id: StragglerGear
+  equipment:
+    outerClothing: ClothingOuterHardsuitEVA
+    head: ClothingHeadHelmetEVA
+    mask: ClothingMaskBreath
+    back: JetpackMiniFilled
+    suitstorage: OxygenTankFilled
+  inhand:
+  - HandHeldMassScanner

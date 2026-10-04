@@ -24,6 +24,12 @@ new-life-button-ready = New Life
 new-life-button-cooldown = New Life ({ $seconds }s)
 new-life-button-blocked = New Life (unavailable)
 
+ghost-gui-straggler-button = Straggler
+ghost-gui-straggler-title = Straggler
+ghost-gui-straggler-confirm = Confirm
+ghost-gui-straggler-cancel = Cancel
+ghost-gui-straggler-warning = This character is seperate from the one you have played this round. By respawning as a straggler your main character will no longer be playable, press confirm once you have read this message.
+
 # Blocked reasons
 new-life-blocked-not-in-round = the round is not in progress
 new-life-blocked-evac = the evacuation shuttle has been called

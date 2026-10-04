@@ -1,6 +1,7 @@
 using Content.Client.Gameplay;
 using Content.Client.Ghost;
 using Content.Client.UserInterface.Systems.Gameplay;
+using Content.Client.UserInterface.Systems.Ghost.Controls;
 using Content.Client.UserInterface.Systems.Ghost.Widgets;
 using Content.Shared.Ghost.Components;
 using Content.Shared.Ghost.Systems;
@@ -19,6 +20,7 @@ public sealed partial class GhostUIController : UIController, IOnSystemChanged<G
     [UISystemDependency] private readonly GhostSystem? _system = default;
 
     private GhostGui? Gui => UIManager.GetActiveUIWidgetOrNull<GhostGui>();
+    private StragglerWarningWindow? _stragglerWarning;
 
     public override void Initialize()
     {
@@ -131,6 +133,7 @@ public sealed partial class GhostUIController : UIController, IOnSystemChanged<G
 
     private void OnPlayerDetached()
     {
+        CloseStragglerWarning();
         Gui?.Hide();
     }
 
@@ -181,6 +184,7 @@ public sealed partial class GhostUIController : UIController, IOnSystemChanged<G
         Gui.ReturnToBodyPressed += ReturnToBody;
         Gui.GhostRolesPressed += GhostRolesPressed;
         Gui.NewLifePressed += NewLife;
+        Gui.StragglerPressed += Straggler;
         Gui.TargetWindow.WarpClicked += OnWarpClicked;
         Gui.TargetWindow.OnGhostnadoClicked += OnGhostnadoClicked;
         Gui.TargetWindow.OnWarpToRandomFollowedClicked += OnWarpToRandomFollowedClicked;
@@ -191,6 +195,8 @@ public sealed partial class GhostUIController : UIController, IOnSystemChanged<G
 
     public void UnloadGui()
     {
+        CloseStragglerWarning();
+
         if (Gui == null)
             return;
 
@@ -198,6 +204,7 @@ public sealed partial class GhostUIController : UIController, IOnSystemChanged<G
         Gui.ReturnToBodyPressed -= ReturnToBody;
         Gui.GhostRolesPressed -= GhostRolesPressed;
         Gui.NewLifePressed -= NewLife;
+        Gui.StragglerPressed -= Straggler;
         Gui.TargetWindow.WarpClicked -= OnWarpClicked;
 
         Gui.Hide();
@@ -211,6 +218,26 @@ public sealed partial class GhostUIController : UIController, IOnSystemChanged<G
     private void NewLife()
     {
         _system?.RequestNewLife();
+    }
+
+    private void Straggler()
+    {
+        CloseStragglerWarning();
+        _stragglerWarning = new StragglerWarningWindow();
+        _stragglerWarning.Confirmed += ConfirmStraggler;
+        _stragglerWarning.OpenCentered();
+    }
+
+    private void ConfirmStraggler()
+    {
+        _stragglerWarning = null;
+        _system?.RequestStraggler();
+    }
+
+    private void CloseStragglerWarning()
+    {
+        _stragglerWarning?.Close();
+        _stragglerWarning = null;
     }
 
     private void RequestWarps()

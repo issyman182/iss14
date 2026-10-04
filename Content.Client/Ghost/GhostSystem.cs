@@ -216,6 +216,11 @@ namespace Content.Client.Ghost
             RaiseNetworkEvent(new GhostNewLifeRequest());
         }
 
+        public void RequestStraggler()
+        {
+            RaiseNetworkEvent(new GhostStragglerRequest());
+        }
+
         public void OpenGhostRoles()
         {
             _console.RemoteExecuteCommand(null, "ghostroles");

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Content.Server.Administration;
 using Content.Server.Antag;
 using Content.Server.Antag.Components;
@@ -12,13 +13,24 @@ using Content.Shared.GameTicking;
 using Content.Shared.Ghost;
 using Content.Shared.Mind;
 using Content.Shared.Mobs;
+using Content.Shared.Maps;
+using Content.Shared.Physics;
+using Content.Shared.Preferences;
+using Content.Shared.Roles;
+using Content.Shared.Cargo.Components;
 using Robust.Shared.Prototypes;
 using Robust.Server.GameObjects;
+using Robust.Shared.Map;
+using Robust.Shared.Map.Components;
 using Robust.Shared.Network;
+using Robust.Shared.Physics;
 using Robust.Shared.Player;
+using Robust.Shared.Random;
 using Robust.Shared.Timing;
 using Content.Shared.Ghost.Systems;
 using Content.Shared.Ghost.Components;
+using Content.Shared.Station.Components;
+using Content.Shared.Station.Systems;
 
 namespace Content.Server.NewLife;
 
@@ -38,9 +50,16 @@ public sealed partial class NewLifeSystem : EntitySystem
     [Dependency] private SharedMindSystem _mind = default!;
     [Dependency] private AntagSelectionSystem _antag = default!;
     [Dependency] private NewLifeManager _newLife = default!;
+    [Dependency] private StationSpawningSystem _stationSpawning = default!;
+    [Dependency] private SharedMapSystem _map = default!;
+    [Dependency] private TurfSystem _turf = default!;
+    [Dependency] private IRobustRandom _random = default!;
 
     /// <summary>When each player most recently died, used to drive the respawn cooldown.</summary>
     private readonly Dictionary<NetUserId, TimeSpan> _deathTimes = new();
+
+    /// <summary>Earliest time each player may use Straggler again.</summary>
+    private readonly Dictionary<NetUserId, TimeSpan> _stragglerCooldowns = new();
 
     /// <summary>
     /// Antag roles captured when a player takes a new life (rule entity + antag specifier), re-granted to their
@@ -50,6 +69,8 @@ public sealed partial class NewLifeSystem : EntitySystem
 
     private TimeSpan _nextSync;
     private static readonly TimeSpan SyncInterval = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan StragglerCooldown = TimeSpan.FromMinutes(1);
+    private static readonly ProtoId<StartingGearPrototype> StragglerGear = "StragglerGear";
 
     public override void Initialize()
     {
@@ -59,12 +80,14 @@ public sealed partial class NewLifeSystem : EntitySystem
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart);
         SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnSpawnComplete);
         SubscribeNetworkEvent<GhostNewLifeRequest>(OnNewLifeRequest);
+        SubscribeNetworkEvent<GhostStragglerRequest>(OnStragglerRequest);
     }
 
     private void OnRoundRestart(RoundRestartCleanupEvent ev)
     {
         _newLife.ResetRound();
         _deathTimes.Clear();
+        _stragglerCooldowns.Clear();
         _pendingKeepAntag.Clear();
     }
 
@@ -240,5 +263,74 @@ public sealed partial class NewLifeSystem : EntitySystem
         // Wipes the mind off the old corpse (left soulless) and drops the player into the lobby to pick a new
         // character before late-joining.
         _gameTicker.Respawn(session);
+    }
+
+    private void OnStragglerRequest(GhostStragglerRequest msg, EntitySessionEventArgs args)
+    {
+        var session = args.SenderSession;
+
+        if (_stragglerCooldowns.TryGetValue(session.UserId, out var cooldownEnd)
+            && _timing.CurTime < cooldownEnd)
+        {
+            return;
+        }
+
+        if (session.AttachedEntity is not { Valid: true } attached
+            || !TryComp<GhostComponent>(attached, out _)
+            || !TryComp<ActorComponent>(attached, out var actor)
+            || actor.PlayerSession != session
+            || !TryGetStragglerSpawn(out var spawnCoordinates))
+        {
+            Log.Warning($"User {session.Name} sent an invalid {nameof(GhostStragglerRequest)}");
+            return;
+        }
+
+        // Build the replacement entity before abandoning the old mind so a missing/invalid grid
+        // cannot strand the player without a character.
+        var profile = HumanoidCharacterProfile.Random();
+        var mob = _stationSpawning.SpawnPlayerMob(spawnCoordinates, null, profile, null);
+        _stationSpawning.EquipStartingGear(mob, StragglerGear);
+        _stragglerCooldowns[session.UserId] = _timing.CurTime + StragglerCooldown;
+
+        // Wiping this mind leaves the old body soulless, matching the warning shown by the client.
+        _mind.WipeMind(session);
+        _gameTicker.PlayerJoinGame(session, silent: true);
+
+        var newMind = _mind.CreateMind(session.UserId, MetaData(mob).EntityName);
+        _mind.SetUserId(newMind, session.UserId);
+        _mind.TransferTo(newMind, mob);
+    }
+
+    private bool TryGetStragglerSpawn(out EntityCoordinates coordinates)
+    {
+        coordinates = EntityCoordinates.Invalid;
+        var grids = new List<(EntityUid Grid, MapGridComponent Component, List<TileRef> Tiles)>();
+        var query = EntityQueryEnumerator<MapGridComponent, TransformComponent>();
+
+        while (query.MoveNext(out var uid, out var grid, out var transform))
+        {
+            if (transform.MapUid == null
+                || TerminatingOrDeleted(uid)
+                || HasComp<StationMemberComponent>(uid)
+                || HasComp<TradeStationComponent>(uid))
+            {
+                continue;
+            }
+
+            var tiles = _map.GetAllTiles(uid, grid)
+                .Where(tile => !tile.Tile.IsEmpty && !_turf.IsTileBlocked(tile, CollisionGroup.MobMask))
+                .ToList();
+
+            if (tiles.Count != 0)
+                grids.Add((uid, grid, tiles));
+        }
+
+        if (grids.Count == 0)
+            return false;
+
+        var selected = _random.Pick(grids);
+        var tile = _random.Pick(selected.Tiles);
+        coordinates = _map.GridTileToLocal(selected.Grid, selected.Component, tile.GridIndices);
+        return true;
     }
 }
