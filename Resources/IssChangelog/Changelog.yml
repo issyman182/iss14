@@ -2,6 +2,13 @@ Name: Changelog
 Order: 0
 Entries:
 - author: issyman182
+  version: iss14:1.8.4
+  time: '2026-10-14'
+  changes:
+  - message: Updated the game engine (RobustToolbox) from 289.0.0 to 289.0.5 to match the engine the launcher now downloads. Fixes everyone getting "Failed to deserialize packet" or a connection timeout when joining.
+    type: Fix
+  id: 18
+- author: issyman182
   version: iss14:1.8.3
   time: '2026-08-28'
   changes:
