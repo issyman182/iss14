@@ -8,6 +8,7 @@
     - id: BreakerFlip
     - id: BureaucraticError
     - id: ClericalError
+    - id: Cold
     - id: CockroachMigration
     - id: GasLeak
     - id: GreytideVirus
@@ -392,6 +393,18 @@
   - type: KudzuGrowthRule
   - type: DynamicRuleCost
     cost: 40 #this shit can get insane
+
+- type: entity
+  id: Cold
+  parent: BaseStationEventShortDelay
+  components:
+  - type: StationEvent
+    weight: 5
+    minimumPlayers: 2
+    duration: 1
+  - type: ColdRule
+  - type: DynamicRuleCost
+    cost: 15
 
 - type: entity
   id: PowerGridCheck
